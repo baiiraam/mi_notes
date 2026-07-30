@@ -1,0 +1,713 @@
+# Week 4 ML — Connections Map + Common Misconceptions
+
+## 1. CONNECTIONS MAP — WEEK 4 ML
+
+**How to use:** This map shows how all the concepts from Week 4 ML connect to each other. Trace each path to understand the relationships.
+
+---
+
+### 🌳 THE BIG PICTURE — TEXT-BASED CONCEPT MAP
+
+```
+╔══════════════════════════════════════════════════════════════════════════╗
+║                                                                          ║
+║                    WEEK 4 ML: IMBALANCE, SVM & EXPLAINABILITY         ║
+║                                                                          ║
+║                    ┌─────────────────────────────────────┐              ║
+║                    │   IMBALANCED DATASETS              │              ║
+║                    │   "The norm, not the exception"    │              ║
+║                    └──────────────┬──────────────────────┘              ║
+║                                   │                                      ║
+║    ┌──────────────────────────────┼──────────────────────────────┐      ║
+║    │                              │                              │      ║
+║    ▼                              ▼                              ▼      ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │ DATA-LEVEL   │          │ ALGORITHM-   │          │ METRIC &     │  ║
+║ │ RESAMPLING   │          │ LEVEL        │          │ THRESHOLD    │  ║
+║ └──────┬───────┘          └──────┬───────┘          └──────┬───────┘  ║
+║        │                         │                         │          ║
+║        ▼                         ▼                         ▼          ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │• Oversampling│          │• Class       │          │• Precision/  │  ║
+║ │• Undersampling│          │  Weights     │          │  Recall/F1   │  ║
+║ │• SMOTE       │          │• Focal Loss  │          │• ROC vs PR   │  ║
+║ │• Tomek Links │          │              │          │• Threshold   │  ║
+║ └──────┬───────┘          └──────┬───────┘          └──────┬───────┘  ║
+║        │                         │                         │          ║
+║        └─────────────────────────┼─────────────────────────┘          ║
+║                                  │                                     ║
+║                                  ▼                                     ║
+║                    ┌─────────────────────────────────────┐             ║
+║                    │   SUPPORT VECTOR MACHINES           │             ║
+║                    │   Maximum-Margin Classifier         │             ║
+║                    └──────────────┬──────────────────────┘             ║
+║                                   │                                     ║
+║    ┌──────────────────────────────┼──────────────────────────────┐     ║
+║    │                              │                              │     ║
+║    ▼                              ▼                              ▼     ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │ HARD MARGIN  │          │ SOFT MARGIN  │          │ KERNEL       │  ║
+║ │ (Perfect Sep)│          │ (C Parameter)│          │ TRICK        │  ║
+║ └──────┬───────┘          └──────┬───────┘          └──────┬───────┘  ║
+║        │                         │                         │          ║
+║        ▼                         ▼                         ▼          ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │min ½||w||²   │          │min ½||w||² +  │          │K(x,x')=φ(x)·φ(x')│
+║ │s.t. yᵢ(·) ≥1│          │C·Σξᵢ         │          │RBF, Poly, Lin │  ║
+║ └──────┬───────┘          └──────┬───────┘          └──────┬───────┘  ║
+║        │                         │                         │          ║
+║        └─────────────────────────┼─────────────────────────┘          ║
+║                                  │                                     ║
+║                                  ▼                                     ║
+║                    ┌─────────────────────────────────────┐             ║
+║                    │   MODEL EXPLAINABILITY &            │             ║
+║                    │   ERROR ANALYSIS                    │             ║
+║                    └──────────────┬──────────────────────┘             ║
+║                                   │                                     ║
+║    ┌──────────────────────────────┼──────────────────────────────┐     ║
+║    │                              │                              │     ║
+║    ▼                              ▼                              ▼     ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │ FEATURE      │          │ SHAP VALUES  │          │ ERROR        │  ║
+║ │ IMPORTANCE   │          │ (Game Theory)│          │ ANALYSIS     │  ║
+║ └──────┬───────┘          └──────┬───────┘          └──────┬───────┘  ║
+║        │                         │                         │          ║
+║        ▼                         ▼                         ▼          ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │• MDI (biased)│          │• Efficiency  │          │• Slice by    │  ║
+║ │• Permutation │          │• Consistency  │          │  subgroup    │  ║
+║ │  (gold std)  │          │• Symmetry    │          │• Diagnose    │  ║
+║ │• PDP/ICE     │          │• Dummy       │          │• Fix & Monitor│  ║
+║ └──────────────┘          └──────────────┘          └──────────────┘  ║
+║                                                                         ║
+╚══════════════════════════════════════════════════════════════════════════╝
+```
+
+---
+
+### 🔗 KEY CONNECTION EXPLANATIONS
+
+<details>
+<summary><b>Connection 1: How does class imbalance break models and what are the fix families?</b></summary>
+
+```
+CLASS IMBALANCE
+    │
+    ├── ACCURACY PARADOX
+    │       │
+    │       └── 99.7% accuracy but 0% recall on minority
+    │
+    ├── WHY MODELS FAIL
+    │       │
+    │       ├── Loss treats all samples equally
+    │       ├── Majority dominates gradients
+    │       └── Decision boundary shifts to majority
+    │
+    └── THREE FIX FAMILIES
+            │
+            ├── DATA-LEVEL (Resampling)
+            │       │
+            │       ├── Random Oversampling (duplicate minority)
+            │       ├── Random Undersampling (remove majority)
+            │       ├── SMOTE (synthesize new minority samples)
+            │       └── Tomek Links (clean boundary noise)
+            │
+            ├── ALGORITHM-LEVEL (Loss modification)
+            │       │
+            │       ├── Class Weights (penalize minority errors)
+            │       └── Focal Loss (focus on hard examples)
+            │
+            └── METRIC & THRESHOLD
+                    │
+                    ├── Precision/Recall/F1 (instead of accuracy)
+                    ├── PR-AUC (instead of ROC-AUC for imbalance)
+                    └── Threshold tuning (don't use 0.5 default)
+
+⚠️ NEVER resample the test set! Use imblearn.pipeline.Pipeline.
+```
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 2: How does SVM connect to regularization and kernels?</b></summary>
+
+```
+SVM EVOLUTION
+    │
+    ├── HARD MARGIN SVM
+    │       │
+    │       ├── min ½||w||² s.t. yᵢ(w·xᵢ+b) ≥ 1
+    │       ├── Requires perfect separation
+    │       └── Fails when classes overlap (no solution)
+    │
+    ├── SOFT MARGIN SVM (with C)
+    │       │
+    │       ├── min ½||w||² + C·Σξᵢ
+    │       ├── Slack variables ξᵢ allow margin violations
+    │       └── C controls bias-variance tradeoff
+    │           ├── Small C → soft margin → underfitting
+    │           └── Large C → hard margin → overfitting
+    │
+    ├── KERNEL TRICK
+    │       │
+    │       ├── Replaces x·x' with K(x,x') = φ(x)·φ(x')
+    │       ├── Enables non-linear boundaries
+    │       ├── Cost O(d) but infinite-dimensional features
+    │       └── Common kernels: Linear, Polynomial, RBF, Sigmoid
+    │
+    └── SVR (Regression)
+            │
+            ├── ε-insensitive loss: |error| < ε → no penalty
+            └── Sparse solution → few support vectors
+
+Key insight: C = regularization strength; γ = RBF width.
+```
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 3: How do feature importance methods relate to each other?</b></summary>
+
+```
+FEATURE IMPORTANCE METHODS
+    │
+    ├── BUILT-IN (MDI)
+    │       │
+    │       ├── Computed during training (free)
+    │       ├── Biased toward high-cardinality features
+    │       ├── MDI can rank a random feature as important!
+    │       └── Use: quick sanity check only
+    │
+    ├── PERMUTATION IMPORTANCE (Gold Standard)
+    │       │
+    │       ├── Shuffle feature → measure performance drop
+    │       ├── Model-agnostic, no cardinality bias
+    │       ├── Uses validation data (true generalization)
+    │       └── Use: final results
+    │
+    ├── PDP (Partial Dependence)
+    │       │
+    │       ├── Shows average effect of a feature
+    │       └── Weakness: hides heterogeneity
+    │
+    └── ICE (Individual Conditional Expectation)
+            │
+            ├── Shows effect per individual
+            └── Reveals heterogeneity PDP hides
+
+Key insight: Built-in is fast but biased; permutation is trustworthy but slower.
+```
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 4: How do SHAP and LIME compare?</b></summary>
+
+```
+SHAP vs LIME
+    │
+    ├── SHAP (Game Theory)
+    │       │
+    │       ├── Based on Shapley values (Nobel Prize 2012)
+    │       ├── 4 Fairness Axioms:
+    │       │   ├── Efficiency: Σφᵢ + φ₀ = f(x)
+    │       │   ├── Symmetry: equal contributors → equal credit
+    │       │   ├── Dummy: irrelevant feature → φ=0
+    │       │   └── Additivity: ensemble SHAPs = weighted sum
+    │       ├── Deterministic, consistent, stable
+    │       ├── TreeExplainer: fast, exact for tree models
+    │       └── Use: default for tabular models
+    │
+    └── LIME (Local Linear Approximation)
+            │
+            ├── Fits linear model in local neighborhood
+            ├── Heuristic — no theoretical guarantees
+            ├── Non-deterministic (varies run-to-run)
+            └── Use: exotic models (custom text/image pipelines)
+
+Key insight: SHAP has guarantees; LIME is heuristic. Use SHAP by default.
+```
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 5: How does error analysis connect to explainability and fairness?</b></summary>
+
+```
+ERROR ANALYSIS WORKFLOW
+    │
+    ├── SEPARATE
+    │       └── Split predictions into correct vs errors (FP + FN)
+    │
+    ├── SLICE
+    │       └── Group errors by demographic, feature value, time, class
+    │
+    ├── QUANTIFY
+    │       └── Error rate per slice; flag significant gaps (2× baseline)
+    │
+    ├── DIAGNOSE
+    │       │
+    │       ├── Label Noise → wrong labels
+    │       ├── Spurious Correlation → learned shortcut
+    │       ├── Under-represented Subgroup → small slice
+    │       ├── Distribution Shift → production differs
+    │       ├── Ambiguous Ground Truth → experts disagree
+    │       └── Feature Gap → missing key predictor
+    │
+    ├── FIX
+    │       ├── More data, better features, different threshold
+    │       └── Or: different model per slice
+    │
+    └── MONITOR
+            │
+            ├── Log every prediction
+            ├── Monitor subgroup error rates
+            ├── Track PSI (drift)
+            └── Sample 20-50 errors weekly
+
+Fairness: Aggregate accuracy hides disparate impact. Slicing reveals it.
+```
+
+</details>
+
+---
+
+### 📊 CONNECTION MATRIX — WEEK 4 ML
+
+| Concept A | Connects To | Why |
+|-----------|-------------|-----|
+| **Class Imbalance** | Accuracy Paradox | High accuracy can hide 0% recall |
+| **SMOTE** | Class Weights | Can combine both for severe imbalance |
+| **Class Weights** | SVM (class_weight='balanced') | SVM supports class weights |
+| **C Parameter** | Bias-Variance | Small C = underfit; Large C = overfit |
+| **γ (RBF)** | Bias-Variance | Small γ = underfit; Large γ = overfit |
+| **Kernel Trick** | Feature Engineering | Enables non-linear boundaries |
+| **SVM** | Feature Scaling | SVM is NOT scale-invariant |
+| **Permutation Importance** | MDI | Permutation is unbiased; MDI is biased |
+| **SHAP** | Error Analysis | SHAP reveals which features cause errors |
+| **PR-AUC** | ROC-AUC | PR-AUC is preferred for imbalance |
+| **Threshold Tuning** | Precision/Recall | Lower threshold → higher recall, lower precision |
+| **Error Slicing** | Fairness | Reveals disparate impact across groups |
+| **Counterfactuals** | Regulatory | GDPR 'right to explanation' |
+
+---
+
+## 2. COMMON MISCONCEPTIONS — WEEK 4 ML
+
+**How to use:** Read each misconception first. Try to identify what's wrong with it. Then click to reveal the reality.
+
+---
+
+### Misconception 1: "Class imbalance is rare — most datasets are balanced."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Imbalanced datasets are edge cases that don't occur often. | **Class imbalance is the norm, not the exception:**
+| | • Credit fraud: 99.7% / 0.3% |
+| | • Medical diagnosis: 95% / 5% |
+| | • Email spam: 85% / 15% |
+| | • Churn detection: 80% / 20% |
+| | • Any rare event detection is imbalanced by definition |
+
+**Rule:** Most real-world classification problems are imbalanced. You need to handle imbalance in almost every project.
+
+</details>
+
+---
+
+### Misconception 2: "Accuracy is the best metric for classification."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Higher accuracy = better model. | **Accuracy is dangerously misleading for imbalanced data:**
+| | • 99.7% accuracy on fraud data from always predicting "legitimate" |
+| | • Catching 0% of fraud cases! |
+| | • The "accuracy paradox" — high accuracy, zero usefulness |
+
+**Example:**
+```
+Fraud dataset: 99.7% legit, 0.3% fraud
+Model A: always predicts "legit" → 99.7% accuracy ✅, 0% recall ❌
+Model B: catches 90% fraud, 95% legit → 94.95% accuracy ❌, 90% recall ✅
+
+Model B is MUCH BETTER but has LOWER accuracy!
+```
+
+**Rule:** For imbalanced data, use Precision, Recall, F1, and PR-AUC — NOT accuracy.
+
+</details>
+
+---
+
+### Misconception 3: "Resampling the test set is fine — more data helps."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Applying SMOTE to the full dataset before splitting is harmless. | **This is data leakage!**
+| | • Test set gets synthetic samples that don't exist in reality |
+| | • Evaluation metrics become unrealistically optimistic |
+| | • The model appears to work great → fails in production |
+
+**Wrong pattern:**
+```python
+smote.fit_resample(X, y)  # ENTIRE dataset!
+X_train, X_test = split(X_res, y_res)
+# ❌ Test set now contains synthetic samples!
+```
+
+**Correct pattern:**
+```python
+X_train, X_test = split(X, y)  # Split FIRST
+smote.fit_resample(X_train, y_train)  # Resample ONLY train
+model.predict(X_test)  # ✅ Original test distribution
+```
+
+**Rule:** Split FIRST, then resample ONLY training data. Never let test data influence preprocessing.
+
+</details>
+
+---
+
+### Misconception 4: "SMOTE always improves performance — use it by default."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| SMOTE is always beneficial — just apply it. | **SMOTE is not always the answer:**
+| | • **Text data**: SMOTE creates invalid interpolated vectors |
+| | • **Images**: SMOTE doesn't understand image semantics |
+| | • **Very small minority (<50)**: limited diversity → poor synthetic samples |
+| | • **Tree models**: often respond well to class weights alone |
+| | • **Extreme imbalance**: may need SMOTE + class weights + threshold |
+
+**When to avoid SMOTE:**
+```
+❌ Text classification (sparse vectors)
+❌ Image data (use data augmentation instead)
+❌ N < 50 minority samples (too few to interpolate meaningfully)
+✅ Tabular data with N > 100 minority samples
+```
+
+**Rule:** SMOTE is powerful for tabular data, but not universal. Match method to data type.
+
+</details>
+
+---
+
+### Misconception 5: "Class imbalance is always the problem — fix it and the model works."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Fixing class imbalance is the primary challenge. | **Imbalance is often a symptom, not the root cause:**
+| | • **Underlying problem**: minority class may be poorly defined |
+| | • **Label noise**: wrong labels in minority class cause more damage |
+| | • **Feature gap**: missing key predictors for minority class |
+| | • **Distribution shift**: minority class in production differs from training |
+
+**Example:**
+```
+Fraud detection with 0.3% fraud:
+- Applying SMOTE gives PR-AUC = 0.43
+- But adding a 'transaction velocity' feature gives PR-AUC = 0.67
+- Feature engineering > resampling!
+```
+
+**Rule:** Resampling helps, but features and data quality matter more. Always diagnose before resampling.
+
+</details>
+
+---
+
+### Misconception 6: "SVM always finds the best separating line."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| SVM finds the optimal hyperplane — it's always the best. | **SVM has limitations:**
+| | • **Scaling**: SVM is extremely sensitive to feature scales |
+| | • **N**: Training is O(N²) to O(N³) — too slow for N > 100K |
+| | • **Overlapping classes**: Hard margin fails; soft margin needs tuning |
+| | • **Parameter sensitivity**: C and γ must be tuned carefully |
+| | • **Probabilities**: No native probabilities (Platt scaling expensive) |
+
+**Example:**
+```
+SVM without scaling:
+Features: age (0-100), income (0-200,000)
+Income dominates distance calculation by ~2000×
+→ Age becomes invisible to the model
+→ 52% accuracy instead of 90%!
+```
+
+**Rule:** SVM is powerful but needs scaling, parameter tuning, and is not suitable for large N.
+
+</details>
+
+---
+
+### Misconception 7: "Linear SVM and Logistic Regression are the same thing."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Both are linear classifiers — they're interchangeable. | **Different optimization objectives:**
+
+| Aspect | Linear SVM | Logistic Regression |
+|--------|------------|---------------------|
+| **Objective** | Max margin | Max likelihood |
+| **Loss** | Hinge loss | Cross-entropy |
+| **Probabilities** | No (needs Platt scaling) | ✅ Yes (calibrated) |
+| **Interpretability** | Moderate (weights) | ✅ Good (odds ratios) |
+| **Outlier sensitivity** | Only support vectors matter | All points matter |
+| **Performance** | Often better with clear margins | Better with overlapping classes |
+
+**Rule:** Use SVM for clear margin, small-N data. Use LogReg for probabilities, interpretability, large-N data.
+
+</details>
+
+---
+
+### Misconception 8: "The kernel trick makes SVM infinitely powerful with no downside."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Kernels enable infinite-dimensional features with no cost. | **There are trade-offs:**
+| | • **Computational cost**: RBF kernel matrix is O(N²) memory |
+| | • **Training time**: O(N²) to O(N³) — not scalable |
+| | • **Overfitting**: RBF with large γ memorizes training data |
+| | • **Interpretability**: RBF/polynomial kernels are black boxes |
+| | • **Hyperparameter tuning**: C and γ interact — must grid search |
+
+**Rule:** Kernels are powerful but costly. Use LinearSVC for large N; only use RBF when N < 50K.
+
+</details>
+
+---
+
+### Misconception 9: "SHAP and LIME are interchangeable — just use whichever is faster."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| SHAP and LIME are just two ways to explain models. | **They are fundamentally different:**
+
+| Aspect | LIME | SHAP |
+|--------|------|------|
+| **Theoretical basis** | Local linear approximation (heuristic) | Game theory (Shapley values) |
+| **Consistency** | No — varies run-to-run | Yes |
+| **Additivity** | No | Yes (Efficiency) |
+| **Stability** | Low — random perturbations | High — deterministic |
+| **Scope** | Local only | Local + global |
+
+**Rule:** Use SHAP by default for tabular models. LIME for exotic custom pipelines.
+
+</details>
+
+---
+
+### Misconception 10: "Feature importance scores are objective — just use the numbers."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Feature importance from sklearn is the ground truth. | **Different methods give different results:**
+| | • **MDI**: Biased toward high-cardinality features — can rank random features as important! |
+| | • **Permutation**: Unbiased but slower |
+| | • **SHAP**: Game-theoretic but approximate |
+| | • **Coefficients**: Only linear effects; need scaling |
+
+**Example:**
+```
+Zip_code has 10,000 unique values:
+→ MDI importance = 0.35 (biased!)
+→ Permutation importance = 0.02 (real effect)
+→ The gap suggests zip_code is a proxy for something else
+→ Fair-lending implication!
+```
+
+**Rule:** Always verify feature importance with multiple methods. MDI is for quick sanity checks only.
+
+</details>
+
+---
+
+### Misconception 11: "PDP and ICE plots tell the same story."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| PDP and ICE plots show the same information. | **They show different levels of detail:**
+| | • **PDP**: Average effect — hides heterogeneity |
+| | • **ICE**: Individual effects — reveals subgroups |
+
+**Example:**
+```
+Feature: "promotion"
+PDP: Average effect = +0.02 (seems small)
+ICE: Reveals two subgroups:
+  → Group A: promotion hurts churn (-0.10)
+  → Group B: promotion helps churn (+0.15)
+→ PDP average hides this split!
+```
+
+**Rule:** Always check ICE plots when you suspect heterogeneity. PDP averages can mislead.
+
+</details>
+
+---
+
+### Misconception 12: "Model explainability is optional — if it works, ship it."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Explainability is nice-to-have; performance is what matters. | **Explainability is often required:**
+| | • **Regulatory**: GDPR Article 22, US ECOA, EU AI Act |
+| | • **Trust**: Domain experts won't use what they don't understand |
+| | • **Debug**: You can't fix what you can't explain |
+| | • **Fairness**: Can't detect bias without explanations |
+| | • **Business**: "Tenure drives 40% of churn" is actionable — a 96% AUC number is not |
+
+**Rule:** Explainability is not optional for high-stakes ML. It's a requirement for trust, compliance, and debugging.
+
+</details>
+
+---
+
+### Misconception 13: "AUC-ROC is the best metric for comparing models."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| AUC-ROC is the gold standard for classification. | **AUC-ROC can be misleading for imbalanced data:**
+| | • With 9,970 negatives, FPR = FP/(FP+TN) stays near 0 even with many FPs |
+| | • ROC curve looks great even for a bad model |
+| | • PR-AUC reveals minority class performance honestly |
+
+**Example:**
+```
+Fraud detection with 0.1% fraud:
+ROC-AUC = 0.97 (looks great!)
+PR-AUC = 0.43 (real story)
+
+A random classifier at 0.1% prevalence:
+ROC-AUC = 0.5
+PR-AUC ≈ 0.001
+
+So PR-AUC = 0.43 is much better than chance,
+but ROC-AUC = 0.97 is inflated!
+```
+
+**Rule:** For imbalanced data, use PR-AUC. ROC-AUC is for balanced data.
+
+</details>
+
+---
+
+### Misconception 14: "The default 0.5 threshold is always the right operating point."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| 0.5 is the natural threshold for classification. | **0.5 is arbitrary and often wrong:**
+| | • With 0.3% fraud, true fraud cases may peak at p=0.1 |
+| | • Using 0.5 threshold misses ALL of them |
+| | • Threshold should be tuned based on business costs |
+
+**Example:**
+```
+Fraud detection:
+Default threshold 0.5 → Recall = 0.60
+Tuned threshold 0.15 → Recall = 0.90
+
+Trade-off: Precision drops from 0.99 to 0.91
+→ More fraud caught, but more false alarms
+```
+
+**Rule:** Always tune the decision threshold on validation data using the PR curve. 0.5 is rarely optimal.
+
+</details>
+
+---
+
+### Misconception 15: "Explainability is only for satisfying regulators — it doesn't add business value."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Explainability is a compliance cost. | **Explainability drives business decisions:**
+| | • **Actionable insights**: "Tenure drives 40% of churn" → intervene |
+| | • **Debugging**: Find spurious correlations before they hurt |
+| | • **Scientific discovery**: SHAP reveals novel gene interactions |
+| | • **Stakeholder alignment**: Business teams need "why" not just "what" |
+| | • **Trust**: Users adopt models they understand |
+| | • **Fairness**: Avoid costly bias scandals |
+
+**Analogy:** A car with a black box is mysterious; a car with diagnostic tools is maintainable. Explainability is the diagnostic dashboard for ML.
+
+</details>
+
+---
+
+## 📊 QUICK REFERENCE: MISCONCEPTIONS vs REALITY — WEEK 4 ML
+
+| Misconception | Reality |
+|---------------|---------|
+| Class imbalance is rare | It's the norm, not the exception |
+| Accuracy is the best metric | Misleading for imbalanced data |
+| Resampling the test set is fine | It's data leakage — split first |
+| SMOTE always works | Not for text, images, or very small N |
+| Imbalance is the root problem | Features and data quality matter more |
+| SVM always finds the best line | Needs scaling, tuning; poor for large N |
+| Linear SVM = Logistic Regression | Different objectives; use for different needs |
+| Kernel trick has no downside | O(N²) memory and time; expensive |
+| SHAP = LIME | SHAP has guarantees; LIME is heuristic |
+| Feature importance is objective | MDI is biased; permutation is better |
+| PDP = ICE | PDP hides heterogeneity; ICE reveals it |
+| Explainability is optional | Required for regulatory, trust, debugging |
+| AUC-ROC is the best metric | PR-AUC is better for imbalanced data |
+| 0.5 threshold is always right | Tune threshold on validation data |
+| Explainability is compliance cost | Drives business decisions and trust |

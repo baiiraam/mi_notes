@@ -1,0 +1,358 @@
+# Chapter 3: Goals of Interpretability
+
+## 📌 Cheat Sheet
+
+### THREE GOALS OF INTERPRETABILITY
+
+| Goal | Description | Key Question |
+|------|-------------|--------------|
+| **Improve the Model** | Debug, fix errors, identify shortcuts, guide feature engineering | "Is the model learning what it should?" |
+| **Justify Model & Predictions** | Provide explanations to stakeholders | "Can we trust and contest this decision?" |
+| **Discover Insights** | Extract knowledge about relationships in data | "What can we learn from this model?" |
+
+These three goals are not mutually exclusive—you may pursue all of them in a single project. However, your primary goal determines which interpretability methods are most appropriate. Start by evaluating model performance; if the model is underperforming, focus on improvement first before moving to justification or discovery.
+
+---
+
+### STAKEHOLDERS OF ML SYSTEMS
+
+| Stakeholder | Role | Needs Justification? |
+|-------------|------|---------------------|
+| **Creators** | Build system and train model | Technical debugging |
+| **Operators** | Interact with system directly | Operational understanding |
+| **Executors** | Make decisions based on outputs | Decision confidence |
+| **Decision Subjects** | Affected by decisions | Recourse, contestability |
+| **Auditors** | Audit and investigate system | Regulatory compliance |
+| **Data Subjects** | People whose data is used | Privacy, consent |
+
+Different stakeholders require different types of explanations. A technical creator needs feature importance plots; an executive needs high-level summaries; a decision subject needs actionable recourse. When designing your interpretability approach, always ask: "Who is this explanation for?"
+
+---
+
+### WHEN TO USE EACH GOAL
+
+| Goal | Best When | Example |
+|------|-----------|---------|
+| **Improve Model** | Model underperforms or behaves unexpectedly | Debugging Clever Hans predictors |
+| **Justify Predictions** | High-stakes decisions affecting people | Loan approvals, medical devices |
+| **Discover Insights** | Scientific discovery or business strategy | Agricultural research, churn analysis |
+
+The choice of goal is contextual and may shift over a project's lifecycle. Early on, you're likely in the "improve" phase. After deployment, "justify" becomes critical for stakeholder trust. As the model runs, "discover" helps you learn from the data and refine your understanding of the problem domain.
+
+---
+
+### KEY CONCEPTS
+
+| Term | Definition |
+|------|------------|
+| **Clever Hans Predictor** | Model that takes "shortcuts" using non-causal features (e.g., snow for wolf classification) |
+| **Recourse** | Ability for decision subjects to contest or change a prediction |
+| **Fidelity** | How accurately an explanation reflects the model's actual behavior |
+
+Understanding these concepts is essential before diving into specific interpretability methods. Clever Hans predictors are particularly dangerous because they often increase performance metrics while learning the wrong patterns—making them invisible without interpretability. Recourse transforms explanations from passive information into active empowerment for decision subjects.
+
+---
+
+## 📖 Glossary
+
+### Core Terms
+
+#### Clever Hans Predictor
+- **Definition**: A model that has learned to take "shortcuts" by relying on non-causal or spurious features
+- **Origin**: Named after Clever Hans, a horse that appeared to do arithmetic but was actually responding to subtle cues from his trainer
+- **In my words**: The model finds an easy way to make predictions that doesn't actually solve the real problem
+- **Example**: Wolf vs husky classifier that uses snow in the background instead of actual wolf features
+- **Why it matters**: These shortcuts often *increase* performance on test data, making them hard to detect without interpretability
+
+#### Recourse
+- **Definition**: The ability for someone affected by a model's decision to contest or change that decision
+- **In my words**: If the model says "no," can you do something to get a "yes"?
+- **Example**: If a loan is rejected, the applicant should know what to change to get approved
+- **Connection**: Requires interpretability to provide actionable feedback
+
+#### Stakeholders
+- **Definition**: People or groups with an interest in or affected by the ML system
+- **Types**: Creators, Operators, Executors, Decision Subjects, Auditors, Data Subjects
+- **In my words**: Everyone who touches or is touched by the model
+- **Why it matters**: Different stakeholders need different types of explanations
+
+#### Feature Engineering
+- **Definition**: Creating new features from raw data to improve model performance
+- **In my words**: Transforming data to make patterns more obvious to the model
+- **Connection**: Interpretability helps identify which features are most important, guiding engineering efforts
+
+### Key People
+
+| Name | Contribution |
+|------|--------------|
+| Adadi & Berrada (2018) | Identified goals of interpretability (improve, justify, discover, control) |
+| Tomsett et al. (2018) | Defined ML stakeholders |
+| Caruana et al. (2015) | Pneumonia/asthma Clever Hans example |
+| Ribeiro, Singh, & Guestrin (2016) | Wolf vs husky Clever Hans example |
+| Zhang et al. (2019) | Almond yield research using ML + interpretability |
+
+---
+
+## 🧠 Concept Map
+
+```
+                    GOALS OF INTERPRETABILITY
+                              |
+        +---------------------+---------------------+
+        |                     |                     |
+  IMPROVE MODEL        JUSTIFY PREDICTIONS    DISCOVER INSIGHTS
+        |                     |                     |
+        |                     |                     |
+   +----+----+          +-----+-----+         +-----+-----+
+   |         |          |           |         |           |
+Debug    Feature      Stakeholders       Research     Business
+Clever   Engineering    Need           (Science)     Strategy
+Hans     Guidance    Justification
+Predictors
+```
+
+### Stakeholders Map
+
+```
+                    ML SYSTEM STAKEHOLDERS
+                            |
+        +---------+---------+---------+---------+
+        |         |         |         |         |
+   CREATORS  OPERATORS  EXECUTORS  DECISION   AUDITORS   DATA
+   (Build)   (Interact) (Decide)   SUBJECTS   (Audit)   SUBJECTS
+                                    (Affected)            (Data)
+```
+
+### Key Insights Flow
+
+```
+1. PERFORMANCE EVALUATION
+          ↓
+    [Is model doing well?]
+          ↓
+    YES → Move to other goals
+    NO → Use interpretability to IMPROVE
+          ↓
+2. IDENTIFY STAKEHOLDERS
+          ↓
+    Who needs justification?
+          ↓
+3. APPLY INTERPRETABILITY
+          ↓
+    - Debug shortcuts
+    - Provide recourse
+    - Extract insights
+```
+
+---
+
+## 🎯 Teach It Summary
+
+Interpretability is not an end in itself—it serves three main goals: improving the model, justifying its predictions, and discovering insights.
+
+First, **improving the model** means using interpretability to debug and fix problems. Models can be "Clever Hans" predictors—they take shortcuts that actually *increase* performance on test data while learning the wrong things. For example, a model might classify wolves vs huskies by looking for snow in the background, or predict that asthma patients are *less* likely to die from pneumonia (because they receive faster treatment, not because asthma is protective). Interpretability helps catch these issues. It also guides feature engineering by showing which features matter most.
+
+Second, **justifying the model and its predictions** means providing explanations to different stakeholders. A system has many stakeholders: creators who build it, operators who run it, executives who make decisions based on it, decision subjects who are affected by it, auditors who review it, and data subjects whose data is used. Each needs different types of justification. For example, someone whose loan was rejected needs recourse—an explanation of what they could change to get approved.
+
+Third, **discovering insights** means using the model as a tool for learning, not just prediction. Scientists use ML to study relationships (e.g., how fertilizer affects crop yields). Without interpretability, they only get predictions, not understanding. Marketing teams need to know *why* customers churn to design effective responses, not just who will churn.
+
+Your specific goal determines which interpretability methods to use. Evaluate your model's performance first—if it's underperforming, focus on improvement. Otherwise, consider who needs justification and what insights would be valuable.
+
+---
+
+## ❓ Annotations & Questions
+
+### Clarification Questions
+
+<details>
+<summary><b>Q1: How do I know which goal to prioritize in my project?</b></summary>
+
+The author suggests:
+1. First, evaluate performance metrics
+2. If model underperforms → focus on IMPROVING the model
+3. If model performs well → consider JUSTIFICATION (stakeholders) or INSIGHTS (learning)
+
+**My thought**: This seems iterative—you might cycle through all three goals during a project's lifecycle.
+</details>
+
+<details>
+<summary><b>Q2: What's the difference between "justify" and "discover insights"?</b></summary>
+
+- **Justify**: Explaining the model's behavior *to others* (stakeholders, regulators)
+- **Discover Insights**: Learning something new *for yourself* (scientific discovery, business strategy)
+
+**My thought**: The distinction is about audience—justification is outward-facing, insights are inward-facing.
+</details>
+
+<details>
+<summary><b>Q3: How does "recourse" differ from a simple explanation?</b></summary>
+
+- **Explanation**: "Why was my loan rejected?" → "Because your income is low."
+- **Recourse**: "What can I change to get approved?" → "Increase your income to $X or reduce debt to $Y."
+
+**My thought**: Recourse is inherently **actionable**—it tells you what to *do*, not just what *happened*.
+</details>
+
+### Critical Thoughts
+
+<details>
+<summary><b>Q4: Is "improving the model" always the first goal?</b></summary>
+
+The author says to evaluate performance first and focus on improvement if needed.
+
+**But**: What if the model performs well but is biased? Improving accuracy might not address fairness.
+
+**My thought**: "Performance" should include fairness, robustness, and other metrics—not just accuracy.
+</details>
+
+<details>
+<summary><b>Q5: Are stakeholders always aligned in what they need?</b></summary>
+
+**Creators**: Want technical understanding to debug
+**Executors**: Want confidence to make decisions
+**Decision Subjects**: Want fairness and recourse
+**Auditors**: Want compliance and transparency
+
+**My thought**: These interests can conflict. For example, a decision subject wants recourse, but the company might not want to reveal proprietary information. This creates tension.
+</details>
+
+<details>
+<summary><b>Q6: Is "discovering insights" just scientific use, or does it apply in industry too?</b></summary>
+
+- **Science**: Understanding relationships (e.g., almond yields)
+- **Industry**: Business strategy (e.g., churn prediction—why do customers leave?)
+- **My thought**: Any time you want to *learn* from the model rather than just *use* it, you're in the "discover insights" category.
+</details>
+
+<details>
+<summary><b>Q7: Can interpretability actually make a model worse if misused?</b></summary>
+
+Example: If a model learns a counterintuitive but correct pattern, interpretability might cause developers to "fix" something that wasn't broken.
+
+**My thought**: Interpretability is a tool—it reveals what the model is doing, but humans still need domain expertise to interpret the interpretation correctly.
+</details>
+
+<details>
+<summary><b>Q8: The author mentions "Clever Hans" predictors that increase performance—how can a shortcut increase performance?</b></summary>
+
+If the shortcut (e.g., snow in wolf images) happens to correlate with the target in the training data, the model can use it to improve accuracy on that dataset.
+
+**But**: It fails when the correlation breaks (e.g., wolves on grass, huskies in snow).
+
+**My thought**: This is why generalization is so important—and why interpretability helps us see what the model is *actually* relying on.
+</details>
+
+### Connections to Other Knowledge
+
+<details>
+<summary><b>Q9: How do the three goals map to different XAI methods?</b></summary>
+
+| Goal | Methods |
+|------|---------|
+| **Improve** | Feature importance, partial dependence plots, error analysis |
+| **Justify** | LIME, SHAP, counterfactuals (for individual predictions) |
+| **Discover** | Global feature importance, PDP, ALE plots |
+
+**Need to check**: Later chapters will cover specific methods for each goal.
+</details>
+
+<details>
+<summary><b>Q10: How does this connect to the "incompleteness of problem formalization" from Chapter 2?</b></summary>
+
+- **Incompleteness**: The loss function doesn't capture all constraints (fairness, safety, etc.)
+- **Interpretability goals**: Help address this incompleteness by:
+  - **Improving**: Fixing hidden bugs the loss function doesn't reveal
+  - **Justifying**: Providing the "why" that the loss function can't express
+  - **Discovering**: Extracting knowledge beyond the prediction
+</details>
+
+### Questions I Want Answered Later
+
+<details>
+<summary><b>Click to expand: Open Questions</b></summary>
+
+- [ ] What are specific methods for each of the three goals?
+- [ ] How do I choose between LIME, SHAP, and other methods based on my goal?
+- [ ] What's the role of stakeholders in choosing interpretability methods?
+- [ ] How do regulations (GDPR, etc.) affect the "justification" goal?
+- [ ] Can a single method serve all three goals?
+- [ ] How do I evaluate if my model is a "Clever Hans" predictor?
+- [ ] What's the relationship between causality and the three goals?
+- [ ] How do I provide recourse without revealing proprietary model information?
+- [ ] Are there cases where interpretability *hurts* stakeholder trust?
+- [ ] How do I balance competing stakeholder needs?
+</details>
+
+### Papers to Read
+
+<details>
+<summary><b>Click to expand: Reading List</b></summary>
+
+- [ ] Adadi & Berrada (2018) - Goals of interpretability
+- [ ] Tomsett et al. (2018) - ML stakeholders
+- [ ] Caruana et al. (2015) - Pneumonia/asthma Clever Hans example
+- [ ] Ribeiro, Singh, & Guestrin (2016) - Wolf vs husky ("Why Should I Trust You?") — LIME paper
+- [ ] Zhang et al. (2019) - Almond yield research
+- [ ] Freiesleben & Molnar - "ml-science-book.com" (mentioned in text)
+</details>
+
+---
+
+## 📝 Personal Takeaways
+
+1. **Interpretability is goal-dependent** — what works for debugging won't work for stakeholder justification
+
+2. **"Clever Hans" is dangerous** because the shortcuts *increase* performance, making them invisible without interpretability
+
+3. **Stakeholders matter** — different people need different explanations. A regulator needs different justification than an end-user
+
+4. **Recourse is more than explanation** — it's actionable feedback. "Why" is good; "what to do" is better
+
+5. **Performance first** — if the model is bad, explainability won't save it. Fix the model first
+
+6. **Models can be knowledge sources** — not just prediction tools. This is a major shift in how we use ML
+
+7. **Feature engineering benefit** — interpretability can guide where to invest engineering effort
+
+8. **The three goals aren't mutually exclusive** — you can and should pursue multiple goals simultaneously
+
+9. **Clever Hans examples are everywhere** — pneumonia, wolf/husky, and likely many more in real-world systems
+
+10. **This chapter sets up the "WHY" and "WHO"** — next chapters cover the "HOW" (methods)
+
+---
+
+## 🔗 Chapter Connections
+
+### To Chapter 2
+- Chapter 2: *Why* interpretability matters (curiosity, safety, bias, trust)
+- Chapter 3: *What goals* interpretability serves (improve, justify, discover)
+- Connection: The "why" from Chapter 2 maps to the "goals" in Chapter 3
+
+### To Future Chapters (Anticipated)
+- **Model-specific methods** (linear models, trees) → Improvement
+- **Model-agnostic methods** (LIME, SHAP) → Justification
+- **Feature importance, PDP** → Discovery
+- **Counterfactuals** → Recourse (justification)
+- **Stakeholder analysis** → Which methods to choose
+
+### To External Fields
+- **Regulation**: GDPR, AI Act—justification goal
+- **Science**: ML as a tool for discovery—insights goal
+- **HCI/UX**: How to present explanations to different stakeholders
+- **Causality**: Clever Hans = non-causal shortcuts
+
+---
+
+## 📌 Key Takeaways (Quick Summary)
+
+1. **Three goals**: Improve model, justify predictions, discover insights
+2. **Improve**: Debug Clever Hans shortcuts, guide feature engineering
+3. **Justify**: Provide explanations to stakeholders (creators, operators, executives, decision subjects, auditors, data subjects)
+4. **Discover**: Extract knowledge from the model (science, business strategy)
+5. **Prioritize**: Check performance first, then choose goals based on needs
+6. **Key concept**: Clever Hans predictors take shortcuts that *increase* performance, making them invisible
+7. **Key concept**: Recourse = actionable feedback, not just explanation
+8. **Different stakeholders need different justifications**
+9. **Models can be knowledge sources, not just prediction tools**
+10. **Your goal determines which interpretability methods to use**

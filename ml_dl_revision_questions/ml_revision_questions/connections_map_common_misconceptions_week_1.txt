@@ -1,0 +1,755 @@
+# Week 1 ML — Connections Map + Common Misconceptions
+
+
+## 1. CONNECTIONS MAP — WEEK 1 ML
+
+**How to use:** This map shows how all the concepts from Week 1 ML connect to each other. Trace each path to understand the relationships.
+
+---
+
+### 🌳 THE BIG PICTURE — TEXT-BASED CONCEPT MAP
+
+```
+╔══════════════════════════════════════════════════════════════════════════╗
+║                                                                          ║
+║                    WEEK 1 ML: INTRODUCTION TO ML                        ║
+║                                                                          ║
+║                    ┌─────────────────────────┐                          ║
+║                    │   WHAT IS ML?           │                          ║
+║                    │   "Learn without being  │                          ║
+║                    │   explicitly programmed"│                          ║
+║                    └────────────┬────────────┘                          ║
+║                                 │                                       ║
+║                                 ▼                                       ║
+║                    ┌─────────────────────────┐                          ║
+║                    │   ML PIPELINE           │                          ║
+║                    │   Data + Algo + Compute │                          ║
+║                    │   → Model → Predictions │                          ║
+║                    └────────────┬────────────┘                          ║
+║                                 │                                       ║
+║          ┌──────────────────────┼──────────────────────┐               ║
+║          │                      │                      │               ║
+║          ▼                      ▼                      ▼               ║
+║    ┌───────────┐        ┌───────────┐        ┌───────────┐            ║
+║    │  WHY ML?  │        │  WHY NOW? │        │ TRADITIONAL│            ║
+║    │ Problems  │        │  4 Drivers│        │   CODE vs  │            ║
+║    │ too fuzzy │        │  Data,    │        │     ML     │            ║
+║    │ for rules │        │  Compute, │        └─────┬─────┘            ║
+║    └─────┬─────┘        │  Tools,  │              │                    ║
+║          │              │  Algo    │              │                    ║
+║          │              └──────────┘              │                    ║
+║          └─────────────────┬──────────────────────┘                    ║
+║                            │                                           ║
+║                            ▼                                           ║
+║                    ┌─────────────────────────┐                         ║
+║                    │   3 PARADIGMS OF ML     │                         ║
+║                    └────────────┬────────────┘                         ║
+║                                 │                                      ║
+║    ┌──────────────┬─────────────┼─────────────┬────────────┐          ║
+║    │              │             │             │            │          ║
+║    ▼              ▼             ▼             ▼            ▼          ║
+║ ┌───────┐  ┌───────────┐ ┌─────────────┐ ┌──────────┐ ┌─────────┐   ║
+║ │SUPER- │  │UNSUPER-   │ │ REINFORCE-  │ │ SEMI-   │ │ SELF-   │   ║
+║ │VISED  │  │VISED      │ │ MENT       │ │ SUPER-  │ │ SUPER-  │   ║
+║ │(Labeled│  │(Unlabeled)│ │ (Rewards)  │ │ VISED   │ │ VISED   │   ║
+║ │ Data)  │  │           │ │            │ │         │ │ (Labels │   ║
+║ └───┬────┘  └─────┬─────┘ └──────┬─────┘ └────┬────┘ │ from    │   ║
+║     │             │              │            │      │ Data)   │   ║
+║     └─────────────┼──────────────┼────────────┼──────┴────┬────┘   ║
+║                   │              │            │           │        ║
+║                   ▼              ▼            ▼           ▼        ║
+║         ┌──────────────────────────────────────────────────┐       ║
+║         │              KNN (LECTURE 2)                     │       ║
+║         │  Instance-based · Lazy Learner · Non-parametric  │       ║
+║         │  Similar inputs → Similar outputs                │       ║
+║         └──────────────────────┬───────────────────────────┘       ║
+║                                │                                    ║
+║    ┌───────────────────────────┼───────────────────────────┐       ║
+║    │                           │                           │       ║
+║    ▼                           ▼                           ▼       ║
+║ ┌──────────────┐    ┌───────────────────┐    ┌───────────────────┐ ║
+║ │DISTANCE      │    │ FEATURE SCALING   │    │ CURSE OF          │ ║
+║ │METRICS       │    │ Min-Max / Z-Score │    │ DIMENSIONALITY    │ ║
+║ │Euclidean (L2)│    │ (Scale BEFORE     │    │ Distances         │ ║
+║ │Manhattan (L1)│    │  distance-based)  │    │ equalize in high-d│ ║
+║ │Cosine        │    └───────────────────┘    │ KD-Trees break    │ ║
+║ │Jaccard       │                             │ at d > 20         │ ║
+║ └──────┬───────┘                             └──────┬────────────┘ ║
+║        │                                           │              ║
+║        └───────────────────────────────────────────┘              ║
+║                                │                                    ║
+║                                ▼                                    ║
+║                    ┌─────────────────────────┐                      ║
+║                    │   ANN (Approx NN)       │                      ║
+║                    │   HNSW, LSH, KD-Trees   │                      ║
+║                    │   O(log n) vs O(n·d)    │                      ║
+║                    │   Speed vs Accuracy     │                      ║
+║                    └────────────┬────────────┘                      ║
+║                                 │                                    ║
+║                                 ▼                                    ║
+║                    ┌─────────────────────────────────┐              ║
+║                    │   HOW DO WE KNOW IT WORKS?     │              ║
+║                    │   VALIDATION & EVALUATION      │              ║
+║                    └────────────┬────────────────────┘              ║
+║                                 │                                    ║
+║    ┌────────────────────────────┼────────────────────────────┐      ║
+║    │                            │                            │      ║
+║    ▼                            ▼                            ▼      ║
+║ ┌──────────────┐    ┌───────────────────┐    ┌──────────────────┐  ║
+║ │ DATA         │    │ BIAS-VARIANCE     │    │ EVALUATION       │  ║
+║ │ SPLITTING    │    │ TRADEOFF          │    │ METRICS          │  ║
+║ │ Train/Val/   │    │ High Bias =       │    │ Classification:  │  ║
+║ │ Test         │    │ Underfitting      │    │ Acc, Prec, Rec,  │  ║
+║ │ Stratified   │    │ High Variance =   │    │ F1, AUC-ROC     │  ║
+║ │ CV (K-Fold,  │    │ Overfitting       │    │ Regression:      │  ║
+║ │ LOOCV)       │    │ Total Error =     │    │ RMSE, MAE, R²,   │  ║
+║ │ Nested CV    │    │ Bias² + Var + σ²  │    │ MAPE             │  ║
+║ └──────┬───────┘    └──────┬────────────┘    └──────┬───────────┘  ║
+║        │                   │                        │              ║
+║        └───────────────────┼────────────────────────┘              ║
+║                            │                                       ║
+║                            ▼                                       ║
+║                    ┌─────────────────────────┐                     ║
+║                    │   DEPLOYMENT & ETHICS   │                     ║
+║                    │   Distribution Shift    │                     ║
+║                    │   Data Leakage          │                     ║
+║                    │   Fairness & Bias       │                     ║
+║                    │   Explainability        │                     ║
+║                    │   Privacy &             │                     ║
+║                    │   Accountability        │                     ║
+║                    └─────────────────────────┘                     ║
+║                                                                     ║
+╚══════════════════════════════════════════════════════════════════════════╝
+```
+
+---
+
+### 🔗 KEY CONNECTION EXPLANATIONS
+
+<details>
+<summary><b>Connection 1: Why does data quality matter more than algorithm choice?</b></summary>
+
+```
+Data Quality → Algorithm Performance → Generalization
+
+┌─────────────────────────────────────────────────────────────────┐
+│                                                                 │
+│  "Data Quality Matters More Than Algorithm Choice"             │
+│                                                                 │
+│  Garbage In → Garbage Out                                      │
+│  Good Data → Even simple models work well                     │
+│                                                                 │
+│  Data Issues:                                                  │
+│  • Imbalanced classes → Accuracy is misleading                │
+│  • Label noise → Model learns wrong patterns                  │
+│  • Data leakage → Overly optimistic performance               │
+│  • Biased data → Discriminatory outcomes                      │
+│  • Small dataset → Overfitting → Poor generalization          │
+│                                                                 │
+│  Key Insight: A complex model on bad data < Simple model on   │
+│  good data. Algorithm choice is secondary to data quality.     │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 2: How does the Bias-Variance Tradeoff connect everything?</b></summary>
+
+```
+Bias-Variance Tradeoff
+    │
+    ├── Determines Model Complexity
+    │       │
+    │       ├── Too Simple → High Bias → Underfitting
+    │       │       │
+    │       │       └── Fix: More complex model, more features
+    │       │
+    │       └── Too Complex → High Variance → Overfitting
+    │               │
+    │               └── Fix: More data, regularization, simpler model
+    │
+    ├── Connects to KNN
+    │       │
+    │       ├── K=1 → High Variance (Overfitting)
+    │       └── K=N → High Bias (Underfitting)
+    │
+    ├── Connects to Cross-Validation
+    │       │
+    │       └── CV helps find the sweet spot (optimal complexity)
+    │
+    └── Connects to Evaluation Metrics
+            │
+            └── Training error vs Validation error gap = Overfitting
+```
+
+**The cascade:** Model complexity → Bias/Variance tradeoff → Underfitting/Overfitting → CV to find sweet spot → Metrics to validate → Deployment success.
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 3: KNN → Feature Scaling → Distance → Curse → ANN</b></summary>
+
+```
+KNN (Core Algorithm)
+    │
+    ├── Requires DISTANCE METRIC
+    │       │
+    │       ├── Euclidean (L2) → Default for continuous features
+    │       ├── Manhattan (L1) → Grid-based, robust to outliers
+    │       └── Cosine → Text documents, embeddings
+    │
+    ├── Requires FEATURE SCALING
+    │       │
+    │       ├── Min-Max Normalization → [0,1], sensitive to outliers
+    │       └── Z-Score Standardization → Mean=0, Var=1, robust
+    │
+    ├── Suffers from CURSE OF DIMENSIONALITY
+    │       │
+    │       ├── Distances equalize in high dimensions
+    │       ├── Data becomes sparse (every point is an outlier)
+    │       └── KD-Trees break at d > 20
+    │
+    └── Solution: APPROXIMATE NN (ANN)
+            │
+            ├── KD-Trees → Partition space (good for d < 20)
+            ├── LSH → Hash similar points to same bucket
+            └── HNSW → Multi-layer graph (state of the art)
+```
+
+**Key insight:** Each step connects to the next — choose distance based on data type, scale features so distance is meaningful, curse kicks in at high dimensions, switch to ANN for scalability.
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 4: Data Splitting → CV → Metrics → Deployment</b></summary>
+
+```
+1. DATA SPLITTING
+    │
+    ├── Training Set → Fit model parameters
+    ├── Validation Set → Tune hyperparameters
+    └── Test Set → Final evaluation (used ONCE)
+    │
+    ├── If small dataset → Use CROSS-VALIDATION
+    │       │
+    │       ├── K-Fold CV → 5-fold or 10-fold (default)
+    │       ├── Stratified CV → Preserve class proportions
+    │       └── LOOCV → K=N (tiny datasets only)
+    │
+    ├── Prevent DATA LEAKAGE
+    │       │
+    │       ├── Fit scalers on TRAIN only
+    │       ├── Split time-series chronologically
+    │       └── Remove duplicates before splitting
+    │
+    └── Choose EVALUATION METRICS
+            │
+            ├── Classification: Acc, Prec, Rec, F1, AUC-ROC
+            ├── Regression: RMSE, MAE, R², MAPE
+            └── Match metric to business cost structure
+```
+
+**The chain must work at every step.** A break at any point → invalid performance estimate → deployment failure.
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 5: Expert Systems → ML → Why ML is needed</b></summary>
+
+```
+EXPERT SYSTEMS (Rule-Based "AI")
+    │
+    ├── MYCIN (1970s): 600+ rules for medical diagnosis
+    │   └── Failed because: Manual rule updates don't scale
+    │
+    ├── Deep Blue (1997): Handcrafted chess evaluation
+    │   └── Failed because: Couldn't generalize to Go/other games
+    │
+    └── ELIZA (1966): Pattern-matched chatbot responses
+        └── Failed because: Zero understanding, just mirroring
+    │
+    Key Lesson: Encoding all human knowledge in rules doesn't scale.
+    ↓
+MACHINE LEARNING (Solution)
+    │
+    ├── Learns patterns from DATA instead of rules
+    ├── Generalizes to new scenarios (unlike expert systems)
+    ├── Adapts to changing conditions (retrainable)
+    └── Scales with data and compute
+```
+
+**Key insight:** The failure of expert systems is exactly what motivated ML!
+
+</details>
+
+---
+
+### 📊 CONNECTION MATRIX
+
+| Concept A | Connects To | Why |
+|-----------|-------------|-----|
+| **Data Quality** | Algorithm Performance | Good data > Complex algorithm |
+| **Bias-Variance** | KNN K value | K=1 → high variance; K=N → high bias |
+| **Feature Scaling** | KNN | Unscaled features dominate distance calculations |
+| **Curse of Dimensionality** | ANN | High-d → exact KNN fails → use ANN |
+| **Data Splitting** | Cross-Validation | Small datasets → use CV instead of holdout |
+| **Data Leakage** | CV/Test | Leakage → over-optimistic performance |
+| **Underfitting** | Overfitting | Tradeoff via bias-variance |
+| **Precision** | Recall | Tradeoff via F1 score |
+| **Confusion Matrix** | All Classification Metrics | TP/TN/FP/FN define all metrics |
+| **Distribution Shift** | Deployment | Model fails when data changes |
+| **Bias in Data** | Ethics | Model inherits and amplifies bias |
+| **Model Complexity** | Bias-Variance | More complex → lower bias, higher variance |
+| **Regularization** | Overfitting | Fix for high variance |
+| **Train/Val/Test** | Generalization | Only way to get honest performance estimate |
+
+---
+
+## 2. COMMON MISCONCEPTIONS — WEEK 1 ML
+
+**How to use:** Read each misconception first. Try to identify what's wrong with it. Then click to reveal the reality.
+
+---
+
+### Misconception 1: "If I have good data, the algorithm doesn't matter much — any model will work."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Data quality is so important that algorithm choice is almost irrelevant. | Data quality is crucial, but **algorithm choice still matters**: |
+| | • **KNN** fails in high dimensions (curse) |
+| | • **Linear models** fail on non-linear patterns |
+| | • **Decision trees** might overfit without pruning |
+| | • Different models have different **inductive biases** |
+
+**Example:**
+```
+Same data, different algorithms:
+- KNN (K=1): 99% train, 60% test (overfitting)
+- Linear Regression: 75% train, 74% test (underfitting)
+- Random Forest: 92% train, 88% test (good fit)
+→ Algorithm choice absolutely matters!
+```
+
+**Rule:** Garbage data + good algorithm = garbage. Good data + wrong algorithm = suboptimal. Both matter.
+
+</details>
+
+---
+
+### Misconception 2: "KNN is a lazy learner, so it doesn't really 'learn' anything useful."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| KNN does no learning — it just memorizes data. | KNN does "learn" in a different way: |
+| | • It learns the **training data structure** (stores it) |
+| | • It learns the **decision boundary** implicitly |
+| | • The "learning" happens at **query time**, not training time |
+| | • It can approximate **any decision boundary** |
+
+**Analogy:** A medical student who memorizes every symptom-disease pair (KNN) vs one who learns a general rule (logistic regression). Both "learned" — just differently.
+
+**When KNN beats learned models:** Complex, non-linear decision boundaries, small datasets, multi-class problems.
+
+</details>
+
+---
+
+### Misconception 3: "Accuracy is the only metric I need — higher is always better."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Accuracy is the ultimate measure of model performance. | **Accuracy is often misleading:**
+| | • **Imbalanced classes**: 99% accuracy can be trivial (always predict majority) |
+| | • **Business costs**: Accuracy ignores the cost of errors |
+| | • **Different error costs**: FP vs FN have different consequences |
+
+**Example:**
+```
+Cancer screening dataset: 99% healthy, 1% sick
+Model A: always predicts "healthy" → 99% accuracy ✅
+Model B: catches 90% of sick, 95% of healthy → 94.95% accuracy ❌
+
+Model B has LOWER accuracy but is MUCH BETTER for the task!
+```
+
+**Rule:** Choose the metric that aligns with your business costs, not just "highest number."
+
+</details>
+
+---
+
+### Misconception 4: "Validation and test sets are the same thing — just different names."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Validation set and test set are interchangeable. | **They serve completely different purposes!** |
+
+| Validation Set | Test Set |
+|----------------|----------|
+| Tune hyperparameters | Final evaluation ONLY |
+| Early stopping decisions | MUST be untouched until the end |
+| Model selection | Measures true generalization |
+| Used many times | Used ONCE |
+
+**The fatal mistake:** Tuning on the test set = **data leakage**. The model now "knows" the test set, and your final evaluation is invalid. The test set must be hidden until the very end!
+
+</details>
+
+---
+
+### Misconception 5: "More data always helps — you can never have too much data."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| More data = always better model. | **Not necessarily:**
+| | • **Low-quality data** → garbage in, garbage out |
+| | • **Imbalanced data** → more data can make it worse |
+| | • **Label noise** → more wrong labels = worse model |
+| | • **Dataset shift** → data from wrong distribution hurts |
+| | • **Diminishing returns** → at some point, more data barely helps |
+| | • **Curse of dimensionality** → more features ≠ more signal |
+
+**Analogy:** A bigger bucket can hold more water, but if the water is dirty, you get more dirty water. Quality > Quantity!
+
+</details>
+
+---
+
+### Misconception 6: "Overfitting is easy to spot — the model has 0% training error."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Overfitting only happens when training error is 0%. | Overfitting can happen even with non-zero training error: |
+| | • The gap between train and validation error is the signal |
+| | • Even 10% train / 25% val is overfitting |
+| | • Overfitting happens gradually as model complexity increases |
+| | • It's not binary — it's a spectrum |
+
+**Diagnosis:**
+```
+Signs of Overfitting:
+  ✅ Training error << Validation error
+  ✅ Validation error starts increasing while training error decreases
+  ✅ Model performs well on seen data, poorly on unseen
+```
+
+**Rule:** Always compare train vs validation error. The gap is what matters!
+
+</details>
+
+---
+
+### Misconception 7: "Cross-validation is just for small datasets — unnecessary for large ones."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| CV is a crutch for small datasets. With big data, holdout is fine. | CV is useful for ALL dataset sizes, but for different reasons: |
+| | • **Small datasets**: CV maximizes training data per fold |
+| | • **Large datasets**: CV provides more robust estimate of performance |
+| | • CV reduces **variance** of the performance estimate |
+| | • CV can detect **overfitting** to a specific validation split |
+
+**When to use CV:**
+```
+✅ Small datasets (to maximize training data)
+✅ Hyperparameter tuning (to avoid overfitting to one validation set)
+✅ When you need confidence intervals (multiple CV runs)
+✅ When dataset distribution is uncertain (stratified CV)
+❌ Only when compute cost is prohibitive (very large data)
+```
+
+</details>
+
+---
+
+### Misconception 8: "Data leakage is obvious — I would never make that mistake."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Data leakage is an obvious error that beginners make. | Data leakage is **subtle and common, even for experts:**
+| | • **Scaling before splitting** — easy to do automatically |
+| | • **Shuffling time-series** — common mistake |
+| | • **Duplicate rows across splits** — hard to detect |
+| | • **Feature engineering using global statistics** — very subtle |
+
+**Common Leakage Examples:**
+```python
+# ❌ WRONG — Leakage!
+scaler.fit(X_full)  # Fit on ALL data
+X_train = scaler.transform(X_train)
+X_test = scaler.transform(X_test)
+
+# ✅ CORRECT
+scaler.fit(X_train)  # Fit on TRAIN only
+X_train = scaler.transform(X_train)
+X_test = scaler.transform(X_test)  # Same transform, no leakage
+```
+
+**Rule:** If the test set influences training in any way, you have leakage.
+
+</details>
+
+---
+
+### Misconception 9: "RMSE and MAE tell the same story — choose whichever."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| RMSE and MAE are interchangeable error metrics. | **They penalize errors differently:**
+
+| Aspect | MAE | RMSE |
+|--------|-----|------|
+| Outlier sensitivity | ❌ Robust | ✅ Sensitive |
+| Interpretation | Average absolute error | √(average squared error) |
+| Units | Same as target | Same as target |
+| Penalizes small errors | Linearly | Quadratically |
+| Penalizes large errors | Linearly | **Severely** |
+
+**Example:**
+```
+Errors: [1, 2, 3, 4, 100]
+MAE = (1+2+3+4+100)/5 = 22
+RMSE = √((1+4+9+16+10000)/5) = √(2006) ≈ 44.8
+
+RMSE is much higher due to one large error!
+```
+
+**Rule:** Use MAE for robustness to outliers, RMSE when large errors must be penalized heavily.
+
+</details>
+
+---
+
+### Misconception 10: "All distance metrics work equally well for KNN."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Euclidean distance is the default — it works for everything. | **Different data types need different distance metrics:**
+
+| Data Type | Best Distance | Why |
+|-----------|--------------|-----|
+| Continuous features (after scaling) | **Euclidean (L2)** | Intuitive straight-line distance |
+| Text documents (TF-IDF) | **Cosine** | Focuses on direction, ignores magnitude |
+| Grid-based movement (robot) | **Manhattan (L1)** | Moves in grid patterns |
+| Binary purchase history | **Jaccard** | Measures overlap of sets |
+| High-dimensional embeddings | **Cosine** | Magnitude often less meaningful |
+| Sparse data | **Manhattan (L1)** | Robust to zeros |
+
+**Example:**
+```
+Text documents:
+Document A: [1, 0, 0, 0, 0]  (short doc)
+Document B: [10, 0, 0, 0, 0] (same doc, longer)
+Euclidean distance: 9 → very far (wrong!)
+Cosine distance: 0 → identical (correct!)
+```
+
+**Rule:** Choose the distance metric that matches your data's structure.
+
+</details>
+
+---
+
+### Misconception 11: "The curse of dimensionality only matters for very high dimensions like 10,000+."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| The curse of dimensionality only affects very high-dimensional data. | **The curse kicks in much earlier — often around d > 20:**
+| | • **KD-Trees break at d > 20** (pruning ineffective) |
+| | • Distances start to equalize at d > 30-50 |
+| | • Volume explodes: 2^d corners in a unit hypercube |
+| | • Even d=100 is enough for severe sparsity |
+
+**Example:**
+```
+d = 10: 2^10 = 1024 corners (manageable)
+d = 20: 2^20 = 1,048,576 corners (large)
+d = 50: 2^50 ≈ 1.12 × 10^15 corners (impossible)
+
+To cover 1% of a 20D space, you need 1 million samples!
+```
+
+**Rule:** For KNN with d > 20, consider dimensionality reduction (PCA) or switch to ANN.
+
+</details>
+
+---
+
+### Misconception 12: "ANN (Approximate NN) always gives worse results than exact KNN."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| ANN is a compromise that sacrifices too much accuracy for speed. | **ANN can be nearly as accurate while being 1000× faster:**
+| | • **HNSW** achieves ~99% recall with O(log n) query time |
+| | • Exact KNN is O(n·d) — impossible at scale |
+| | • ANN powers all modern vector databases |
+| | • The accuracy loss is often negligible |
+
+**Comparison:**
+```
+Dataset: 1M samples, d=100
+Exact KNN: 100M operations, 100% recall, 500ms/query
+HNSW (ANN): ~100 operations, 99% recall, 2ms/query
+
+→ 250× faster with 1% accuracy loss!
+```
+
+**Rule:** In production, ANN is the practical choice at scale. Exact KNN is for research/small datasets.
+
+</details>
+
+---
+
+### Misconception 13: "Feature scaling is only needed for KNN — other models are fine."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Scaling is only important for distance-based algorithms like KNN. | **Many algorithms need scaling:**
+| | • **Linear/Logistic Regression** — coefficients depend on scale |
+| | • **SVM** — distances to hyperplane depend on scale |
+| | • **PCA** — variance dominated by larger scales |
+| | • **Neural Networks** — gradients affected by input scales |
+| | • **Clustering (K-Means)** — distances like KNN |
+| | • **Only tree-based models** (Decision Trees, Random Forest) are scale-invariant |
+
+**Example:**
+```
+Linear Regression with unscaled features:
+Age: 25-45, Salary: 50k-90k
+→ Salary dominates the model coefficients
+→ Age becomes almost irrelevant!
+```
+
+**Rule:** Scale features for most ML models, except tree-based ones. If in doubt, scale.
+
+</details>
+
+---
+
+### Misconception 14: "Underfitting is rare — models usually overfit."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Underfitting is rare because models are complex enough. | Underfitting is **very common** in real-world ML:
+| | • **Too much regularization** → model too simple |
+| | • **Wrong algorithm** → linear model on non-linear data |
+| | • **Insufficient features** → missing key predictors |
+| | • **Too little training** → model hasn't converged |
+| | • **Data leakage fixes** → sometimes over-correct |
+
+**Diagnosis:**
+```
+Signs of Underfitting:
+  ✅ Training error is high (>20%)
+  ✅ Validation error is similar (same high value)
+  ✅ Both train and val errors plateau at high values
+  ✅ Model predictions are clearly wrong (e.g., constant prediction)
+```
+
+**Rule:** If both train and validation error are high, the model is underfitting. Don't assume overfitting!
+
+</details>
+
+---
+
+### Misconception 15: "ML is always the best choice when you have data."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| If you have data, ML will improve it. | **ML is NOT always the right tool:**
+| | • **Simple deterministic rules** are better (sorting, arithmetic) |
+| | • **Small datasets** → high chance of overfitting |
+| | • **High-stakes decisions** → need explainability (maybe simpler model) |
+| | • **Real-time constraints** → ML may be too slow |
+| | • **No clear pattern** → ML may find spurious correlations |
+
+**Decision Checklist:**
+```
+Question: Should I use ML?
+├── Perfect deterministic rules exist? → NO (use traditional code)
+├── Complex/fuzzy/unstructured problem? → YES (ML is strong)
+├── Interpretability required? → Consider simple models
+├── Limited data? → Consider rules or simple ML
+└── Yes to complex + enough data + no perfect rules → USE ML
+```
+
+**Rule:** ML is a tool, not a hammer for every nail.
+
+</details>
+
+---
+
+## 📊 QUICK REFERENCE: MISCONCEPTIONS vs REALITY — WEEK 1 ML
+
+| Misconception | Reality |
+|---------------|---------|
+| Algorithm doesn't matter if data is good | Both matter — algorithm choice affects performance |
+| KNN doesn't "learn" anything | It learns implicitly via data structure |
+| Accuracy is the only metric | Precision/Recall/F1 are often more important |
+| Validation = Test set | They serve different purposes |
+| More data always helps | Quality, balance, relevance matter more |
+| Overfitting = 0% train error | Overfitting is measured by the train-val gap |
+| CV is only for small datasets | CV helps with robust estimates at any size |
+| Data leakage is obvious | Leakage is subtle and common |
+| RMSE = MAE | RMSE penalizes outliers more severely |
+| All distance metrics work equally | Choose metric based on data type |
+| Curse only at 10,000+ dimensions | Curse kicks in at d > 20 |
+| ANN always worse than exact KNN | ANN can be 99% accurate, 1000× faster |
+| Scaling only for KNN | Many algorithms need scaling (Reg, SVM, PCA) |
+| Underfitting is rare | Underfitting is common in practice |
+| ML is always better with data | Traditional code is better for deterministic problems |

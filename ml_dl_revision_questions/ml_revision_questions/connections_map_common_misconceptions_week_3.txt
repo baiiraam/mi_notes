@@ -1,0 +1,788 @@
+# Week 3 ML — Connections Map + Common Misconceptions
+
+## 1. CONNECTIONS MAP — WEEK 3 ML
+
+**How to use:** This map shows how all the concepts from Week 3 ML connect to each other. Trace each path to understand the relationships.
+
+---
+
+### 🌳 THE BIG PICTURE — TEXT-BASED CONCEPT MAP
+
+```
+╔══════════════════════════════════════════════════════════════════════════╗
+║                                                                          ║
+║                    WEEK 3 ML: DATA PREP, FEATURES & VIZ                ║
+║                                                                          ║
+║                    ┌─────────────────────────────────────┐              ║
+║                    │   WHY DATA PREP MATTERS            │              ║
+║                    │   60-80% of data scientist time    │              ║
+║                    │   #1 factor in failed ML projects  │              ║
+║                    └──────────────┬──────────────────────┘              ║
+║                                   │                                      ║
+║                                   ▼                                      ║
+║                    ┌─────────────────────────────────────┐              ║
+║                    │   DATA PREPARATION PIPELINE         │              ║
+║                    │   Raw → Inspect → Clean → Impute   │              ║
+║                    │   → Encode → Visualize             │              ║
+║                    └──────────────┬──────────────────────┘              ║
+║                                   │                                      ║
+║    ┌──────────────────────────────┼──────────────────────────────┐      ║
+║    │                              │                              │      ║
+║    ▼                              ▼                              ▼      ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │ DATA         │          │ MISSING      │          │ CATEGORICAL  │  ║
+║ │ CLEANING     │          │ VALUES       │          │ ENCODING     │  ║
+║ └──────┬───────┘          └──────┬───────┘          └──────┬───────┘  ║
+║        │                         │                         │          ║
+║        ▼                         ▼                         ▼          ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │ • Duplicates │          │ • MCAR/MAR   │          │ • One-Hot    │  ║
+║ │ • Outliers   │          │   /MNAR      │          │ • Label      │  ║
+║ │ • Formatting │          │ • Imputation │          │ • Target     │  ║
+║ │ • Dtypes     │          │ • Indicator  │          │ • Frequency  │  ║
+║ └──────┬───────┘          └──────┬───────┘          └──────┬───────┘  ║
+║        │                         │                         │          ║
+║        └─────────────────────────┼─────────────────────────┘          ║
+║                                  │                                     ║
+║                                  ▼                                     ║
+║                    ┌─────────────────────────────────────┐             ║
+║                    │   FEATURE ENGINEERING               │             ║
+║                    │   "Applied ML is basically FE"     │             ║
+║                    │   — Andrew Ng                      │             ║
+║                    └──────────────┬──────────────────────┘             ║
+║                                   │                                     ║
+║    ┌──────────────────────────────┼──────────────────────────────┐     ║
+║    │                              │                              │     ║
+║    ▼                              ▼                              ▼     ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │ NUMERICAL    │          │ TEMPORAL     │          │ TEXT &       │  ║
+║ │ TRANSFORMS   │          │ FEATURES     │          │ AGGREGATIONS │  ║
+║ └──────┬───────┘          └──────┬───────┘          └──────┬───────┘  ║
+║        │                         │                         │          ║
+║        ▼                         ▼                         ▼          ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │ • Scaling    │          │ • Year/Month │          │ • TF-IDF     │  ║
+║ │ • Log/Sqrt   │          │ • Hour/DOW   │          │ • Embeddings │  ║
+║ │ • Binning    │          │ • Cyclical   │          │ • Aggregates │  ║
+║ │ • Polynomial │          │ • Lags/Rolls │          │ • Domain     │  ║
+║ │ • Ratios     │          │ • Sin/Cos    │          │   Features   │  ║
+║ └──────────────┘          └──────────────┘          └──────────────┘  ║
+║        │                         │                         │          ║
+║        └─────────────────────────┼─────────────────────────┘          ║
+║                                  │                                     ║
+║                                  ▼                                     ║
+║                    ┌─────────────────────────────────────┐             ║
+║                    │   FEATURE SELECTION                 │             ║
+║                    │   Filter · Wrapper · Embedded      │             ║
+║                    └──────────────┬──────────────────────┘             ║
+║                                   │                                     ║
+║                                   ▼                                     ║
+║                    ┌─────────────────────────────────────┐             ║
+║                    │   DATA VISUALIZATION                │             ║
+║                    │   Anscombe's Quartet · Design       │             ║
+║                    │   Principles · Chart Types          │             ║
+║                    └──────────────┬──────────────────────┘             ║
+║                                   │                                     ║
+║    ┌──────────────────────────────┼──────────────────────────────┐     ║
+║    │                              │                              │     ║
+║    ▼                              ▼                              ▼     ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │ DESIGN       │          │ CHART TYPES  │          │ STORYTELLING │  ║
+║ │ PRINCIPLES   │          │              │          │ & DASHBOARDS │  ║
+║ └──────┬───────┘          └──────┬───────┘          └──────┬───────┘  ║
+║        │                         │                         │          ║
+║        ▼                         ▼                         ▼          ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │ • Data-Ink   │          │ • Bar        │          │ • Context    │  ║
+║ │ • Color      │          │ • Line       │          │ • Conflict   │  ║
+║ │ • Gestalt    │          │ • Scatter    │          │ • Resolution │  ║
+║ │ • Tufte      │          │ • Box        │          │ • Action     │  ║
+║ │              │          │ • Heatmap    │          │              │  ║
+║ └──────────────┘          └──────────────┘          └──────────────┘  ║
+║                                                                         ║
+╚══════════════════════════════════════════════════════════════════════════╝
+```
+
+---
+
+### 🔗 KEY CONNECTION EXPLANATIONS
+
+<details>
+<summary><b>Connection 1: Why does data prep consume 60-80% of a data scientist's time?</b></summary>
+
+```
+DATA PREP IS THE FOUNDATION FOR EVERYTHING THAT FOLLOWS
+    │
+    ├── RAW DATA → INSPECT
+    │       │
+    │       ├── Profile: df.info(), df.describe()
+    │       └── Identify issues: missing, duplicates, outliers, format
+    │
+    ├── CLEAN
+    │       │
+    │       ├── Duplicates removed → prevents training/test leakage
+    │       ├── Outliers handled → prevents model distortion
+    │       └── Formatting standardized → enables groupBy/joins
+    │
+    ├── IMPUTE
+    │       │
+    │       ├── MCAR → safe to delete
+    │       ├── MAR → impute with predictors
+    │       └── MNAR → add missingness indicator
+    │
+    ├── ENCODE
+    │       │
+    │       ├── Nominal → One-Hot Encoding
+    │       ├── Ordinal → Ordinal/Label Encoding
+    │       └── High-cardinality → Target/Frequency Encoding
+    │
+    └── VISUALIZE
+            │
+            └── EDA catches issues before modeling
+
+        ⚠️ GARBAGE IN → GARBAGE OUT
+        No algorithm can fix bad data!
+```
+
+**Key insight:** Data prep is not "pre-work" — it's the most important work. A simple model on clean data beats a complex model on dirty data.
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 2: How do missingness types determine strategy?</b></summary>
+
+```
+MISSINGNESS TYPE
+    │
+    ├── MCAR (Missing Completely at Random)
+    │       │
+    │       ├── Example: Sensor randomly drops 5%
+    │       ├── Safe to delete rows
+    │       └── Test: Little's MCAR test (p > 0.05)
+    │
+    ├── MAR (Missing at Random)
+    │       │
+    │       ├── Example: Men less likely to report weight
+    │       ├── Impute using observed variables
+    │       ├── Most common in practice
+    │       └── KNN / MICE imputation
+    │
+    └── MNAR (Missing Not at Random)
+            │
+            ├── Example: High earners skip salary
+            ├── Highest bias risk
+            ├── Imputation unreliable
+            ├── Add missingness indicator
+            └── Requires domain knowledge
+
+        ⚠️ WRONG STRATEGY → BIASED MODEL
+        Deleting rows is only safe under MCAR!
+```
+
+**Key insight:** The mechanism of missingness determines whether deletion, imputation, or indicator is appropriate. Don't just blindly fill with mean!
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 3: How do encoding methods connect to model types?</b></summary>
+
+```
+ENCODING METHOD            →        BEST FOR
+─────────────────────────────────────────────────────────
+Binary (0/1)               →        Yes/No features
+One-Hot Encoding           →        Nominal, <15 categories
+                             →        Linear models, SVM, NN
+                             →        ⚠️ Avoid for high-cardinality
+─────────────────────────────────────────────────────────
+Label/Ordinal Encoding     →        Ordinal data (S<M<L)
+                             →        Tree-based models (XGBoost)
+                             →        ⚠️ Implies order!
+─────────────────────────────────────────────────────────
+Target Encoding            →        High-cardinality nominal
+                             →        ⚠️ Leakage risk — use K-fold
+─────────────────────────────────────────────────────────
+Frequency Encoding         →        High-cardinality nominal
+                             →        ✅ No leakage risk
+                             →        ⚠️ Loses category distinction
+─────────────────────────────────────────────────────────
+Embeddings                 →        NLP / semantics
+                             →        Word2Vec, FastText, BERT
+```
+
+**Key insight:** The encoding method must match the variable type AND the model type. A mismatch can ruin your model!
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 4: How does feature engineering connect to model performance?</b></summary>
+
+```
+RAW FEATURE                    →        ENGINEERED FEATURE
+─────────────────────────────────────────────────────────
+timestamp (1704153600)         →        hour_of_day, day_of_week
+                                        is_weekend, is_holiday
+                                        (Model can't learn cycles from raw int)
+─────────────────────────────────────────────────────────
+age (25, 30, 35)               →        age_bin: ['18-25', '26-35', ...]
+                                        (Non-linear effects captured)
+─────────────────────────────────────────────────────────
+salary, debt                   →        debt_to_income = debt / salary
+                                        (Ratio captures affordability)
+─────────────────────────────────────────────────────────
+height, weight                 →        BMI = weight / height²
+                                        (Medical risk encoded)
+─────────────────────────────────────────────────────────
+date, amount                   →        total_spend per customer
+                                        avg_order_value
+                                        recency_frequency
+                                        (Group-level context)
+─────────────────────────────────────────────────────────
+domain knowledge               →        Charlson Comorbidity Index
+                                        (Expert knowledge encoded)
+```
+
+**Key insight:** A well-engineered feature can matter more than the choice of algorithm. Give the model "pre-digested" knowledge.
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 5: How does data visualization connect to everything else?</b></summary>
+
+```
+VISUALIZATION PURPOSE                    CONNECTION
+─────────────────────────────────────────────────────────
+Understand Distributions        →   Guides scaling & transforms
+    └── Histograms, KDE              →   Log transform for skewed data
+
+Spot Outliers                   →   Guides outlier handling
+    └── Box plots, scatter         →   Remove? Impute? Winsorize?
+
+Find Relationships              →   Guides feature engineering
+    └── Scatter plots               →   Polynomial? Ratios? Interactions?
+
+Check Data Quality              →   Guides cleaning & imputation
+    └── Nullity heatmap           →   Missing patterns → MCAR/MAR/MNAR
+
+Communicate Insights            →   Guides business decisions
+    └── Bar charts, line charts    →   Stakeholders understand charts
+
+Guide Feature Engineering       →   Guides feature creation
+    └── What to log-transform?     →   Becomes obvious from plotting
+```
+
+**Key insight:** Anscombe's Quartet proves: numbers lie, plots tell the truth. ALWAYS visualize before modeling.
+
+</details>
+
+---
+
+### 📊 CONNECTION MATRIX — WEEK 3 ML
+
+| Concept A | Connects To | Why |
+|-----------|-------------|-----|
+| **Data Quality** | Model Performance | Garbage in = garbage out |
+| **MCAR/MAR/MNAR** | Imputation Strategy | Wrong strategy → bias |
+| **Outliers** | Handling Strategy | Fraud = signal, not noise |
+| **Encoding** | Model Type | OHE for linear, Label for trees |
+| **Target Encoding** | Leakage | Must use K-fold to prevent leakage |
+| **Scaling** | Algorithm | KNN/SVM need scaling; trees don't |
+| **Log Transform** | Skewed Data | Right-skew → log reduces skew |
+| **Cyclical Encoding** | Time Features | Sin/cos preserves circular structure |
+| **Lags/Rolls** | Time Series | Captures autocorrelation |
+| **TF-IDF** | Text Classification | Downweights common words |
+| **Aggregations** | Group-Level Context | Relative features are powerful |
+| **Feature Selection** | Overfitting | Fewer features = less overfitting |
+| **Data-Ink Ratio** | Chart Quality | Remove chartjunk |
+| **Color Palettes** | Accessibility | 8% of men are colorblind |
+| **Anscombe's Quartet** | Visualization | Stats alone aren't enough |
+
+---
+
+## 2. COMMON MISCONCEPTIONS — WEEK 3 ML
+
+**How to use:** Read each misconception first. Try to identify what's wrong with it. Then click to reveal the reality.
+
+---
+
+### Misconception 1: "Data preparation is just a one-time step before modeling."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Data prep is "pre-work" — you clean once and move on. | Data prep is **iterative** — you will loop back many times: |
+| | • New issues discovered during EDA → go back |
+| | • Feature engineering reveals new patterns → go back |
+| | • Model diagnostics reveal issues → go back |
+| | • Production data changes → update pipeline |
+
+**Example:**
+```
+Raw Data → Inspect → Clean → Impute → Encode → Visualize
+    ↑                              ↓
+    └─────────────── Loop ─────────┘
+    (Often multiple loops!)
+```
+
+**Rule:** Data prep is never "done." It's a continuous process throughout the project lifecycle.
+
+</details>
+
+---
+
+### Misconception 2: "Deleting rows with missing values is always the safest option."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| If in doubt, just delete rows with missing values. | **Deletion is only safe under MCAR:** |
+| | • **MCAR** → deletion is unbiased |
+| | • **MAR** → deletion biases the model |
+| | • **MNAR** → deletion biases the model |
+
+**Example:**
+```
+Dataset: 35% of 'income' missing, mostly from self-employed
+→ This is MAR (missing depends on employment_status)
+→ Deleting rows would remove most self-employed people
+→ Model would only learn patterns for employees
+→ Biased model!
+```
+
+**Rule:** Understand WHY data is missing before deciding HOW to handle it. When in doubt, impute.
+
+</details>
+
+---
+
+### Misconception 3: "One-Hot Encoding is the best encoding method for all categorical variables."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| One-Hot Encoding is the standard — use it for everything. | **OHE fails with high cardinality:**
+| | • 800 cities → 799 columns (curse of dimensionality) |
+| | • Sparse data → wasted memory and compute |
+| | • Rare categories → overfitting |
+| | • Linear models can handle it; trees don't need it |
+
+**When OHE is good:**
+```
+✅ Nominal categories (< 15 unique values)
+✅ Linear models / SVM / Neural Networks
+✅ No implied order
+```
+
+**When OHE is bad:**
+```
+❌ High-cardinality (500+ unique values)
+❌ Tree-based models (wastes depth)
+❌ When you need to avoid column explosion
+```
+
+**Rule:** Match encoding to data type AND model type. OHE is not universal!
+
+</details>
+
+---
+
+### Misconception 4: "Outliers should always be removed — they corrupt the model."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Outliers are errors that must be removed. | **Outliers can be valuable signal:**
+| | • **Fraud detection** — fraud IS an outlier! Removing them = removing all fraud cases |
+| | • **Rare disease detection** — the outlier IS the case |
+| | • **Anomaly detection** — outliers are what you're looking for |
+
+**Example:**
+```
+Fraud detection:
+- 99% legitimate transactions, 1% fraud
+- Fraud transactions are outliers by definition
+- If you remove outliers → you remove ALL fraud cases
+→ Model learns nothing!
+```
+
+**Rule:** Understand WHY an outlier exists before removing it. Domain knowledge is critical.
+
+</details>
+
+---
+
+### Misconception 5: "Feature engineering is optional — the model will learn everything it needs."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Deep learning learns features automatically — no need for feature engineering. | **Feature engineering is still essential:**
+| | • Andrew Ng: "Applied ML is basically feature engineering" |
+| | • A well-engineered feature > algorithm choice |
+| | • Models can't learn cycles from raw timestamps |
+| | • Models can't derive ratios (debt/income) |
+| | • Models can't encode domain expertise |
+
+**Example:**
+```
+Raw timestamp: 1704153600
+→ Model must discover hours, weekdays, holidays from one integer
+→ Requires enormous data to learn implicitly
+
+Engineered: hour_of_day, day_of_week, is_weekend
+→ Model immediately has actionable signals
+```
+
+**Rule:** Give the model "pre-digested" knowledge. Don't make it learn what you already know.
+
+</details>
+
+---
+
+### Misconception 6: "Feature scaling is only needed for distance-based algorithms like KNN."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Only KNN and SVM need scaling — others are fine. | **Many algorithms need scaling:**
+| | • **Linear/Logistic Regression** — coefficients depend on scale |
+| | • **PCA** — variance dominated by larger scales |
+| | • **Neural Networks** — gradients affected by input scales |
+| | • **Clustering (K-Means)** — distances like KNN |
+| | • **Only tree-based models** are scale-invariant |
+
+**Example:**
+```
+Linear Regression with unscaled features:
+Age: 25-45, Salary: 50k-90k
+→ Salary dominates the model coefficients
+→ Age becomes almost irrelevant!
+```
+
+**Rule:** Scale for most models. Only trees are truly scale-invariant. If in doubt, scale.
+
+</details>
+
+---
+
+### Misconception 7: "Target encoding is always dangerous — just avoid it."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Target encoding causes data leakage — never use it. | **Target encoding is powerful when done correctly:**
+| | • Use **K-fold cross-fitting** to prevent leakage |
+| | • Compute target means on training folds only |
+| | • Never compute on full dataset before validation |
+| | • Often one of the most powerful high-cardinality encodings |
+
+**Correct approach:**
+```python
+# ❌ WRONG — leaks target information
+mean_per_cat = df.groupby('city')['target'].mean()
+df['city_encoded'] = df['city'].map(mean_per_cat)
+
+# ✅ CORRECT — K-fold cross-fitting
+for train_idx, val_idx in kfold.split(df):
+    train_mean = df.iloc[train_idx].groupby('city')['target'].mean()
+    df.iloc[val_idx, 'city_encoded'] = df.iloc[val_idx]['city'].map(train_mean)
+```
+
+**Rule:** Target encoding is powerful but dangerous — use it carefully with K-fold to prevent leakage.
+
+</details>
+
+---
+
+### Misconception 8: "Accuracy is the best metric for classification — higher is better."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Higher accuracy = better model. | **Accuracy can be dangerously misleading:**
+| | • **Imbalanced classes**: 99% accuracy from predicting majority class |
+| | • **Different error costs**: FP and FN have different consequences |
+| | • **Business alignment**: Accuracy doesn't measure business impact |
+
+**Example:**
+```
+Fraud detection: 99% legitimate, 1% fraud
+Model A: always predicts "legitimate" → 99% accuracy ✅
+Model B: catches 90% fraud, 95% legitimate → 94.95% accuracy ❌
+
+Model B is MUCH BETTER but has LOWER accuracy!
+```
+
+**Rule:** Choose metrics based on costs of errors. For imbalanced data, use Precision/Recall/F1/AUC.
+
+</details>
+
+---
+
+### Misconception 9: "Missing values only matter if there are a lot of them."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| If <5% missing, you can ignore it. | **Missingness pattern matters more than quantity:**
+| | • Even 1% missing can bias your model if MNAR |
+| | • A 1% missing indicator could be highly predictive |
+| | • The FACT of missingness can be the signal |
+
+**Example:**
+```
+Loan application data:
+- 2% of applicants don't disclose income
+- These applicants have 40% higher default rate!
+- The missingness IS the signal
+→ Adding a missingness indicator (income_was_missing)
+→ AUC improves from 0.74 to 0.81!
+```
+
+**Rule:** Always check: does the FACT of being missing predict your target? If yes, keep the indicator.
+
+</details>
+
+---
+
+### Misconception 10: "If my model performance is good, my data must be clean."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Good model performance validates clean data. | **Hidden data issues can inflate performance:**
+| | • **Data leakage** — model appears good, but fails in production |
+| | • **Duplicate rows across splits** — test data leaks into train |
+| | • **Spatial/temporal leakage** — non-i.i.d. data issues |
+| | • **Target encoding leakage** — target info used in features |
+
+**Example:**
+```
+Model achieves AUC = 0.92 in validation → looks great!
+Deploy to production → AUC = 0.67 → fails!
+Cause: customer_service_calls feature included calls made
+after the churn event (leakage).
+```
+
+**Rule:** Good performance alone does NOT mean clean data. Always audit for leakage, duplicates, and temporal issues.
+
+</details>
+
+---
+
+### Misconception 11: "Visualization is just for presentation — not for analysis."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Charts are for communicating results, not for analysis. | **Visualization is a critical analysis tool:**
+| | • **Anscombe's Quartet** — identical stats, different plots |
+| | • Outliers jump out visually in seconds |
+| | • Relationships invisible in correlation coefficients become obvious |
+| | • Missing patterns are immediately visible |
+| | • EDA is impossible without visualization |
+
+**Example:**
+```
+Four datasets with IDENTICAL:
+- mean(x)=9, mean(y)=7.5
+- var(x)=11, var(y)≈4.12
+- correlation=0.816
+- regression line: y=3+0.5x
+
+But when plotted:
+- One is linear
+- One is curved
+- One has an outlier
+- One is vertical
+→ Visualization catches what numbers hide!
+```
+
+**Rule:** ALWAYS visualize before modeling. It's not optional — it's essential.
+
+</details>
+
+---
+
+### Misconception 12: "More features always means a better model."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Adding more features always helps the model learn better. | **More features can make the model WORSE:**
+| | • **Overfitting** — model fits noise instead of signal |
+| | • **Curse of dimensionality** — distances meaningless |
+| | • **Multicollinearity** — unstable coefficients |
+| | • **Slower training** — 10× features = 10× slower |
+| | • **Noise amplification** — irrelevant features add noise |
+
+**Example:**
+```
+Dataset: 2,000 rows, 500 features
+Training accuracy: 95%
+Validation accuracy: 61%
+→ Classic overfitting (p >> n)
+→ Features are spurious correlations!
+
+Fix: Feature selection (Filter/ Wrapper/ Embedded)
+→ Reduce to top 20-50 features
+→ Validation accuracy improves!
+```
+
+**Rule:** Feature selection is critical. More features ≠ better model.
+
+</details>
+
+---
+
+### Misconception 13: "Feature engineering and feature selection are the same thing."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Feature engineering and feature selection are interchangeable. | **They are different steps:**
+| | **Feature Engineering** = CREATE new features |
+| | • Transformations (log, scaling, binning) |
+| | • Interactions (ratios, polynomials) |
+| | • Aggregations (group-level stats) |
+| | • Temporal (lags, rolling windows) |
+| | • Domain-specific (expert knowledge) |
+
+**Feature Selection** = CHOOSE which features to keep
+| | • Filter methods (statistical scores) |
+| | • Wrapper methods (RFE) |
+| | • Embedded methods (Lasso, tree importance) |
+
+**Process:** Engineer → Select → Validate → Repeat
+
+</details>
+
+---
+
+### Misconception 14: "Time features don't need special encoding — just use the raw timestamp."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| A timestamp is a number — the model can learn time patterns. | **Raw timestamps are useless for cyclic patterns:**
+| | • Model sees hour 23 and hour 0 as 23 apart |
+| | • In reality, they're only 1 hour apart (circular) |
+| | • Same for months: Dec (12) and Jan (1) are adjacent |
+| | • **Solution**: Sin/Cos encoding for cycles |
+
+**Example:**
+```
+Raw hours: 23, 0, 1, 2, 3
+→ Numeric distance: 23, 22, 21, 20 (seems far!)
+→ Actually: 23 → 0 is only 1 hour apart!
+
+Sin/Cos encoding:
+sin_hour = sin(2π × hour/24)
+cos_hour = cos(2π × hour/24)
+→ Hour 23 and hour 0 map to the same point!
+→ Linear models can capture circular proximity!
+```
+
+**Rule:** Cyclic features (hours, months, days) need sin/cos encoding. Raw numbers lose the circular structure.
+
+</details>
+
+---
+
+### Misconception 15: "A chart with more data is always more informative."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| More data, colors, and details make charts more informative. | **Chartjunk obscures the insight:**
+| | • Too many colors (15 in a pie) = impossible to distinguish |
+| | • 3D charts distort perception |
+| | • Truncated y-axes exaggerate differences |
+| | • Chartjunk adds noise without adding information |
+
+**Tufte's Data-Ink Ratio:**
+```
+Data-Ink Ratio = Ink used to display data / Total ink used
+
+Maximize data ink! Remove everything that is not data.
+```
+
+**Example of bad chart:**
+```
+❌ 3D exploded pie with 14 slices, rainbow colors,
+   gradient background, drop shadows, legend in box
+
+→ Nothing is readable! No insight!
+```
+
+**Good chart:**
+```
+✅ Sorted horizontal bar chart
+   5 bars + "Other" aggregated
+   Simple palette
+   Clear labels
+→ Insight is obvious in 5 seconds!
+```
+
+**Rule:** Every chart should answer one question for one audience. Remove everything else.
+
+</details>
+
+---
+
+## 📊 QUICK REFERENCE: MISCONCEPTIONS vs REALITY — WEEK 3 ML
+
+| Misconception | Reality |
+|---------------|---------|
+| Data prep is a one-time step | Data prep is iterative (you'll loop back) |
+| Deleting rows with missing is safest | Only safe under MCAR; impute otherwise |
+| OHE is always the best encoding | Fails with high-cardinality (800+ columns) |
+| Outliers should always be removed | Fraud/rare events ARE outliers — keep them |
+| Feature engineering is optional | It's essential — Andrew Ng says so |
+| Scaling only for KNN/SVM | Needed for regression, PCA, NNs too |
+| Target encoding is always dangerous | Powerful when done with K-fold cross-fitting |
+| Accuracy is the best metric | Misleading for imbalanced data |
+| <5% missing can be ignored | Missingness pattern matters more than quantity |
+| Good performance = clean data | Leakage can inflate performance |
+| Visualization is just presentation | Critical analysis tool (Anscombe's Quartet) |
+| More features = better model | More features = overfitting risk |
+| Feature engineering = feature selection | Engineer = CREATE; Select = CHOOSE |
+| Raw timestamp is fine for time features | Cyclic features need sin/cos encoding |
+| More data in charts = more informative | Chartjunk obscures insights |

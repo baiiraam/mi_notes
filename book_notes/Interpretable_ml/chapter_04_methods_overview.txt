@@ -1,0 +1,542 @@
+# Chapter 4: Methods Overview
+
+## 📌 Cheat Sheet
+
+### TAXONOMY OF INTERPRETABILITY METHODS
+
+```
+                    INTERPRETABILITY METHODS
+                           │
+           ┌───────────────┴───────────────┐
+           │                               │
+   INTERPRETABILITY                POST-HOC
+   BY DESIGN                     INTERPRETABILITY
+   (Inherently                        │
+    Interpretable)          ┌─────────┴─────────┐
+           │                │                   │
+   ┌───────┴───────┐  MODEL-AGNOSTIC     MODEL-SPECIFIC
+   │               │        │                   │
+Linear        Decision   ┌───┴───┐          Neural Networks
+Regression     Trees     │       │          (saliency maps,
+   │             │      Local  Global        concepts, etc.)
+Logistic       Rules
+Regression      │
+   │          RuleFit
+Penalized
+ Models
+```
+
+The choice between interpretability by design and post-hoc methods depends on your goals from Chapter 3. If you need faithful, transparent explanations for high-stakes decisions, interpretability by design may be preferable. If you need flexibility to use state-of-the-art models while still gaining insights, post-hoc methods are the way to go. In practice, many projects use a combination of both approaches.
+
+---
+
+### INTERPRETABILITY BY DESIGN VS POST-HOC
+
+| Aspect | Interpretability by Design | Post-Hoc Interpretability |
+|--------|---------------------------|---------------------------|
+| **When applied** | During model training | After model is trained |
+| **Model constraints** | Algorithm restricted to interpretable models | No restrictions on model complexity |
+| **Examples** | Linear regression, Decision trees, RuleFit | LIME, SHAP, PDP, Permutation Importance |
+| **Faithfulness** | High (explanations reflect actual model) | Variable (some methods approximate) |
+| **Flexibility** | Low (locked into interpretable model class) | High (works with any model) |
+| **Performance trade-off** | Often sacrifices some performance | Can use best-performing models |
+
+There is no universally "best" approach—each has strengths and weaknesses. Interpretability by design gives you faithful, trustworthy explanations but may limit predictive performance. Post-hoc methods let you use powerful black-box models but introduce questions about whether the explanation faithfully represents the model's actual behavior. The Rashomon effect (multiple equally good models with different interpretations) complicates both approaches.
+
+---
+
+### MODEL-AGNOSTIC POST-HOC METHODS
+
+| Category | Focus | Methods |
+|----------|-------|---------|
+| **Local** | Explain individual predictions | LIME, SHAP, Counterfactuals, Anchors, Ceteris Paribus, ICE |
+| **Global** | Describe average behavior | PDP, ALE, Permutation Feature Importance, LOFO, H-statistic, Surrogate Models |
+
+Local methods provide a "zoomed in" view for understanding edge cases and unusual predictions. Global methods describe the big picture—how features affect predictions on average. The choice between local and global depends on your goal: debugging edge cases → local; understanding overall model behavior → global. You can also turn global methods into "group-wise" methods by applying them to subsets of your data.
+
+---
+
+### SIPA PRINCIPLE (Model-Agnostic Methods)
+
+| Step | Description |
+|------|-------------|
+| **S**ample | Take a sample from the data |
+| **I**ntervention | Manipulate the data (e.g., permute a feature) |
+| **P**rediction | Get model predictions for manipulated data |
+| **A**ggregation | Aggregate results (e.g., compare loss) |
+
+This four-step principle underlies virtually all model-agnostic interpretation methods. Understanding SIPA helps you recognize the common pattern across methods like permutation feature importance, PDP, and LIME. The key insight is that model-agnostic methods treat the model as a black box—they only need inputs and outputs, never looking inside.
+
+---
+
+### SCOPE OF INTERPRETABILITY
+
+| Level | Description | Example |
+|-------|-------------|---------|
+| **Entirely Interpretable** | The whole model can be understood | Small decision tree, sparse linear regression |
+| **Partially Interpretable** | Parts of the model are interpretable | Linear regression with hundreds of features (individual coefficients) |
+| **Interpretable Predictions** | Individual predictions can be explained | k-NN (showing similar images), decision tree prediction path |
+
+When evaluating an interpretability approach, always ask: "At what level does this provide understanding?" A model might not be entirely interpretable but still provide valuable insights through partial interpretability or interpretable predictions. Don't dismiss a method just because it doesn't achieve "entirely interpretable"—that's a high bar that few real-world models meet.
+
+---
+
+### KEY CONCEPTS
+
+| Term | Definition |
+|------|------------|
+| **Interpretability by Design** | Training inherently interpretable models (e.g., linear regression, decision trees) |
+| **Post-Hoc Interpretability** | Applying interpretation methods after model training |
+| **Model-Agnostic** | Methods that ignore model internals, only use inputs/outputs |
+| **Model-Specific** | Methods that analyze model internals (e.g., neural network gradients) |
+| **Local Methods** | Explain individual predictions |
+| **Global Methods** | Describe average behavior across a dataset |
+| **Rashomon Effect** | Multiple equally good models with different interpretations |
+| **SIPA Principle** | Sample, Intervene, Predict, Aggregate—the basis of model-agnostic methods |
+
+These concepts form the vocabulary you'll need for the rest of the book. The Rashomon effect is particularly important to remember: when multiple models perform equally well but tell different stories, which one should you interpret? This is a fundamental challenge in both interpretability by design and post-hoc approaches.
+
+---
+
+## 📖 Glossary
+
+### Core Terms
+
+#### Interpretability by Design
+- **Definition**: Using machine learning algorithms that produce inherently interpretable models
+- **Synonyms**: Intrinsic interpretability, inherent interpretability
+- **Examples**: Linear regression, logistic regression, decision trees, decision rules, RuleFit
+- **In my words**: You choose a model that is simple enough for humans to understand from the start
+- **Key insight**: The algorithm constrains the search space to models that are interpretable
+
+#### Post-Hoc Interpretability
+- **Definition**: Applying interpretation methods after the model is already trained
+- **In my words**: You train any model you want, then use separate tools to understand it
+- **Key insight**: Separates model training from model interpretation
+
+#### Model-Agnostic Methods
+- **Definition**: Methods that ignore model internals, only analyzing inputs and outputs
+- **In my words**: Methods that work with any model—they don't care what's inside
+- **Key insight**: Treat the model as a black box; flexibility is the main advantage
+
+#### Model-Specific Methods
+- **Definition**: Methods that analyze the internal structure of specific model types
+- **Examples**: Gradient-based saliency maps for neural networks, Gini importance for random forests
+- **In my words**: Methods that "look inside" the model to understand it
+
+#### Local Methods
+- **Definition**: Interpretation methods that explain individual predictions
+- **Examples**: LIME, SHAP, counterfactuals, anchors, ceteris paribus, ICE
+- **In my words**: "Why did the model make THIS prediction for THIS person?"
+
+#### Global Methods
+- **Definition**: Interpretation methods that describe average behavior across a dataset
+- **Examples**: PDP, ALE, permutation feature importance, LOFO, H-statistic
+- **In my words**: "How does this feature affect predictions on average?"
+
+#### Rashomon Effect
+- **Definition**: The phenomenon where multiple different models have similar predictive performance but different interpretations
+- **Origin**: Named after the 1950 Japanese film "Rashomon," which tells four different versions of a murder story
+- **In my words**: Two models can be equally accurate but tell completely different stories about the data
+- **Why it matters**: Which model should you interpret? There's no clear answer
+
+#### SIPA Principle
+- **Definition**: The four steps underlying model-agnostic methods: Sample, Intervene, Predict, Aggregate
+- **Origin**: Scholbeck et al. (2020)
+- **In my words**: The recipe for almost all model-agnostic interpretability
+
+#### Clever Hans Predictor
+- **Definition**: A model that takes "shortcuts" using non-causal or spurious features
+- **In my words**: The model finds an easy way to make predictions that doesn't actually solve the real problem
+- **Example**: Pneumonia model that learned asthma patients are less likely to die (because they receive faster treatment)
+
+#### Group-wise Methods
+- **Definition**: Global methods applied to subsets of the data to understand regional behavior
+- **In my words**: Instead of "on average," look at "for this specific group of people"
+
+#### Prototype-based Neural Networks
+- **Definition**: Neural networks that classify by comparing to learned prototypes (example images)
+- **Example**: ProtoViT (Ma et al. 2024)
+- **In my words**: The model says "This looks like this prototype image, so it must be this class"
+
+### Key Methods Summary
+
+#### Interpretability by Design
+| Method | Description | Interpretability Level |
+|--------|-------------|----------------------|
+| **Linear Regression** | Fit linear model by minimizing squared error | Entirely (if sparse) |
+| **Logistic Regression** | Linear model for classification | Entirely (if sparse) |
+| **Decision Trees** | Recursive splitting into rules | Entirely or prediction path |
+| **Decision Rules** | If-then rules from data | Partially or prediction path |
+| **RuleFit** | Tree-based rules + Lasso regression | Partially |
+| **Penalized Models** | Add penalties for sparsity | Partially |
+
+#### Model-Agnostic Post-Hoc (Local)
+| Method | Description | Key Feature |
+|--------|-------------|-------------|
+| **LIME** | Local surrogate model | Replaces complex model with interpretable one locally |
+| **SHAP** | Shapley value computation | Fair attribution based on game theory |
+| **Counterfactuals** | What would change the prediction? | Actionable explanations |
+| **Anchors** | Rules that "anchor" a prediction | High-precision rules |
+| **Ceteris Paribus** | Change one feature, see effect | Simple, model-faithful |
+| **ICE** | Same as CP for multiple points | Shows heterogeneity |
+
+#### Model-Agnostic Post-Hoc (Global)
+| Method | Description | Key Feature |
+|--------|-------------|-------------|
+| **PDP** | Average prediction as feature changes | Easy to understand |
+| **ALE** | Local effects, handles correlations | Better with correlated features |
+| **PFI** | Permute feature, measure loss increase | Feature importance ranking |
+| **LOFO** | Remove feature, retrain, measure loss | Most faithful feature importance |
+| **H-statistic** | Measures feature interactions | Quantifies interaction strength |
+| **Surrogate Models** | Replace complex model with simpler one | Trade-off explanation |
+
+#### Model-Specific Post-Hoc (Neural Networks)
+| Technique | Question Answered |
+|-----------|-------------------|
+| **Learned Features** | What features did the neural network learn? |
+| **Saliency Maps** | How did each pixel contribute to a prediction? |
+| **Concepts** | Which concepts did the network learn? |
+| **Adversarial Examples** | How can we fool the network? |
+| **Influential Instances** | How influential was each training point? |
+
+### Key People
+
+| Name | Contribution |
+|------|--------------|
+| Ribeiro, Singh, & Guestrin (2016) | LIME; model-agnostic flexibility |
+| Rudin (2019) | Argues for interpretable by design over post-hoc |
+| Caruana et al. (2015) | GAMs; pneumonia Clever Hans example |
+| Scholbeck et al. (2020) | SIPA principle for model-agnostic methods |
+| Ma et al. (2024) | ProtoViT—prototype-based neural networks |
+| Yang et al. (2024) | Inherently interpretable tree ensembles |
+| Bühlmann & Hothorn (2007) | Model-based boosting |
+| Molnar et al. (2023) | PDP and PFI for data insights |
+| Freiesleben et al. (2024) | More on PDP and PFI for data insights |
+
+---
+
+## 🧠 Concept Map
+
+```
+                    INTERPRETABILITY METHODS
+                           │
+           ┌───────────────┴───────────────┐
+           │                               │
+   INTERPRETABILITY                POST-HOC
+   BY DESIGN                     INTERPRETABILITY
+   (Inherently                        │
+    Interpretable)          ┌─────────┴─────────┐
+           │                │                   │
+   ┌───────┴───────┐  MODEL-AGNOSTIC     MODEL-SPECIFIC
+   │               │        │                   │
+Linear        Decision   ┌───┴───┐          Neural Networks
+Regression     Trees     │       │          (saliency maps,
+   │             │      Local  Global        concepts, etc.)
+Logistic       Rules      │       │
+Regression      │       LIME    PDP
+   │          RuleFit    SHAP    ALE
+Penalized                C. Par. PFI
+ Models                   ICE    LOFO
+                          Anch.  H-stat
+                          Surrogates
+```
+
+### Interpretability by Design Examples
+
+```
+INTERPRETABILITY BY DESIGN
+          │
+    ┌─────┴─────┬──────────┬──────────┐
+    │           │          │          │
+Linear     Logistic   Decision    Decision   RuleFit
+Regression Regression   Trees      Rules
+    │           │          │          │
+    └───────────┴──────────┴──────────┘
+              │
+        Also: Prototype-based NNs (ProtoViT)
+              Inherently interpretable tree ensembles
+              Model-based boosting
+              GAMs with interaction detection
+```
+
+### Model-Agnostic Methods Flow
+
+```
+              MODEL-AGNOSTIC METHODS
+                      │
+              SIPA PRINCIPLE
+        (Sample → Intervene → Predict → Aggregate)
+                      │
+         ┌────────────┴────────────┐
+         │                         │
+      LOCAL                      GLOBAL
+         │                         │
+    Explain individual      Describe average
+    predictions                behavior
+         │                         │
+    ┌────┴────┐               ┌────┴────┐
+    │         │               │         │
+LIME     SHAP   Counter-   PDP    ALE   PFI   LOFO
+Anchors  C.P.   factual    H-stat Surrogates
+ICE
+```
+
+### Scope of Interpretability
+
+```
+          SCOPE OF INTERPRETABILITY
+                    │
+     ┌──────────────┼──────────────┐
+     │              │              │
+ENTIRELY       PARTIALLY     INTERPRETABLE
+MODEL          MODEL         PREDICTIONS
+     │              │              │
+Small tree   Linear coefs   k-NN neighbors
+Sparse LR    Decision rules Decision tree path
+```
+
+---
+
+## 🎯 Teach It Summary
+
+Interpretability methods fall into two main categories: **interpretability by design** (using inherently interpretable models) and **post-hoc interpretability** (applying methods after training).
+
+**Interpretability by design** means constraining the algorithm to produce interpretable models—like linear regression, logistic regression, decision trees, or decision rules. These models are transparent by nature. Some are entirely interpretable (small trees, sparse linear models), some partially interpretable (linear models with many coefficients), and some have interpretable predictions (k-NN showing similar examples). The main strengths are faithfulness and ease of debugging. The main weakness is that they often sacrifice predictive performance for interpretability.
+
+**Post-hoc methods** are applied after training and can be **model-agnostic** (ignoring model internals, using only inputs and outputs) or **model-specific** (analyzing internal structure, like neural network gradients). Model-agnostic methods follow the **SIPA principle**: Sample, Intervene, Predict, Aggregate. Examples include permutation feature importance, PDP, and LIME. Model-specific methods are used for complex models like neural networks—saliency maps, concept analysis, and adversarial examples.
+
+Within model-agnostic methods, we distinguish **local methods** (explaining individual predictions—LIME, SHAP, counterfactuals) and **global methods** (describing average behavior—PDP, ALE, feature importance). Local methods are great for debugging edge cases; global methods help understand overall model behavior.
+
+The chapter also introduces the **Rashomon effect**—the phenomenon where multiple different models have similar performance but different interpretations. This makes it unclear which model to interpret.
+
+In reality, the categories are blurry. Logistic regression coefficients need post-processing to become odds ratios. Boosted trees with depth 1 become generalized additive models. Shapley values can be computed for any model, including linear regression. The key is to embrace the fuzziness and mix approaches as needed.
+
+---
+
+## ❓ Annotations & Questions
+
+### Clarification Questions
+
+<details>
+<summary><b>Q1: When should I choose interpretability by design vs post-hoc?</b></summary>
+
+**Interpretability by design** is better when:
+- Faithfulness is critical (high-stakes decisions)
+- You need to justify the model to regulators
+- You're in a domain with established interpretable models (e.g., medical research)
+
+**Post-hoc** is better when:
+- Predictive performance is the top priority
+- You need flexibility to use state-of-the-art models
+- You're in the research/exploration phase
+
+**My thought**: The choice often comes down to the trade-off between faithfulness and flexibility.
+</details>
+
+<details>
+<summary><b>Q2: What's the practical difference between local and global methods?</b></summary>
+
+- **Local**: "Why did the model say THIS specific person will default on their loan?"
+- **Global**: "How does income generally affect loan default predictions?"
+
+**My thought**: Both are useful—local for individual cases, global for understanding the model as a whole. You often need both.
+</details>
+
+<details>
+<summary><b>Q3: What exactly is the Rashomon effect, and why does it matter?</b></summary>
+
+The Rashomon effect is when multiple different models have similar predictive performance but tell different stories about the data.
+
+**Why it matters**: If two models perform equally well but give different interpretations, which one should you believe? This undermines the idea that interpretability reveals "the truth" about the data.
+
+**My thought**: This is a fundamental limitation—interpretability reveals what the model learned, not necessarily what's "true" about the world.
+</details>
+
+<details>
+<summary><b>Q4: What does "entirely interpretable" actually mean in practice?</b></summary>
+
+The author says even this is fuzzy. A small decision tree or a sparse linear regression might qualify.
+
+**My thought**: "Entirely interpretable" is an ideal that few real-world models achieve. Most models are at best "partially interpretable" or have "interpretable predictions." This is okay—we don't need perfect interpretability, just enough for our goals.
+</details>
+
+### Critical Thoughts
+
+<details>
+<summary><b>Q5: Is post-hoc interpretability "less trustworthy" than interpretability by design?</b></summary>
+
+Rudin (2019) argues that post-hoc methods can be misleading because they don't faithfully represent the model. The author acknowledges this but doesn't fully resolve it.
+
+**My thought**: There's a tension here. Interpretability by design is more faithful, but if the model has poor performance, it's not useful. Post-hoc methods can explain powerful models, but the explanations are approximations. There's no perfect solution—you have to choose based on your goals and risk tolerance.
+</details>
+
+<details>
+<summary><b>Q6: How do you handle the Rashomon effect in practice?</b></summary>
+
+The author doesn't give a concrete solution. Possible approaches:
+1. Interpret multiple models and look for consensus
+2. Use domain knowledge to validate interpretations
+3. Use causal inference to identify the "right" relationships
+
+**My thought**: This is an open research problem. In practice, you often have to rely on domain expertise to decide which interpretation makes sense.
+</details>
+
+<details>
+<summary><b>Q7: The SIPA principle seems too simple—is that really how all model-agnostic methods work?</b></summary>
+
+Yes! Let's check:
+- **PFI**: Sample → Permute feature → Predict → Compare loss
+- **PDP**: Sample → Replace feature values → Predict → Average
+- **LIME**: Sample → Perturb data → Predict → Fit local surrogate model
+
+**My thought**: It's elegant. Once you understand SIPA, you can see the common pattern across seemingly different methods.
+</details>
+
+<details>
+<summary><b>Q8: Are model-specific methods (neural network methods) always post-hoc?</b></summary>
+
+Usually yes, because you train the network first and then analyze it. But there are exceptions, like prototype-based neural networks (ProtoViT) which are interpretable by design.
+
+**My thought**: The categories are blurry—which is the author's point. Don't get too hung up on labels.
+</details>
+
+<details>
+<summary><b>Q9: The author says linear regression can be "post-hoc" if you compute marginal effects. Does this mean the categories are meaningless?</b></summary>
+
+Not meaningless, just not rigid. Categories are useful for organizing your thinking, but real methods often cross boundaries.
+
+**My thought**: Think of it as a spectrum, not a binary classification. Some methods are closer to "by design," others closer to "post-hoc," and many are somewhere in between.
+</details>
+
+### Connections to Other Knowledge
+
+<details>
+<summary><b>Q10: How do the three goals from Chapter 3 map to method categories?</b></summary>
+
+| Goal | Best Approaches |
+|------|-----------------|
+| **Improve Model** | Global methods (PDP, PFI, LOFO), interpretability by design |
+| **Justify Predictions** | Local methods (LIME, SHAP, counterfactuals), interpretability by design |
+| **Discover Insights** | Global methods (PDP, ALE), interpretability by design (if theoretically justified) |
+
+**My thought**: The mapping isn't one-to-one—you can use multiple method categories for each goal.
+</details>
+
+<details>
+<summary><b>Q11: How does the Rashomon effect relate to causal inference?</b></summary>
+
+If multiple models can explain the data equally well, they might be using different non-causal correlations. Causal inference helps you identify which relationships are actually causal, cutting through the Rashomon confusion.
+
+**My thought**: This is a powerful connection. Interpretability without causality is limited—it tells you what the model uses, not what's "true."
+</details>
+
+### Questions I Want Answered Later
+
+<details>
+<summary><b>Click to expand: Open Questions</b></summary>
+
+- [ ] How do I choose between LIME, SHAP, and other local methods?
+- [ ] When should I use PDP vs ALE?
+- [ ] How do I detect if a model is a "Clever Hans" predictor?
+- [ ] What's the relationship between interpretability and causality?
+- [ ] How do I validate that an explanation is "faithful"?
+- [ ] What are the practical steps for applying the SIPA principle?
+- [ ] How do I turn global methods into "group-wise" methods?
+- [ ] What's the current state of prototype-based neural networks?
+- [ ] How do I handle the Rashomon effect in practice?
+- [ ] Are there automated tools for choosing interpretability methods?
+- [ ] How do model-agnostic methods handle categorical features?
+- [ ] What are the computational costs of different methods?
+</details>
+
+### Papers to Read
+
+<details>
+<summary><b>Click to expand: Reading List</b></summary>
+
+- [ ] Ribeiro, Singh, & Guestrin (2016) - "Why Should I Trust You?" (LIME)
+- [ ] Rudin (2019) - "Stop Explaining Black Box Machine Learning Models for High Stakes Decisions"
+- [ ] Caruana et al. (2015) - "Intelligible Models for HealthCare" (GAMs, pneumonia example)
+- [ ] Scholbeck et al. (2020) - SIPA principle
+- [ ] Ma et al. (2024) - ProtoViT (prototype-based neural networks)
+- [ ] Yang et al. (2024) - Inherently interpretable tree ensembles
+- [ ] Bühlmann & Hothorn (2007) - Model-based boosting
+- [ ] Molnar et al. (2023) - PDP and PFI for data insights
+- [ ] Freiesleben et al. (2024) - More on PDP and PFI for data insights
+- [ ] Adadi & Berrada (2018) - Goals of interpretability
+</details>
+
+---
+
+## 📝 Personal Takeaways
+
+1. **Interpretability by design vs post-hoc is the fundamental split**—choose based on whether you prioritize faithfulness or flexibility
+
+2. **Model-agnostic methods are everywhere**—they work by the SIPA principle: Sample, Intervene, Predict, Aggregate
+
+3. **Local vs global** is another key distinction—local for individual cases, global for overall understanding
+
+4. **The Rashomon effect is a big deal**—multiple equally good models can tell different stories, making it unclear which to trust
+
+5. **Categories are blurry**—logistic regression can be interpreted in multiple ways, boosted trees with depth 1 become additive models
+
+6. **Embrace the fuzziness**—don't get too attached to one approach; mix and match
+
+7. **Prototype-based neural networks** are an exciting development—making deep learning interpretable by design
+
+8. **Scope of interpretability matters**—ask: is the whole model interpretable, parts of it, or just individual predictions?
+
+9. **Model-specific methods are necessary** for neural networks because they're too complex for model-agnostic or by-design approaches
+
+10. **This chapter is the map**—the rest of the book will explore each method in detail
+
+---
+
+## 🔗 Chapter Connections
+
+### To Chapter 3
+- Chapter 3: Goals (improve, justify, discover)
+- Chapter 4: Methods (by design, post-hoc, model-agnostic/specific)
+- Connection: Your goal determines which methods to use
+
+### To Future Chapters (Anticipated)
+- **Linear Regression, Logistic Regression** (interpretability by design)
+- **Decision Trees, Rules, RuleFit** (interpretability by design)
+- **PDP, ALE, Feature Importance** (global model-agnostic)
+- **LIME, SHAP, Counterfactuals** (local model-agnostic)
+- **Saliency Maps, Concepts, Adversarial Examples** (neural network specific)
+
+### To External Fields
+- **Causality**: Rashomon effect, Clever Hans shortcuts
+- **Psychology**: How humans understand explanations (from Chapter 2)
+- **Regulation**: Why interpretability by design is preferred for high-stakes decisions (Rudin 2019)
+- **Computer Vision**: Prototype-based neural networks
+
+---
+
+## 📌 Key Takeaways (Quick Summary)
+
+1. **Two main categories**: Interpretability by design (inherently interpretable models) and post-hoc (after training)
+
+2. **Post-hoc splits into**: Model-agnostic (ignores internals) and model-specific (analyzes internals)
+
+3. **Model-agnostic splits into**: Local (individual predictions) and global (average behavior)
+
+4. **SIPA principle**: Sample, Intervene, Predict, Aggregate—underlies all model-agnostic methods
+
+5. **Scope of interpretability**: Entirely interpretable, partially interpretable, or interpretable predictions
+
+6. **Rashomon effect**: Multiple equally good models with different interpretations
+
+7. **Categories are blurry**—embrace the fuzziness and mix approaches
+
+8. **Interpretability by design** examples: Linear regression, logistic regression, decision trees, rules, RuleFit
+
+9. **Local methods** examples: LIME, SHAP, counterfactuals, anchors, ceteris paribus, ICE
+
+10. **Global methods** examples: PDP, ALE, PFI, LOFO, H-statistic, surrogate models
+
+11. **Model-specific methods** focus on neural networks: saliency maps, concepts, adversarial examples
+
+12. **Your goals determine which methods to use**—the rest of the book will help you make that choice

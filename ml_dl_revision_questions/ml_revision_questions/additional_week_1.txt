@@ -1,0 +1,970 @@
+# 📚 WEEK 1 — MACHINE LEARNING COMPLETE STUDY GUIDE
+## Confidence Tracker + Interactive One-Sentence Summary + Interactive Quick Reference Cheat Sheet
+
+---
+
+## 1. CONFIDENCE TRACKER — WEEK 1
+
+After completing each exercise, mark your confidence level:
+
+| Confidence Level | Meaning |
+|------------------|---------|
+| 🟢 **Green** | I knew this cold — could explain it to someone else |
+| 🟡 **Yellow** | I got it right, but I wasn't 100% sure / guessed |
+| 🔴 **Red** | I had no idea — got it wrong or completely guessed |
+
+---
+
+| Exercise | Topic | 🟢 | 🟡 | 🔴 | Re-study? |
+|----------|-------|----|----|----|-----------|
+| Ex 2 | Traditional Code vs ML Decision Tree | | | | ☐ |
+| Ex 3 | Paradigm Matching (Supervised/Unsupervised/RL) | | | | ☐ |
+| Ex 4 | Spot the Leakage | | | | ☐ |
+| Ex 5 | Metrics Scenario (Cancer Screening) | | | | ☐ |
+| Ex A | Fix the Broken Workflow | | | | ☐ |
+| Ex B | Underfitting vs Overfitting Diagnosis | | | | ☐ |
+| Ex C | Metric Translation (Business to ML) | | | | ☐ |
+| Ex D | Ethics & Pitfalls Scenario (Bank Loans) | | | | ☐ |
+| Ex E | The Model Selection Memo | | | | ☐ |
+| Ex F | Design the Experiment (200 samples) | | | | ☐ |
+| Ex G | The Deployment Disaster | | | | ☐ |
+| Ex H | Teach It to a Non-Technical Boss | | | | ☐ |
+| Ex I | Feature Scaling for KNN | | | | ☐ |
+| Ex J | Complexity & Curse — When KNN Fails | | | | ☐ |
+| Ex K | Choose the Right Distance | | | | ☐ |
+| Ex L | Advanced Validation (LOOCV & Nested CV) | | | | ☐ |
+| Ex M | Bias-Variance Formula | | | | ☐ |
+| Ex N | ML Boom & Expert Systems | | | | ☐ |
+| Ex O | Beyond the Big Three (Semi-Supervised, Self-Supervised, Transfer) | | | | ☐ |
+| Ex P | Applications & Use Cases | | | | ☐ |
+| Ex Q | The Complete Cheat Sheet | | | | ☐ |
+
+---
+
+## 2. ONE-SENTENCE SUMMARY — WEEK 1 (INTERACTIVE)
+
+**How to use:** For each concept, try to write your own one-sentence summary *before* clicking to reveal the model answer. If your version captures the core idea, you understand it. If not, that concept needs revision.
+
+---
+
+### Intro to ML — Traditional Code vs ML
+
+<details>
+<summary><b>Machine Learning (Arthur Samuel's Definition)</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** A field of study that gives computers the ability to learn without being explicitly programmed.
+
+</details>
+
+---
+
+<details>
+<summary><b>When to use Traditional Code vs ML</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Use traditional code when perfect deterministic rules exist (sorting, formulas); use ML when problems are too complex for explicit rules (fraud detection, image recognition, recommendations).
+
+</details>
+
+---
+
+<details>
+<summary><b>Supervised Learning</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Learning from labeled data where the model maps inputs to known outputs (e.g., spam detection, house price prediction).
+
+</details>
+
+---
+
+<details>
+<summary><b>Unsupervised Learning</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Finding hidden patterns in unlabeled data without predefined outputs (e.g., customer segmentation, topic modeling, anomaly detection).
+
+</details>
+
+---
+
+<details>
+<summary><b>Reinforcement Learning</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Learning by trial and error through rewards and punishments in sequential decision-making environments (e.g., game playing, robotics).
+
+</details>
+
+---
+
+<details>
+<summary><b>ML Pipeline</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** The end-to-end process: Data + Algorithm + Compute → Model → Predictions.
+
+</details>
+
+---
+
+### Data Leakage
+
+<details>
+<summary><b>Data Leakage</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** When information from outside the training set (like test data or future information) leaks into training, causing unrealistically optimistic performance that doesn't generalize to production.
+
+</details>
+
+---
+
+<details>
+<summary><b>Temporal Leakage</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Using future data to predict the past by shuffling time-series data, which creates patterns that don't exist in real-time deployment.
+
+</details>
+
+---
+
+<details>
+<summary><b>Test Set Contamination</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** When test set information is used for any decision (like tuning hyperparameters or early stopping), invalidating it as a measure of true generalization.
+
+</details>
+
+---
+
+<details>
+<summary><b>Preventing Data Leakage</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Fit all preprocessing (scaling, encoding, outlier removal) on training data only, then apply the same transformations to validation and test sets.
+
+</details>
+
+---
+
+### Evaluation Metrics
+
+<details>
+<summary><b>Accuracy</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** The percentage of correct predictions — `(TP + TN) / (TP + TN + FP + FN)` — but can be misleading with imbalanced classes.
+
+</details>
+
+---
+
+<details>
+<summary><b>Precision</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** How many of the positive predictions were actually correct — `TP / (TP + FP)` — prioritize when false positives are costly (e.g., marking real emails as spam).
+
+</details>
+
+---
+
+<details>
+<summary><b>Recall (Sensitivity)</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** How many of the actual positives were caught — `TP / (TP + FN)` — prioritize when false negatives are costly (e.g., missing cancer in screening).
+
+</details>
+
+---
+
+<details>
+<summary><b>F1 Score</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** The harmonic mean of precision and recall — `2 × (P × R) / (P + R)` — balances both metrics, ideal for imbalanced classes.
+
+</details>
+
+---
+
+<details>
+<summary><b>AUC-ROC</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** A threshold-independent metric that measures a model's ability to rank positive examples higher than negative ones; 0.5 = random guessing, 1.0 = perfect ranking.
+
+</details>
+
+---
+
+<details>
+<summary><b>RMSE (Root Mean Squared Error)</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Measures average prediction error in the same units as the target, penalizing large errors more heavily than MAE.
+
+</details>
+
+---
+
+<details>
+<summary><b>MAE (Mean Absolute Error)</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Measures average absolute prediction error in the same units as the target; more robust to outliers than RMSE.
+
+</details>
+
+---
+
+<details>
+<summary><b>R² (Coefficient of Determination)</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** The proportion of variance in the target explained by the model — intuitive for stakeholders, ranging from 0 to 1.
+
+</details>
+
+---
+
+<details>
+<summary><b>MAPE (Mean Absolute Percentage Error)</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Measures error as a percentage of the actual value, making it intuitive for business reporting.
+
+</details>
+
+---
+
+### Underfitting vs Overfitting
+
+<details>
+<summary><b>Underfitting (High Bias)</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** The model is too simple to capture the underlying patterns, resulting in high error on both training and test data.
+
+</details>
+
+---
+
+<details>
+<summary><b>Overfitting (High Variance)</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** The model memorizes the training data (including noise) and performs well on train but poorly on test, failing to generalize.
+
+</details>
+
+---
+
+<details>
+<summary><b>Bias-Variance Tradeoff</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** As model complexity increases, bias decreases but variance increases; the goal is to find the sweet spot that minimizes total error.
+
+</details>
+
+---
+
+<details>
+<summary><b>Bias-Variance Decomposition</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Total expected error = Bias² + Variance + Irreducible Error (noise inherent in the data that no model can eliminate).
+
+</details>
+
+---
+
+<details>
+<summary><b>Irreducible Error (σ²)</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** The noise in the data itself (measurement errors, unmeasured factors) that sets the floor for achievable model performance.
+
+</details>
+
+---
+
+### Cross-Validation
+
+<details>
+<summary><b>Train/Validation/Test Split</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** The three-way split: Training set fits the model, Validation set tunes hyperparameters, Test set provides the final unbiased performance estimate.
+
+</details>
+
+---
+
+<details>
+<summary><b>K-Fold Cross-Validation</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Divide data into K folds; train on K-1 folds and validate on the held-out fold, repeating K times to get a reliable performance estimate.
+
+</details>
+
+---
+
+<details>
+<summary><b>Stratified K-Fold</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Like K-Fold but preserves class proportions in each fold, essential for imbalanced datasets.
+
+</details>
+
+---
+
+<details>
+<summary><b>Leave-One-Out Cross-Validation (LOOCV)</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** K-Fold where K = N (number of samples); trains on N-1 samples and validates on 1, repeated N times — useful for tiny datasets but computationally expensive.
+
+</details>
+
+---
+
+<details>
+<summary><b>Nested Cross-Validation</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Two-level CV: outer loop evaluates model performance, inner loop tunes hyperparameters — prevents double-dipping and gives unbiased performance estimates.
+
+</details>
+
+---
+
+### Feature Scaling
+
+<details>
+<summary><b>Why Feature Scaling Matters</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Features with larger magnitudes dominate distance-based algorithms (like KNN), making scaling essential when features have different units/ranges.
+
+</details>
+
+---
+
+<details>
+<summary><b>Min-Max Normalization</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Rescales features to a fixed range, usually [0, 1], using `(x - min) / (max - min)`.
+
+</details>
+
+---
+
+<details>
+<summary><b>Z-Score Standardization</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Transforms features to have zero mean and unit variance using `(x - μ) / σ`; more robust to outliers than Min-Max.
+
+</details>
+
+---
+
+### Curse of Dimensionality
+
+<details>
+<summary><b>Curse of Dimensionality</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** In high-dimensional spaces, distances equalize (nearest and farthest become indistinguishable), data becomes sparse, and every point is an outlier.
+
+</details>
+
+---
+
+<details>
+<summary><b>KNN Time Complexity</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Naive KNN is O(n·d) per query — with 1M samples and 100 features, that's 100 million operations per query, too slow for production.
+
+</details>
+
+---
+
+<details>
+<summary><b>ANN (Approximate Nearest Neighbors)</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Sub-linear time algorithms (O(log n)) that sacrifice perfect accuracy for scalability, powering modern vector databases (HNSW, FAISS).
+
+</details>
+
+---
+
+### Distance Metrics
+
+<details>
+<summary><b>Euclidean Distance (L2)</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** The straight-line distance between two points; best for continuous features after scaling.
+
+</details>
+
+---
+
+<details>
+<summary><b>Manhattan Distance (L1)</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** The grid-based distance (sum of absolute differences); useful when movement is restricted to axes (robots, sparse data).
+
+</details>
+
+---
+
+<details>
+<summary><b>Cosine Similarity</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Measures angle (direction) between vectors regardless of magnitude; ideal for text documents and embeddings.
+
+</details>
+
+---
+
+<details>
+<summary><b>Jaccard Similarity</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Measures overlap between two sets (intersection over union); ideal for binary purchase history or sets.
+
+</details>
+
+---
+
+### Regularization & Model Selection
+
+<details>
+<summary><b>Regularization</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Techniques that constrain model complexity to prevent overfitting, slightly increasing bias to significantly reduce variance.
+
+</details>
+
+---
+
+<details>
+<summary><b>Overfitting Fixes</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** More data, simpler model, regularization, feature selection, early stopping, or cross-validation.
+
+</details>
+
+---
+
+<details>
+<summary><b>Underfitting Fixes</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** More complex model, more features, reduce regularization, or train longer.
+
+</details>
+
+---
+
+### Ethics & Pitfalls
+
+<details>
+<summary><b>Distribution Shift (Concept Drift)</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** When the data distribution changes after deployment (e.g., COVID changed economic patterns), making the model outdated and inaccurate.
+
+</details>
+
+---
+
+<details>
+<summary><b>Biased Training Data</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Historical data containing societal biases (e.g., discriminatory lending) gets inherited and amplified by the model, creating fairness violations.
+
+</details>
+
+---
+
+<details>
+<summary><b>Explainability (Interpretability)</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** The ability to understand why a model made a decision; critical in high-stakes domains like healthcare, finance, and law.
+
+</details>
+
+---
+
+<details>
+<summary><b>Model Memorization & Privacy</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Models can memorize training data (e.g., medical records), and predictions might inadvertently leak private information.
+
+</details>
+
+---
+
+### ML History
+
+<details>
+<summary><b>Expert Systems</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Hand-crafted systems where domain experts encode rules (e.g., MYCIN for medical diagnosis); they don't scale because updating rules manually is impossible.
+
+</details>
+
+---
+
+<details>
+<summary><b>MYCIN</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** A 1970s medical diagnosis system with 600+ hand-coded rules for bacterial infections; failed because doctors had to manually update every rule — doesn't scale.
+
+</details>
+
+---
+
+<details>
+<summary><b>Deep Blue</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** A 1997 chess engine that beat Kasparov using handcrafted evaluation functions and brute force search (200M positions/sec), not learned from data.
+
+</details>
+
+---
+
+<details>
+<summary><b>ELIZA</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** A 1966 chatbot with scripted pattern-matched responses; not true AI because it had zero understanding and just mirrored user input with simple rules.
+
+</details>
+
+---
+
+### Beyond Supervised/Unsupervised/RL
+
+<details>
+<summary><b>Semi-Supervised Learning</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Uses a small amount of labeled data + a large amount of unlabeled data, common in practice because labeling is expensive.
+
+</details>
+
+---
+
+<details>
+<summary><b>Self-Supervised Learning</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Creates supervision signals from the data itself (e.g., GPT predicts the next word, BERT masks words); no human labels needed.
+
+</details>
+
+---
+
+<details>
+<summary><b>Transfer Learning</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Pre-training a model on a large dataset (e.g., ResNet on ImageNet) and fine-tuning it on a smaller, task-specific dataset; works great when you have limited data.
+
+</details>
+
+---
+
+### Applications
+
+<details>
+<summary><b>Cold Start Problem</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** New users have no history → nothing to recommend; solutions: ask preferences upfront, recommend popular items, or use content-based features.
+
+</details>
+
+---
+
+<details>
+<summary><b>Collaborative Filtering</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** "Users like you also liked..." — recommends items based on what similar users have purchased.
+
+</details>
+
+---
+
+<details>
+<summary><b>Content-Based Filtering</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** "More of what you like..." — recommends items similar to what the user has already liked.
+
+</details>
+
+---
+
+## 3. QUICK REFERENCE CHEAT SHEET — WEEK 1 (INTERACTIVE)
+
+**How to use:** Before clicking each dropdown, try to recall the formula, algorithm, or fact from memory. This turns passive memorization into active recall.
+
+---
+
+### ML Definition & Pipeline
+
+<details>
+<summary><b>Definition of ML (Arthur Samuel, 1959)</b> — Try to recall first</summary>
+
+**Model Answer:** "A field of study that gives computers the ability to learn without being **explicitly programmed**."
+
+</details>
+
+---
+
+<details>
+<summary><b>ML Pipeline</b> — Try to recall first</summary>
+
+**Model Answer:** Data + Algorithm + Compute → Model → Predictions
+
+</details>
+
+---
+
+### Three Paradigms
+
+<details>
+<summary><b>Supervised Learning</b> — Try to recall key details first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Data Type** | Labeled |
+| **Goal** | Map inputs to outputs |
+| **Examples** | Spam detection, house price prediction |
+
+</details>
+
+---
+
+<details>
+<summary><b>Unsupervised Learning</b> — Try to recall key details first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Data Type** | Unlabeled |
+| **Goal** | Find hidden structure |
+| **Examples** | Customer segmentation, topic modeling, anomaly detection |
+
+</details>
+
+---
+
+<details>
+<summary><b>Reinforcement Learning</b> — Try to recall key details first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Data Type** | Rewards |
+| **Goal** | Learn by trial and error |
+| **Examples** | Game playing, robotics, supply chain optimization |
+
+</details>
+
+---
+
+### Three-Way Split
+
+<details>
+<summary><b>Train/Validation/Test Split</b> — Try to recall first</summary>
+
+| Split | Purpose |
+|-------|---------|
+| **Training Set** | Fit model parameters |
+| **Validation Set** | Tune hyperparameters |
+| **Test Set** | Final unbiased estimate (used ONCE) |
+
+</details>
+
+---
+
+### Key Metrics Formulas
+
+<details>
+<summary><b>Accuracy</b> — Try to recall formula first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Formula** | `(TP + TN) / (TP + TN + FP + FN)` |
+| **When to Use** | Balanced classes |
+| **Misleading When** | Classes are imbalanced |
+
+</details>
+
+---
+
+<details>
+<summary><b>Precision</b> — Try to recall formula first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Formula** | `TP / (TP + FP)` |
+| **When to Prioritize** | False positives are costly |
+| **Example** | Spam detection (don't mark real emails as spam) |
+
+</details>
+
+---
+
+<details>
+<summary><b>Recall (Sensitivity)</b> — Try to recall formula first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Formula** | `TP / (TP + FN)` |
+| **When to Prioritize** | False negatives are costly |
+| **Example** | Cancer screening (don't miss sick patients) |
+
+</details>
+
+---
+
+<details>
+<summary><b>F1 Score</b> — Try to recall formula first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Formula** | `2 × (P × R) / (P + R)` |
+| **When to Use** | Imbalanced classes, need balance |
+| **Harmonic Mean** | Penalizes extreme values more than arithmetic mean |
+
+</details>
+
+---
+
+<details>
+<summary><b>RMSE</b> — Try to recall formula first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Formula** | `√( (1/N) Σ (y - ŷ)² )` |
+| **Units** | Same as target variable |
+| **Key Feature** | Penalizes large errors more heavily |
+
+</details>
+
+---
+
+<details>
+<summary><b>R² (Coefficient of Determination)</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Formula** | `1 - (SS_res / SS_total)` |
+| **Range** | 0 to 1 |
+| **Interpretation** | % of variance explained by the model |
+
+</details>
+
+---
+
+<details>
+<summary><b>MAPE (Mean Absolute Percentage Error)</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Formula** | `(1/N) Σ |(y - ŷ)/y| × 100` |
+| **Best For** | Business reporting (stakeholders understand percentages) |
+
+</details>
+
+---
+
+### Bias-Variance Tradeoff
+
+<details>
+<summary><b>Bias-Variance Decomposition</b> — Try to recall formula first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Formula** | `Total Error = Bias² + Variance + Irreducible Error (σ²)` |
+| **High Bias** | Underfitting |
+| **High Variance** | Overfitting |
+
+</details>
+
+---
+
+<details>
+<summary><b>Irreducible Error (σ²)</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **What It Is** | Noise inherent in the data (measurement errors, unmeasured factors) |
+| **Can It Be Eliminated?** | ❌ No — it's the floor of achievable error |
+
+</details>
+
+---
+
+### Underfitting vs Overfitting Diagnosis
+
+<details>
+<summary><b>Diagnosing & Fixing</b> — Try to recall first</summary>
+
+| Symptom | Diagnosis | Fix |
+|---------|-----------|-----|
+| Train error 2%, Val error 25% | **Overfitting** | More data, simpler model, regularization, early stopping |
+| Train error 40%, Val error 42% | **Underfitting** | More complex model, more features, train longer, reduce regularization |
+| Train error 0%, Val error 30% | **Severe Overfitting** | Regularization, simpler model, more data |
+
+</details>
+
+---
+
+### Feature Scaling
+
+<details>
+<summary><b>Min-Max Normalization</b> — Try to recall formula first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Formula** | `x' = (x - min) / (max - min)` |
+| **Range** | [0, 1] |
+| **Vulnerability** | Sensitive to outliers |
+
+</details>
+
+---
+
+<details>
+<summary><b>Z-Score Standardization</b> — Try to recall formula first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Formula** | `x' = (x - μ) / σ` |
+| **Result** | Mean = 0, Variance = 1 |
+| **Robustness** | More robust to outliers than Min-Max |
+
+</details>
+
+---
+
+### KNN Complexity
+
+<details>
+<summary><b>KNN Time & Memory Complexity</b> — Try to recall first</summary>
+
+| Aspect | Complexity |
+|--------|------------|
+| **Time per Query** | `O(n · d)` — n = samples, d = features |
+| **Memory** | `O(n · d)` — stores entire training set |
+| **1M samples × 100 features** | 100 million operations per query — too slow |
+
+</details>
+
+---
+
+<details>
+<summary><b>ANN (Approximate Nearest Neighbors)</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Time** | Sub-linear `O(log n)` |
+| **Tradeoff** | Sacrifices **perfect accuracy** for **scalability** |
+| **Example** | HNSW (powers FAISS, Pinecone, Weaviate) |
+
+</details>
+
+---
+
+### Distance Metrics
+
+<details>
+<summary><b>When to Use Which Distance</b> — Try to recall first</summary>
+
+| Scenario | Best Distance | Why? |
+|----------|--------------|------|
+| Text documents (TF-IDF) | **Cosine** | Focuses on direction, ignores magnitude |
+| Continuous features (house prices) | **Euclidean (L2)** | Default choice after scaling |
+| User embeddings | **Euclidean or Cosine** | Both work well for embeddings |
+| Grid movement (robot) | **Manhattan (L1)** | Moves in grid patterns (up/down/left/right) |
+| Binary purchase history | **Jaccard or Cosine** | Measures overlap of sets |
+
+</details>
+
+---
+
+### Cross-Validation Methods
+
+<details>
+<summary><b>CV Methods Comparison</b> — Try to recall first</summary>
+
+| Method | Compute Cost | Estimate Bias | Estimate Variance | Best For |
+|--------|--------------|---------------|-------------------|----------|
+| **Holdout** | Low | Higher | Higher | Large datasets, fast iteration |
+| **5-Fold CV** | Medium | Moderate | Moderate | General purpose default |
+| **10-Fold CV** | Medium-High | Lower | Moderate | When accuracy matters |
+| **LOOCV** | Very High | Lowest | Highest | Tiny datasets (<100 samples) |
+
+</details>
+
+---
+
+### Regularization Fixes
+
+<details>
+<summary><b>Overfitting Fixes</b> — Try to recall first</summary>
+
+- More data
+- Simpler model
+- **Regularization** (L1, L2)
+- Feature selection
+- Early stopping
+- Cross-validation
+
+</details>
+
+---
+
+<details>
+<summary><b>Underfitting Fixes</b> — Try to recall first</summary>
+
+- More complex model
+- More features
+- **Reduce** regularization
+- Train longer
+
+</details>
+
+---
+
+### ML History
+
+<details>
+<summary><b>4 Drivers of the ML Boom</b> — Try to recall first</summary>
+
+1. **Data Explosion** (Internet, hospitals, government data)
+2. **Open-Source Tools** (CUDA, scikit-learn, PyTorch)
+3. **Cheap Compute** (GPUs, TPUs)
+4. **Algorithm Advances** (more parallelizable, better training)
+
+</details>
+
+---
+
+<details>
+<summary><b>Key Historical Systems</b> — Try to recall first</summary>
+
+| System | Year | What It Was | Limitation |
+|--------|------|-------------|------------|
+| **ELIZA** | 1966 | Scripted chatbot | Zero understanding — just mirroring |
+| **MYCIN** | 1970s | Medical diagnosis (600+ rules) | Manual rule updates don't scale |
+| **Deep Blue** | 1997 | Chess engine (handcrafted eval) | Couldn't generalize to other games |
+
+**Key Lesson:** Encoding all human knowledge in rules doesn't scale. ML learns patterns from data instead.
+
+</details>
+
+---
+
+### Beyond the Big Three
+
+<details>
+<summary><b>Semi-Supervised, Self-Supervised, Transfer Learning</b> — Try to recall first</summary>
+
+| Method | Data Type | Key Idea | Example |
+|--------|-----------|----------|---------|
+| **Semi-Supervised** | Small labeled + Large unlabeled | Uses both to improve performance | Medical imaging (label 1k, use 100k unlabeled) |
+| **Self-Supervised** | Unlabeled only | Creates labels from data itself | GPT (predict next word), BERT (mask words) |
+| **Transfer Learning** | Pre-trained + Fine-tuned | Pre-train on large data, fine-tune on small | ResNet on ImageNet → fine-tune for X-rays |
+
+</details>
+
+---
+
+### Applications
+
+<details>
+<summary><b>Key Application Stats</b> — Try to recall first</summary>
+
+| Application | Stat |
+|-------------|------|
+| **Netflix recommendations** | 75% of views |
+| **Amazon recommendations** | 35% of sales |
+| **Cold Start Problem** | New users have no history |
+
+</details>
+
+---

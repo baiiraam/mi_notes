@@ -1,0 +1,716 @@
+# 📚 WEEK 4 — MACHINE LEARNING COMPLETE STUDY GUIDE
+## Confidence Tracker + Interactive One-Sentence Summary + Interactive Quick Reference Cheat Sheet
+
+---
+
+## 1. CONFIDENCE TRACKER — WEEK 4
+
+After completing each exercise, mark your confidence level:
+
+| Confidence Level | Meaning |
+|------------------|---------|
+| 🟢 **Green** | I knew this cold — could explain it to someone else |
+| 🟡 **Yellow** | I got it right, but I wasn't 100% sure / guessed |
+| 🔴 **Red** | I had no idea — got it wrong or completely guessed |
+
+---
+
+| Exercise | Topic | 🟢 | 🟡 | 🔴 | Re-study? |
+|----------|-------|----|----|----|-----------|
+| ID-1 | The Problem — What is Class Imbalance? | | | | ☐ |
+| ID-2 | Measuring Imbalance Severity | | | | ☐ |
+| ID-3 | Resampling Strategies — Random Oversampling | | | | ☐ |
+| ID-4 | Resampling Strategies — Random Undersampling | | | | ☐ |
+| ID-5 | SMOTE — Synthetic Minority Oversampling | | | | ☐ |
+| ID-6 | Intelligent Undersampling — Tomek Links & NearMiss | | | | ☐ |
+| ID-7 | Critical — Never Resample the Test Set | | | | ☐ |
+| ID-8 | Class Weights | | | | ☐ |
+| ID-9 | Focal Loss | | | | ☐ |
+| ID-10 | Evaluation Metrics — Precision, Recall, F1 | | | | ☐ |
+| ID-11 | ROC-AUC vs PR-AUC | | | | ☐ |
+| ID-12 | Moving the Decision Threshold | | | | ☐ |
+| ID-13 | Strategy Selection & Pipeline | | | | ☐ |
+| ID-14 | Common Mistakes | | | | ☐ |
+| SVM-1 | Intuition — Maximum-Margin Classifier | | | | ☐ |
+| SVM-2 | The Math — Hyperplanes & Margins | | | | ☐ |
+| SVM-3 | Hard Margin Optimization | | | | ☐ |
+| SVM-4 | Soft Margin & C Parameter | | | | ☐ |
+| SVM-5 | The Kernel Trick | | | | ☐ |
+| SVM-6 | Common Kernel Functions | | | | ☐ |
+| SVM-7 | RBF Kernel — Gamma Parameter | | | | ☐ |
+| SVM-8 | Kernel Decision Guide | | | | ☐ |
+| SVM-9 | Support Vector Regression (SVR) | | | | ☐ |
+| SVM-10 | SVM Strengths & Limitations | | | | ☐ |
+| SVM-11 | Practical Tips & Checklist | | | | ☐ |
+| ME-1 | Why Explainability Matters | | | | ☐ |
+| ME-2 | Global vs Local Interpretability | | | | ☐ |
+| ME-3 | Feature Importance — Built-In vs Permutation | | | | ☐ |
+| ME-4 | Partial Dependence & ICE Plots | | | | ☐ |
+| ME-5 | SHAP Values — The Game-Theoretic Framework | | | | ☐ |
+| ME-6 | SHAP Variants | | | | ☐ |
+| ME-7 | SHAP Visualizations | | | | ☐ |
+| ME-8 | LIME — Local Interpretable Model-agnostic Explanations | | | | ☐ |
+| ME-9 | LIME vs SHAP — Choosing Between Them | | | | ☐ |
+| ME-10 | Systematic Error Analysis | | | | ☐ |
+| ME-11 | Diagnosing Error Types | | | | ☐ |
+| ME-12 | Confusion Matrix Analysis | | | | ☐ |
+| ME-13 | Counterfactual Explanations | | | | ☐ |
+| ME-14 | Production Error Monitoring Checklist | | | | ☐ |
+
+---
+
+## 2. ONE-SENTENCE SUMMARY — WEEK 4 (INTERACTIVE)
+
+**How to use:** For each concept, try to write your own one-sentence summary *before* clicking to reveal the model answer. If your version captures the core idea, you understand it. If not, that concept needs revision.
+
+---
+
+### Imbalanced Datasets
+
+<details>
+<summary><b>Class Imbalance</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** When one class has far fewer samples than another (the norm, not the exception), causing models to favor the majority class and achieve high accuracy while being useless for the minority.
+
+</details>
+
+---
+
+<details>
+<summary><b>Accuracy Paradox</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** A classifier that predicts the majority class for every sample achieves high accuracy (e.g., 99.7% on fraud data) but catches 0% of the minority class — completely useless.
+
+</details>
+
+---
+
+<details>
+<summary><b>Three Families of Solutions for Imbalance</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Data-level (resampling: oversampling, undersampling, SMOTE), algorithm-level (class weights, focal loss), and metric/threshold (precision/recall/F1, threshold tuning).
+
+</details>
+
+---
+
+<details>
+<summary><b>Random Oversampling</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Randomly duplicates minority samples until balance is achieved — simple but risks overfitting because the model memorizes exact copies with no new information.
+
+</details>
+
+---
+
+<details>
+<summary><b>Random Undersampling</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Randomly removes majority samples until balance is achieved — faster training but discards potentially useful majority data and increases variance.
+
+</details>
+
+---
+
+<details>
+<summary><b>SMOTE (Synthetic Minority Oversampling)</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Generates synthetic minority samples by interpolating between a minority sample and one of its K nearest neighbors (`x_new = x_i + λ × (x_j − x_i)`), adding new information rather than duplicating.
+
+</details>
+
+---
+
+<details>
+<summary><b>SMOTE Variants</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** SMOTE-NC handles categorical features, BorderlineSMOTE synthesizes near the decision boundary only, and SMOTETomek combines SMOTE with Tomek Links to clean overlapping samples.
+
+</details>
+
+---
+
+<details>
+<summary><b>Tomek Links</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Pairs of samples from opposite classes that are each other's nearest neighbor; removing the majority sample cleans the decision boundary without large data loss.
+
+</details>
+
+---
+
+<details>
+<summary><b>Never Resample the Test Set</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Split first, then resample ONLY training data — test set must remain untouched to represent real-world distribution; use `imblearn.pipeline.Pipeline` for safe CV.
+
+</details>
+
+---
+
+<details>
+<summary><b>Class Weights</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Instead of changing the data, penalize minority errors more heavily (`class_weight='balanced'` computes `w_c = n_samples / (n_classes × n_c)`); no data modification, fast, and supported by most sklearn models.
+
+</details>
+
+---
+
+<details>
+<summary><b>Focal Loss</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Introduced by Facebook AI, it down-weights easy examples (γ=2) to focus training on hard-to-classify minority samples — ideal for deep learning on highly imbalanced data.
+
+</details>
+
+---
+
+<details>
+<summary><b>Precision</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** `TP/(TP+FP)` — "Of all instances I flagged as positive, what % were actually positive?" Quality of positives; prioritize when false positives are costly.
+
+</details>
+
+---
+
+<details>
+<summary><b>Recall</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** `TP/(TP+FN)` — "Of all actual positives, what % did I catch?" Coverage; prioritize when false negatives are costly (cancer screening, fraud).
+
+</details>
+
+---
+
+<details>
+<summary><b>F1 Score</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** `2 × (P × R)/(P+R)` — harmonic mean of precision and recall; punishes extreme imbalance between the two and is the standard metric for imbalanced problems.
+
+</details>
+
+---
+
+<details>
+<summary><b>ROC-AUC vs PR-AUC</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** ROC-AUC plots TPR vs FPR and can look great even for bad models on imbalanced data; PR-AUC plots Precision vs Recall and reveals minority class performance honestly — PR-AUC is preferred for imbalanced problems.
+
+</details>
+
+---
+
+<details>
+<summary><b>Moving the Decision Threshold</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Default 0.5 is often too high for imbalanced data; scan thresholds on validation data and pick the one maximizing F1 (or business-defined recall target).
+
+</details>
+
+---
+
+### Support Vector Machines
+
+<details>
+<summary><b>SVM (Support Vector Machine)</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Finds the widest separating hyperplane (maximum margin) between classes, introduced by Vapnik & Cortes (1995); great for small-N, high-D data with clear margins.
+
+</details>
+
+---
+
+<details>
+<summary><b>Maximum Margin</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** The margin is the distance between the decision boundary and the closest training points; wider margin = better generalization because the classifier is more robust to small input changes.
+
+</details>
+
+---
+
+<details>
+<summary><b>Hard Margin SVM</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** `minimize ½||w||²` subject to every point being on the correct side with margin ≥1 — convex problem with global optimum, but fails if data is not perfectly separable.
+
+</details>
+
+---
+
+<details>
+<summary><b>Soft Margin SVM and C Parameter</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** `minimize ½||w||² + C·Σξᵢ` where ξᵢ are slack variables allowing margin violations; C controls the trade-off (small C = soft margin/underfitting; large C = hard margin/overfitting).
+
+</details>
+
+---
+
+<details>
+<summary><b>The Kernel Trick</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Replaces inner products `x·x'` with a kernel function `K(x,x')` that equals an inner product in a high-dimensional space — without computing the features — enabling non-linear decision boundaries with O(d) cost.
+
+</details>
+
+---
+
+<details>
+<summary><b>RBF Kernel</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** `K = exp(−γ||x−x'||²)` — the default kernel; contains infinitely many polynomial terms; γ controls Gaussian width (small γ = underfitting, large γ = overfitting).
+
+</details>
+
+---
+
+<details>
+<summary><b>Support Vector Regression (SVR)</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Fits a function within an ε-tube around true values; errors smaller than ε get no penalty; sparser than MSE/MAE and robust to small noise.
+
+</details>
+
+---
+
+<details>
+<summary><b>SVM Strengths</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Effective in high dimensions, versatile via kernels, convex optimization (global optimum), robust to overfitting, memory-efficient (only support vectors stored).
+
+</details>
+
+---
+
+<details>
+<summary><b>SVM Limitations</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Poor scaling with N (O(N²)-O(N³)), highly sensitive to feature scaling, no native probabilities (Platt scaling expensive), multi-class is awkward, black-box for RBF/polynomial.
+
+</details>
+
+---
+
+### Model Explainability & Error Analysis
+
+<details>
+<summary><b>The Black-Box Problem</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Modern ML models are highly accurate but opaque; post-hoc explainability (SHAP, LIME) lets us enjoy black-box accuracy while explaining decisions.
+
+</details>
+
+---
+
+<details>
+<summary><b>Intrinsic vs Post-hoc Explainability</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Intrinsic (linear regression, decision trees) is transparent but less accurate; post-hoc (SHAP, LIME) explains any black-box model but is approximative and expensive.
+
+</details>
+
+---
+
+<details>
+<summary><b>Global vs Local Interpretability</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Global describes overall model behavior (for auditing); local explains individual predictions (for customer-facing explanations and debugging).
+
+</details>
+
+---
+
+<details>
+<summary><b>Permutation Importance</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Measures the drop in model performance when a feature's values are randomly shuffled — model-agnostic, no cardinality bias, and uses validation data for true generalization signal.
+
+</details>
+
+---
+
+<details>
+<summary><b>Partial Dependence Plot (PDP)</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Shows the average model output as one feature varies, holding others fixed; reveals monotonic/non-monotonic relationships but averages can hide heterogeneity.
+
+</details>
+
+---
+
+<details>
+<summary><b>ICE Plot (Individual Conditional Expectation)</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Same as PDP but one line per individual instead of averaging; reveals heterogeneity and interactions that PDP hides.
+
+</details>
+
+---
+
+<details>
+<summary><b>SHAP (SHapley Additive exPlanations)</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Based on Shapley values from game theory (Nobel Prize 2012), SHAP uniquely distributes each prediction among features with four fairness axioms: Efficiency, Symmetry, Dummy, and Additivity.
+
+</details>
+
+---
+
+<details>
+<summary><b>SHAP Properties</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Efficiency (prediction = baseline + sum of SHAP values), Consistency (feature importance never decreases when it contributes more), and Additivity (ensemble SHAPs are weighted sums).
+
+</details>
+
+---
+
+<details>
+<summary><b>SHAP Explainers</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** TreeExplainer (fast, exact for tree models), LinearExplainer (instant, exact for linear models), DeepExplainer (fast approximation for NNs), KernelExplainer (slow, model-agnostic fallback).
+
+</details>
+
+---
+
+<details>
+<summary><b>SHAP Visualizations</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Waterfall/Force (local per-prediction explanations), Summary Bar (global importance), Beeswarm (global direction + distribution), Dependency (effect shape vs feature value).
+
+</details>
+
+---
+
+<details>
+<summary><b>LIME (Local Interpretable Model-agnostic Explanations)</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Fits a simple interpretable model in the local neighborhood of a prediction (Ribeiro et al. 2016); heuristic with no consistency guarantee — faithful only locally.
+
+</details>
+
+---
+
+<details>
+<summary><b>SHAP vs LIME</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** SHAP has theoretical guarantees (game theory), is consistent, and stable; LIME is heuristic and can vary run-to-run — use SHAP by default for tabular models.
+
+</details>
+
+---
+
+<details>
+<summary><b>Systematic Error Analysis</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Separate correct vs errors, slice by groups (demographic, feature, time), quantify error rates, diagnose with SHAP, fix with more data/features/thresholds, and monitor in production.
+
+</details>
+
+---
+
+<details>
+<summary><b>Error Types to Diagnose</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** Label noise (wrong labels), spurious correlation (learned shortcuts), under-represented subgroups (small slices), distribution shift (production differs), ambiguous ground truth (experts disagree), and feature gaps (missing key predictors).
+
+</details>
+
+---
+
+<details>
+<summary><b>Counterfactual Explanations</b> — Try your own 1-sentence summary first</summary>
+
+**Model Answer:** "What minimal change would flip the prediction?" — actionable, regulatory-friendly (GDPR), and much clearer than SHAP for non-technical audiences.
+
+</details>
+
+---
+
+## 3. QUICK REFERENCE CHEAT SHEET — WEEK 4 (INTERACTIVE)
+
+**How to use:** Before clicking each dropdown, try to recall the formula, algorithm, or fact from memory. This turns passive memorization into active recall.
+
+---
+
+### Imbalance Severity
+
+<details>
+<summary><b>Imbalance Severity Levels</b> — Try to recall first</summary>
+
+| Ratio | Severity | Example |
+|-------|----------|---------|
+| 1:2 – 1:5 | **Mild** | Churn (20%) |
+| 1:10 – 1:50 | **Moderate** | Medical diagnosis |
+| 1:100 – 1:500 | **Severe** | Credit fraud |
+| 1:500+ | **Extreme** | Cyber attacks |
+
+</details>
+
+---
+
+### Resampling Methods
+
+<details>
+<summary><b>Resampling Methods</b> — Try to recall first</summary>
+
+| Method | How It Works | Risk |
+|--------|--------------|------|
+| **Random Oversampling** | Duplicate minority samples | Overfitting (memorizes copies) |
+| **Random Undersampling** | Remove majority samples | Loses useful information |
+| **SMOTE** | Synthesize via interpolation | Adds new information ✓ |
+
+**SMOTE Formula:** `x_new = x_i + λ × (x_j − x_i)`, λ ~ Uniform(0,1)
+
+</details>
+
+---
+
+### Class Weights
+
+<details>
+<summary><b>Class Weights</b> — Try to recall first</summary>
+
+| Method | Formula |
+|--------|---------|
+| **Balanced weights** | `w_c = n_samples / (n_classes × n_c)` |
+
+**Example:** 9970 legit, 30 fraud → w_legit ≈ 0.50, w_fraud ≈ 166.7 (333× penalty)
+
+</details>
+
+---
+
+### Evaluation Metrics
+
+<details>
+<summary><b>Precision, Recall, F1</b> — Try to recall first</summary>
+
+| Metric | Formula | What It Measures |
+|--------|---------|------------------|
+| **Precision** | `TP/(TP+FP)` | Quality of positives — minimize FP |
+| **Recall** | `TP/(TP+FN)` | Coverage — minimize FN |
+| **F1** | `2·P·R/(P+R)` | Harmonic mean (balance) |
+
+</details>
+
+---
+
+### ROC-AUC vs PR-AUC
+
+<details>
+<summary><b>ROC vs PR Curve</b> — Try to recall first</summary>
+
+| Curve | Plots | Preferred For |
+|-------|-------|---------------|
+| **ROC-AUC** | TPR vs FPR | Balanced data |
+| **PR-AUC** | Precision vs Recall | **Imbalanced data** |
+
+**Why PR-AUC is better:** FP dominates precision denominator — no hiding; random classifier PR-AUC ≈ minority prevalence.
+
+</details>
+
+---
+
+### SVM Core Formulas
+
+<details>
+<summary><b>SVM Formulas</b> — Try to recall first</summary>
+
+| Formula | Description |
+|---------|-------------|
+| `w·x + b = 0` | Hyperplane |
+| `sign(w·x + b)` | Decision rule |
+| `2/||w||` | Margin width |
+| **Hard margin** | `min ½||w||²` s.t. `yᵢ(w·xᵢ+b) ≥ 1` |
+| **Soft margin** | `min ½||w||² + C·Σξᵢ` s.t. `yᵢ(w·xᵢ+b) ≥ 1−ξᵢ` |
+
+</details>
+
+---
+
+### Kernel Functions
+
+<details>
+<summary><b>Common Kernels</b> — Try to recall first</summary>
+
+| Kernel | Formula | Best For |
+|--------|---------|----------|
+| **Linear** | `x·x'` | Text, high-D sparse |
+| **Polynomial** | `(γx·x' + r)ᵈ` | Interactions, degree ≤5 |
+| **RBF** | `exp(−γ||x−x'||²)` | Default (infinite-dimensional) |
+| **Sigmoid** | `tanh(γx·x' + r)` | Neural-net style (rarely optimal) |
+
+</details>
+
+---
+
+### SVM C & Gamma Effects
+
+<details>
+<summary><b>C and Gamma Effects</b> — Try to recall first</summary>
+
+| Parameter | Small | Large |
+|-----------|-------|-------|
+| **C** | Soft margin (high bias, underfitting) | Hard margin (low bias, overfitting) |
+| **γ (RBF)** | Wide Gaussian (smooth, underfitting) | Narrow Gaussian (wiggly, overfitting) |
+
+</details>
+
+---
+
+### SVM Decision Guide
+
+<details>
+<summary><b>Kernel Selection</b> — Try to recall first</summary>
+
+| Scenario | Recommended Kernel |
+|----------|-------------------|
+| Text classification | **Linear** |
+| Numeric features < 1,000 | **RBF** (tune C, γ) |
+| Known interactions | **Polynomial (deg 2–3)** |
+| Very large N (>100K) | **Linear + LinearSVC** |
+| Need interpretable weights | **Linear** |
+| First pass / unsure | **RBF** with `gamma='scale'` |
+
+</details>
+
+---
+
+### SHAP Properties
+
+<details>
+<summary><b>SHAP Fairness Axioms</b> — Try to recall first</summary>
+
+| Axiom | Meaning |
+|-------|---------|
+| **Efficiency** | Sum of SHAP values = prediction − baseline |
+| **Symmetry** | Equal contributors get equal credit |
+| **Dummy** | Feature that never changes prediction → φ=0 |
+| **Additivity** | Ensemble SHAPs = weighted sum of individual SHAPs |
+
+</details>
+
+---
+
+### SHAP Explainers
+
+<details>
+<summary><b>SHAP Explainers</b> — Try to recall first</summary>
+
+| Explainer | Model Type | Speed | Exactness |
+|-----------|------------|-------|-----------|
+| **TreeExplainer** | XGBoost, RF, LGBM | Very fast | Exact |
+| **LinearExplainer** | Linear/Logistic | Instant | Exact |
+| **DeepExplainer** | Neural networks | Fast | Approx |
+| **KernelExplainer** | ANY model | Slow | Approx |
+
+</details>
+
+---
+
+### SHAP Visualizations
+
+<details>
+<summary><b>SHAP Visualizations</b> — Try to recall first</summary>
+
+| Plot | Scope | Purpose |
+|------|-------|---------|
+| **Waterfall / Force** | Local | Explain individual predictions |
+| **Summary Bar** | Global | Feature importance (mean |SHAP|) |
+| **Beeswarm** | Global | Direction + distribution of impact |
+| **Dependency** | Global | SHAP vs feature value (non-linearity) |
+
+</details>
+
+---
+
+### LIME vs SHAP
+
+<details>
+<summary><b>LIME vs SHAP</b> — Try to recall first</summary>
+
+| Aspect | LIME | SHAP |
+|--------|------|------|
+| Theoretical basis | Local linear approx (heuristic) | Game theory (Shapley values) |
+| Consistency | No — varies run-to-run | Yes |
+| Additivity | No | Yes (efficiency) |
+| Stability | Low | High |
+| Speed on trees | Slow | Fast (TreeExplainer) |
+
+**Rule of thumb:** Use SHAP by default; LIME for exotic custom models.
+
+</details>
+
+---
+
+### Error Analysis Workflow
+
+<details>
+<summary><b>Systematic Error Analysis Steps</b> — Try to recall first</summary>
+
+1. Separate correct vs errors (FP + FN)
+2. Slice by demographic, feature, time, class
+3. Quantify error rate per slice; flag significant gaps
+4. Diagnose — SHAP per slice, check labels, confusion patterns
+5. Fix — more data, new features, different threshold, or per-slice model
+6. Monitor — log errors per slice, alert on drift
+
+</details>
+
+---
+
+### Error Type Diagnosis
+
+<details>
+<summary><b>Error Types</b> — Try to recall first</summary>
+
+| Error Type | Cause | Fix |
+|------------|-------|-----|
+| **Label Noise** | Wrong labels | Clean labels, active learning |
+| **Spurious Correlation** | Learned shortcut (watermark, timestamp) | Remove feature, augment data |
+| **Under-represented Subgroup** | Small slice ignored | Oversample / collect more data |
+| **Distribution Shift** | Production data differs | Retrain on recent data |
+| **Ambiguous Ground Truth** | Experts disagree | Accept upper bound; ensemble |
+| **Feature Gap** | Missing key predictor | Feature engineering; new data source |
+
+</details>
+
+---
+
+### Counterfactual Explanations
+
+<details>
+<summary><b>Counterfactuals</b> — Try to recall first</summary>
+
+**Definition:** "What minimal change to the input would flip the model's prediction?"
+
+**Why useful:** Tells the user what to DO — actionable and regulatory-friendly (GDPR).
+
+**Example:** Denied (income=$45K, DTI=48%) → Approved if DTI=35% instead of 48%.
+
+</details>
+
+---
+
+### Production Monitoring Checklist
+
+<details>
+<summary><b>Production Monitoring</b> — Try to recall first</summary>
+
+| Action | Why |
+|--------|-----|
+| Log every prediction | Post-hoc analysis |
+| Monitor subgroup error rates | Fairness + fairness |
+| Track feature drift (PSI > 0.25 → alert) | Detect distribution shift |
+| Sample 20–50 errors for manual review | Catch patterns dashboards miss |
+| Version control everything | Know what changed |
+| Have a rollback plan | Instant recovery if v2 fails |
+
+</details>
+
+---
