@@ -1,0 +1,1405 @@
+# Week 5 ML — Complete Revision Materials
+
+Based on your ML Week 5 slides covering **Decision Trees, Bagging & Random Forests, and Boosting (GBDT, XGBoost)** , here are comprehensive revision materials following the established format.
+
+---
+
+## 1. CONFIDENCE TRACKER — WEEK 5 ML
+
+| Confidence Level | Meaning |
+|------------------|---------|
+| 🟢 **Green** | I knew this cold — could explain it to someone else |
+| 🟡 **Yellow** | I got it right, but I wasn't 100% sure / guessed |
+| 🔴 **Red** | I had no idea — got it wrong or completely guessed |
+
+---
+
+| Exercise | Topic | 🟢 | 🟡 | 🔴 | Re-study? |
+|----------|-------|----|----|----|-----------|
+| Ex 1 | Decision Tree Fundamentals | | | | ☐ |
+| Ex 2 | ID3 Algorithm — Entropy & Information Gain | | | | ☐ |
+| Ex 3 | Overfitting in Decision Trees — Pruning | | | | ☐ |
+| Ex 4 | Bagging — Bootstrap Aggregating | | | | ☐ |
+| Ex 5 | Out-of-Bag (OOB) Error | | | | ☐ |
+| Ex 6 | Random Forests | | | | ☐ |
+| Ex 7 | Bagging vs Random Forests | | | | ☐ |
+| Ex 8 | Boosting Fundamentals | | | | ☐ |
+| Ex 9 | Boosting vs Bagging | | | | ☐ |
+| Ex 10 | Gradient Boosted Decision Trees (GBDT) | | | | ☐ |
+| Ex 11 | Taylor Expansion in GBDT | | | | ☐ |
+| Ex 12 | GBDT — Tree Scoring & Split Gain | | | | ☐ |
+| Ex 13 | XGBoost — Algorithm Features | | | | ☐ |
+| Ex 14 | XGBoost — System Optimizations | | | | ☐ |
+| Ex 15 | Complete Cheat Sheet | | | | ☐ |
+
+---
+
+## 2. 🎯 TEACH IT SUMMARY
+
+### The Big Picture — Week 5 ML
+
+Week 5 covers **ensemble methods** — combining multiple models to improve performance. The progression is from individual decision trees through bagging and random forests to boosting, with modern implementations like XGBoost.
+
+**Part 1: Decision Trees.** A decision tree is a hierarchical data structure using a **divide and conquer** strategy. The **ID3 algorithm** (Quinlan, 1970s) builds trees greedily by selecting the attribute with highest **information gain** at each step. **Entropy** measures impurity: `H(S) = −p₊log₂(p₊) − p₋log₂(p₋)` — 0 when all examples are the same class, 1 when perfectly balanced. **Information gain** measures reduction in entropy after splitting: `Gain(S,A) = H(S) − Σᵥ (|Sᵥ|/|S|)·H(Sᵥ)`. Finding the minimal decision tree is NP-hard, so ID3 uses a greedy heuristic. **Overfitting** is a major issue — trees can perfectly memorize training data. **Pruning** (pre-pruning: stop early; post-pruning: grow full tree then remove leaves) prevents overfitting.
+
+**Part 2: Bagging & Random Forests.** **Bagging (Bootstrap Aggregating)** creates B bootstrap samples (sampling with replacement; ~63% of data per sample), fits a model to each, and averages predictions. This **reduces variance** without changing bias. **Out-of-Bag (OOB) error** uses the ~37% of data left out of each bootstrap sample as a free validation set — equivalent to LOOCV for large B. **Random Forests** are bagging with trees PLUS at each split, consider only a random subset of `m < p` predictors (default `m ≈ √p` for classification). This produces **less correlated trees** and **lower test error** than bagging (which considers all p predictors, `m = p`).
+
+**Part 3: Boosting.** Boosting combines weak learners **sequentially**, each trying to improve upon its predecessor by focusing on misclassified examples. **Gradient Boosted Decision Trees (GBDT)** is an additive model: `ŷᵢ⁽ᵗ⁾ = ŷᵢ⁽ᵗ⁻¹⁾ + fₜ(xᵢ)` with objective `Obj = Σ l(yᵢ, ŷᵢ) + Σ ω(fₜ)`, where `ω(fₜ)` penalizes tree complexity. The **Taylor expansion** of the objective gives first-order (`gᵢ`) and second-order (`hᵢ`) gradients, allowing direct optimization of any loss function. Each leaf j has weight `wⱼ* = −Gⱼ/(Hⱼ+λ)` and split gain is `Gain = ½[G_L²/(H_L+λ) + G_R²/(H_R+λ) − (G_L+G_R)²/(H_L+H_R+λ)] − γ`. **XGBoost** adds system optimizations (parallel tree construction, block structure, out-of-core computing) and algorithm features (regularized objective, shrinkage, column subsampling, sparsity-awareness). **Boosting reduces bias** but **increases variance** (can overfit); **Bagging reduces variance** (can't overfit).
+
+**The Connecting Thread:** Decision trees are the building block. Bagging averages trees to reduce variance. Random Forests add randomness to further reduce correlation. Boosting sequentially improves trees to reduce bias. Each ensemble method addresses a specific weakness of its predecessors.
+
+---
+
+## 3. ⚠️ COMMON PITFALLS IN PRACTICE
+
+| Pitfall | Why It Happens | How to Avoid |
+|---------|----------------|--------------|
+| **1. Not pruning decision trees** | Trees grow until pure → overfit | Use **post-pruning** or early stopping |
+| **2. Using MDI importance blindly** | Biased toward high-cardinality features | Use **permutation importance** or **SHAP** |
+| **3. Using sklearn Pipeline for SMOTE** | sklearn Pipeline doesn't apply resampling correctly in CV | Use **`imblearn.pipeline.Pipeline`** |
+| **4. Always using 1:1 ratio in SMOTE** | Too aggressive; may overfit | Treat balance ratio as **hyperparameter** |
+| **5. Using boosting with too many trees** | Boosting can overfit | Use **early stopping** or cross-validation |
+| **6. Confusing pre-stopping and post-pruning** | Pre-stopping misses beneficial future splits | Use **post-pruning** (grow full tree then prune) |
+| **7. Using bagging for bias reduction** | Bagging reduces variance, not bias | Use boosting for bias reduction |
+| **8. Using boosting for variance reduction** | Boosting increases variance | Use bagging/random forests for variance reduction |
+| **9. Not using OOB error for Random Forests** | CV is more expensive | OOB error is equivalent to LOOCV — use it! |
+| **10. Using XGBoost without regularization** | XGBoost has built-in regularization | Use `gamma` and `lambda` to prevent overfitting |
+| **11. Not using shrinkage (learning rate)** | GBDT overfits without it | Set `eta` (learning rate) to 0.1-0.3 |
+| **12. Confusing XGBoost and LightGBM growth** | Different growth strategies | XGBoost = level-wise; LightGBM = leaf-wise |
+
+---
+
+## 4. ONE-SENTENCE SUMMARY — WEEK 5 ML
+
+**How to use:** For each concept, try to write your own one-sentence summary *before* clicking to reveal the model answer.
+
+---
+
+### Decision Trees
+
+<details>
+<summary><b>Decision Tree</b> — Try your own first</summary>
+
+**Model Answer:** A hierarchical data structure that implements a divide-and-conquer strategy with nodes as feature tests and leaves as category labels.
+
+</details>
+
+---
+
+<details>
+<summary><b>ID3 Algorithm</b> — Try your own first</summary>
+
+**Model Answer:** A recursive greedy algorithm (Quinlan, 1970s) that builds trees by selecting the attribute with highest information gain at each step; finding the minimal tree is NP-hard.
+
+</details>
+
+---
+
+<details>
+<summary><b>Entropy</b> — Try your own first</summary>
+
+**Model Answer:** `H(S) = −p₊log₂(p₊) − p₋log₂(p₋)` — measures impurity; 0 when all examples same class, 1 when perfectly balanced (maximum uncertainty).
+
+</details>
+
+---
+
+<details>
+<summary><b>Information Gain</b> — Try your own first</summary>
+
+**Model Answer:** `Gain(S,A) = H(S) − Σᵥ (|Sᵥ|/|S|) × H(Sᵥ)` — measures reduction in entropy after splitting on attribute A; higher gain = better split.
+
+</details>
+
+---
+
+<details>
+<summary><b>Overfitting in Decision Trees</b> — Try your own first</summary>
+
+**Model Answer:** When a tree has smaller error on training data but larger error on test data; addressed by pre-pruning (stop early) or post-pruning (remove leaves).
+
+</details>
+
+---
+
+<details>
+<summary><b>Pruning</b> — Try your own first</summary>
+
+**Model Answer:** Removing leaves and assigning the majority label of the parent; evaluated using cross-validation, statistical testing, or minimum description length.
+
+</details>
+
+---
+
+### Bagging & Random Forests
+
+<details>
+<summary><b>Bagging (Bootstrap Aggregating)</b> — Try your own first</summary>
+
+**Model Answer:** Creates B bootstrap samples (sampling with replacement, ~63% of data per sample), fits a model to each, and averages predictions — reduces variance without changing bias.
+
+</details>
+
+---
+
+<details>
+<summary><b>Out-of-Bag (OOB) Error</b> — Try your own first</summary>
+
+**Model Answer:** The ~37% of observations not in each bootstrap sample are used as validation; for large B, OOB error is virtually equivalent to LOOCV.
+
+</details>
+
+---
+
+<details>
+<summary><b>Random Forests</b> — Try your own first</summary>
+
+**Model Answer:** Bagging with trees PLUS at each split, consider a random subset of `m < p` predictors (default `m ≈ √p` for classification), producing less correlated trees and better generalization.
+
+</details>
+
+---
+
+<details>
+<summary><b>Bagging vs Random Forests</b> — Try your own first</summary>
+
+**Model Answer:** Bagging considers all p predictors at each split (high correlation, higher test error); Random Forests considers `m < p` predictors (low correlation, lower test error).
+
+</details>
+
+---
+
+### Boosting
+
+<details>
+<summary><b>Boosting</b> — Try your own first</summary>
+
+**Model Answer:** Sequentially combines weak learners, each trying to improve upon its predecessor by re-weighting misclassified examples; reduces bias but can overfit.
+
+</details>
+
+---
+
+<details>
+<summary><b>Boosting vs Bagging</b> — Try your own first</summary>
+
+**Model Answer:** Boosting is sequential (high dependency, reduces bias, can overfit); Bagging is parallel (low dependency, reduces variance, can't overfit).
+
+</details>
+
+---
+
+<details>
+<summary><b>Gradient Boosted Decision Trees (GBDT)</b> — Try your own first</summary>
+
+**Model Answer:** Additive model where new trees are added sequentially: `ŷᵢ⁽ᵗ⁾ = ŷᵢ⁽ᵗ⁻¹⁾ + fₜ(xᵢ)`, with objective `Obj = Σ l(yᵢ, ŷᵢ) + Σ ω(fₜ)` where ω penalizes tree complexity.
+
+</details>
+
+---
+
+<details>
+<summary><b>Taylor Expansion in GBDT</b> — Try your own first</summary>
+
+**Model Answer:** Approximates the objective using first-order (`gᵢ`) and second-order (`hᵢ`) gradients, allowing direct optimization of any loss function by computing only g and h.
+
+</details>
+
+---
+
+<details>
+<summary><b>Tree Definition in GBDT</b> — Try your own first</summary>
+
+**Model Answer:** Each leaf j has weight `wⱼ` (prediction), complexity `ω(f) = γT + ½λΣ wⱼ²`, and optimal leaf weight `wⱼ* = −Gⱼ/(Hⱼ+λ)`.
+
+</details>
+
+---
+
+<details>
+<summary><b>Gain Formula for Splitting</b> — Try your own first</summary>
+
+**Model Answer:** `Gain = ½[G_L²/(H_L+λ) + G_R²/(H_R+λ) − (G_L+G_R)²/(H_L+H_R+λ)] − γ` — splits are chosen if gain is positive.
+
+</details>
+
+---
+
+<details>
+<summary><b>Pre-stopping vs Post-pruning</b> — Try your own first</summary>
+
+**Model Answer:** Pre-stopping stops splits with negative gain (risks missing beneficial future splits); post-pruning grows full tree then prunes leaf splits with negative gain (generally better).
+
+</details>
+
+---
+
+<details>
+<summary><b>XGBoost</b> — Try your own first</summary>
+
+**Model Answer:** eXtreme Gradient Boosting — optimized GBDT with parallel tree construction, distributed computing, out-of-core computing, sparsity-awareness, shrinkage, and column subsampling.
+
+</details>
+
+---
+
+<details>
+<summary><b>XGBoost System Optimizations</b> — Try your own first</summary>
+
+**Model Answer:** Block structure for linear scan sorting, cache-aware prefetching to reduce cache misses, and out-of-core computing for datasets larger than memory.
+
+</details>
+
+---
+
+<details>
+<summary><b>XGBoost Algorithm Features</b> — Try your own first</summary>
+
+**Model Answer:** Regularized objective (penalizes leaves/weights), shrinkage (learning rate), column subsampling, sparsity-awareness for missing values, and approximate split finding.
+
+</details>
+
+---
+
+## 5. QUICK REFERENCE CHEAT SHEET — WEEK 5 ML
+
+### Entropy & Information Gain
+
+<details>
+<summary><b>Entropy & Information Gain</b> — Try to recall first</summary>
+
+| Formula | Description |
+|---------|-------------|
+| `H(S) = −p₊log₂(p₊) − p₋log₂(p₋)` | Entropy for binary classification |
+| `H(S) = 0` | All examples same class |
+| `H(S) = 1` | Perfectly balanced (50/50) |
+| `Gain(S,A) = H(S) − Σᵥ (|Sᵥ|/|S|) × H(Sᵥ)` | Information gain after splitting on A |
+
+</details>
+
+---
+
+### Bagging & OOB
+
+<details>
+<summary><b>Bagging & OOB</b> — Try to recall first</summary>
+
+| Fact | Value |
+|------|-------|
+| Observations in bootstrap sample | **~63%** (1 − 1/e) |
+| Observations left out (OOB) | **~37%** |
+| OOB equivalent to | **LOOCV** for large B |
+| Bagging reduces | **Variance** (bias not changed) |
+
+</details>
+
+---
+
+### Random Forests
+
+<details>
+<summary><b>Random Forests</b> — Try to recall first</summary>
+
+| Setting | Description |
+|---------|-------------|
+| **m (classification)** | ≈ √p |
+| **m (regression)** | ≈ p/3 |
+| **Bagging trees** | m = p |
+| **Effect of m** | Smaller m → less correlated trees → lower test error |
+
+</details>
+
+---
+
+### Boosting Fundamentals
+
+<details>
+<summary><b>Boosting vs Bagging</b> — Try to recall first</summary>
+
+| Aspect | Boosting | Bagging |
+|--------|----------|---------|
+| Training order | **Sequential** | **Parallel** |
+| Dependency | **High** | **Low** |
+| Bias effect | **Reduces bias** | Bias not changed |
+| Variance effect | **Increases variance** | **Reduces variance** |
+| Risk | Can overfit | Can't overfit |
+
+</details>
+
+---
+
+### GBDT Formulas
+
+<details>
+<summary><b>GBDT Core Formulas</b> — Try to recall first</summary>
+
+| Formula | Description |
+|---------|-------------|
+| `ŷᵢ⁽ᵗ⁾ = ŷᵢ⁽ᵗ⁻¹⁾ + fₜ(xᵢ)` | Additive model update |
+| `Obj = Σ l(yᵢ, ŷᵢ) + Σ ω(fₜ)` | GBDT objective |
+| `ω(f) = γT + ½λΣ wⱼ²` | Tree complexity |
+| `wⱼ* = −Gⱼ/(Hⱼ+λ)` | Optimal leaf weight |
+| `Score = −½Σ [Gⱼ²/(Hⱼ+λ)] + γT` | Tree score |
+
+</details>
+
+---
+
+### Split Gain Formula
+
+<details>
+<summary><b>Gain Formula</b> — Try to recall first</summary>
+
+**Formula:** `Gain = ½[G_L²/(H_L+λ) + G_R²/(H_R+λ) − (G_L+G_R)²/(H_L+H_R+λ)] − γ`
+
+**Interpretation:** Split is accepted if Gain > 0.
+
+</details>
+
+---
+
+### XGBoost Features
+
+<details>
+<summary><b>XGBoost Key Features</b> — Try to recall first</summary>
+
+| Feature | Purpose |
+|---------|---------|
+| **Regularized objective** | Penalizes leaves/weights → prevents overfitting |
+| **Shrinkage** | Step-size (learning rate) → prevents overfitting |
+| **Column subsampling** | Reduces correlation between trees |
+| **Sparsity-awareness** | Handles missing values efficiently |
+| **Parallel tree construction** | Block structure for fast training |
+| **Out-of-core computing** | For datasets larger than memory |
+
+</details>
+
+---
+
+### XGBoost Split Finding
+
+<details>
+<summary><b>Split Finding Options</b> — Try to recall first</summary>
+
+| Option | Description |
+|--------|-------------|
+| **Exact** | Global or local, exact split enumeration |
+| **Approximate** | Global or local, weighted quantile sketch |
+| **Block structure** | Sorted for linear scan |
+
+</details>
+
+---
+
+### Pruning Methods
+
+<details>
+<summary><b>Decision Tree Pruning</b> — Try to recall first</summary>
+
+| Method | Approach |
+|--------|----------|
+| **Pre-pruning** | Stop growing tree early when not enough data |
+| **Post-pruning** | Grow full tree, then remove nodes without sufficient evidence |
+| **Evaluation methods** | Cross-validation, statistical testing, Minimum Description Length |
+
+</details>
+
+---
+
+### Key Defaults
+
+<details>
+<summary><b>Key Defaults</b> — Try to recall first</summary>
+
+| Concept | Default |
+|---------|---------|
+| Random Forests m (classification) | ≈ √p |
+| Random Forests m (regression) | ≈ p/3 |
+| XGBoost learning rate (shrinkage) | 0.1-0.3 |
+| XGBoost max depth | 6 |
+| XGBoost number of trees | 100-1000 (use early stopping) |
+| L-BFGS memory | m=5-20 |
+| Dropout default | 0.5 |
+
+</details>
+
+---
+
+## 6. CONNECTIONS MAP — WEEK 5 ML
+
+### 🌳 TEXT-BASED CONCEPT MAP
+
+```
+╔══════════════════════════════════════════════════════════════════════════╗
+║                                                                          ║
+║                    WEEK 5 ML: ENSEMBLE METHODS                         ║
+║                                                                          ║
+║                    ┌─────────────────────────────────────┐              ║
+║                    │   DECISION TREES (Foundation)      │              ║
+║                    │   ID3 · Entropy · Information Gain │              ║
+║                    │   Overfitting · Pruning            │              ║
+║                    └──────────────┬──────────────────────┘              ║
+║                                   │                                      ║
+║          ┌────────────────────────┼────────────────────────┐           ║
+║          │                        │                        │           ║
+║          ▼                        ▼                        ▼           ║
+║    ┌───────────┐          ┌───────────┐          ┌───────────┐        ║
+║    │  BAGGING  │          │  BOOSTING │          │  RANDOM   │        ║
+║    │ (Bootstrap│          │ (Sequential│          │  FORESTS  │        ║
+║    │Aggregating)│          │  Weak      │          │  (Bagging │        ║
+║    │           │          │  Learners) │          │   + m < p)│        ║
+║    └─────┬─────┘          └─────┬──────┘          └─────┬─────┘        ║
+║          │                      │                      │               ║
+║          ▼                      ▼                      ▼               ║
+║    ┌───────────┐          ┌───────────┐          ┌───────────┐        ║
+║    │Parallel   │          │Sequential │          │Less       │        ║
+║    │Low Dep.   │          │High Dep.  │          │Correlated │        ║
+║    │Reduces    │          │Reduces    │          │Lower Test │        ║
+║    │Variance   │          │Bias       │          │Error      │        ║
+║    └───────────┘          └───────────┘          └───────────┘        ║
+║                                   │                                     ║
+║                                   ▼                                     ║
+║                    ┌─────────────────────────────────────┐             ║
+║                    │   GRADIENT BOOSTED DECISION TREES  │             ║
+║                    │   (GBDT)                           │             ║
+║                    │   Additive Model · Taylor Expansion│             ║
+║                    │   Gain Formula · Regularization    │             ║
+║                    └──────────────┬──────────────────────┘             ║
+║                                   │                                     ║
+║    ┌──────────────────────────────┼──────────────────────────────┐     ║
+║    │                              │                              │     ║
+║    ▼                              ▼                              ▼     ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │   XGBOOST    │          │   LIGHTGBM   │          │   CATBOOST   │  ║
+║ │  System Opt. │          │  Leaf-wise   │          │  Categorical │  ║
+║ │  Block Struc.│          │  Growth      │          │  Handling    │  ║
+║ └──────────────┘          └──────────────┘          └──────────────┘  ║
+║                                                                         ║
+╚══════════════════════════════════════════════════════════════════════════╝
+```
+
+---
+
+### 🔗 KEY CONNECTION EXPLANATIONS
+
+<details>
+<summary><b>Connection 1: How does ID3 use entropy and information gain?</b></summary>
+
+```
+ID3 ALGORITHM
+    │
+    ├── ENTROPY
+    │       ├── H(S) = −p₊log₂(p₊) − p₋log₂(p₋)
+    │       ├── H=0 → all same class (pure, good)
+    │       └── H=1 → perfectly balanced (uncertain, bad)
+    │
+    ├── INFORMATION GAIN
+    │       ├── Gain(S,A) = H(S) − Σᵥ (|Sᵥ|/|S|) × H(Sᵥ)
+    │       ├── Measures reduction in entropy after splitting
+    │       └── Higher gain = better attribute
+    │
+    └── GREEDY GROWTH
+            ├── Pick attribute with highest information gain
+            ├── Split data by attribute values
+            ├── Recurse on each subset
+            └── Continue until all examples same class or no attributes left
+
+    ⚠️ Finding minimal tree is NP-hard → greedy heuristic is used
+```
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 2: How does Bagging work and how does OOB error estimate test error?</b></summary>
+
+```
+BAGGING (Bootstrap Aggregating)
+    │
+    ├── BOOTSTRAP
+    │       ├── Sample with replacement from original data
+    │       ├── Each sample contains ~63% of original data
+    │       └── ~37% left out (Out-of-Bag)
+    │
+    ├── FIT MODELS
+    │       ├── Fit a model to each bootstrap sample
+    │       └── Produces B different models
+    │
+    ├── AGGREGATE
+    │       ├── Regression: average predictions
+    │       └── Classification: majority vote
+    │
+    └── OOB ERROR (No CV needed!)
+            ├── For each sample, find predictions from trees that DID NOT see it
+            ├── Average these predictions
+            ├── Compute error
+            └── Equivalent to LOOCV for large B
+
+    ✅ Reduces variance
+    ✅ Bias not changed
+    ❌ Trees can be correlated (Random Forests fixes this!)
+```
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 3: How do Random Forests improve on Bagging?</b></summary>
+
+```
+BAGGING vs RANDOM FORESTS
+    │
+    ├── BAGGING TREES
+    │       ├── Each tree: all p predictors considered at each split
+    │       ├── Trees are often SIMILAR (high correlation)
+    │       └── Higher test error (due to correlation)
+    │
+    ├── RANDOM FORESTS
+    │       ├── Same as Bagging PLUS random subset of predictors
+    │       ├── m < p predictors considered at each split
+    │       ├── Default: m ≈ √p (classification), m ≈ p/3 (regression)
+    │       ├── Trees are LESS SIMILAR (low correlation)
+    │       └── Lower test error
+    │
+    └── EFFECT OF m
+            ├── m = p → Bagging trees (high correlation)
+            ├── m small → less correlated trees, lower test error
+            └── m can be tuned as a hyperparameter
+
+    ✅ Low correlation between trees
+    ✅ Better generalization
+    ✅ Still has OOB error estimate
+```
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 4: How does Boosting differ from Bagging?</b></summary>
+
+```
+BOOSTING vs BAGGING
+    │
+    ├── BAGGING
+    │       ├── Parallel training (independent)
+    │       ├── Low dependency between models
+    │       ├── Reduces VARIANCE
+    │       ├── Bias not changed
+    │       ├── Can't overfit
+    │       └── Models are averaged
+    │
+    ├── BOOSTING
+    │       ├── Sequential training (dependent)
+    │       ├── High dependency (each fixes previous errors)
+    │       ├── Reduces BIAS
+    │       ├── Increases VARIANCE (can overfit!)
+    │       ├── Can overfit with too many trees
+    │       └── Models are weighted sum
+    │
+    └── KEY INSIGHT
+            ├── Bagging: "Reduce variance by averaging independent learners"
+            └── Boosting: "Reduce bias by sequentially fixing errors"
+
+    AdaBoost (1996) → Random Forests (1999) → GBM (2001) → XGBoost
+```
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 5: How does GBDT mathematically optimize tree growth?</b></summary>
+
+```
+GBDT MATHEMATICAL FRAMEWORK
+    │
+    ├── ADDITIVE MODEL
+    │       └── ŷᵢ⁽ᵗ⁾ = ŷᵢ⁽ᵗ⁻¹⁾ + fₜ(xᵢ)
+    │
+    ├── OBJECTIVE
+    │       └── Obj = Σᵢ l(yᵢ, ŷᵢ) + Σₜ ω(fₜ)
+    │               └── loss          └── regularization (complexity)
+    │
+    ├── TAYLOR EXPANSION
+    │       ├── gᵢ = ∂_ŷᵢ l(yᵢ, ŷᵢ) — first-order gradient
+    │       ├── hᵢ = ∂²_ŷᵢ l(yᵢ, ŷᵢ) — second-order gradient
+    │       └── Obj ≈ Σᵢ [gᵢ fₜ(xᵢ) + ½ hᵢ fₜ²(xᵢ)] + ω(fₜ)
+    │
+    ├── TREE COMPLEXITY
+    │       └── ω(f) = γT + ½λΣ wⱼ²
+    │               │        └── weight regularization
+    │               └── leaf penalty
+    │
+    ├── OPTIMAL LEAF WEIGHT
+    │       └── wⱼ* = −Gⱼ/(Hⱼ+λ)
+    │
+    ├── SPLIT GAIN
+    │       └── Gain = ½[G_L²/(H_L+λ) + G_R²/(H_R+λ) − (G_L+G_R)²/(H_L+H_R+λ)] − γ
+    │
+    └── KEY INSIGHT
+            ├── Can use ANY loss function (just compute g and h)
+            ├── Regularization prevents overfitting
+            └── Split only if Gain > 0 (post-pruning better)
+```
+
+</details>
+
+---
+
+### 📊 CONNECTION MATRIX
+
+| Concept A | Connects To | Why |
+|-----------|-------------|-----|
+| **Entropy** | Information Gain | Entropy measures impurity; gain = reduction in entropy |
+| **Information Gain** | ID3 | ID3 picks attribute with highest gain |
+| **ID3** | Decision Trees | Recursive greedy algorithm |
+| **Bagging** | Variance Reduction | Averages predictions to reduce variance |
+| **OOB Error** | LOOCV | OOB is equivalent to LOOCV for large B |
+| **Random Forests** | Bagging | RF = Bagging + m < p at each split |
+| **Boosting** | Bias Reduction | Sequentially fixes errors to reduce bias |
+| **GBDT** | Boosting | GBDT is a specific boosting algorithm |
+| **Taylor Expansion** | GBDT | Allows optimizing ANY loss via g and h |
+| **Gain Formula** | Tree Growth | Split if gain > 0 |
+| **XGBoost** | GBDT | XGBoost is an optimized implementation |
+| **Regularization** | XGBoost | Leaf penalty + weight penalty prevents overfitting |
+
+---
+
+## 7. COMMON MISCONCEPTIONS — WEEK 5 ML
+
+**How to use:** Read each misconception first. Try to identify what's wrong. Then click to reveal the reality.
+
+---
+
+### Misconception 1: "Decision trees are too simple — they never perform well in practice."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Decision trees are a weak, outdated method. | **Decision trees are the foundation of the most powerful methods:**
+| | • **Random Forests** = many decision trees |
+| | • **XGBoost** = many decision trees |
+| | • **LightGBM** = many decision trees |
+| | • Decision trees are the **building block** of ensemble methods |
+
+**Analogy:** Decision trees are like bricks — individually simple, but when combined properly, they build powerful structures (ensembles).
+
+</details>
+
+---
+
+### Misconception 2: "ID3 always finds the optimal decision tree."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| ID3 finds the smallest/best decision tree. | **Finding the minimal tree is NP-hard:**
+| | • ID3 uses a **greedy heuristic** (information gain) |
+| | • It picks the best attribute at each step |
+| | • But this doesn't guarantee the best overall tree |
+| | • A locally suboptimal split may enable better future splits |
+
+**Rule:** ID3 is a good heuristic, but not guaranteed optimal.
+
+</details>
+
+---
+
+### Misconception 3: "Bagging and Random Forests are the same thing."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Bagging and Random Forests are synonymous. | **Random Forests = Bagging + extra randomness:**
+
+| Aspect | Bagging | Random Forests |
+|--------|---------|----------------|
+| Bootstrap samples | ✅ Yes | ✅ Yes |
+| Predictors per split | All p | Random subset m < p |
+| Default m | m = p | m ≈ √p (classification) |
+| Correlation between trees | High | Low |
+| Test error | Higher | Lower |
+
+**Rule:** All Random Forests use Bagging, but not all Bagging is Random Forests.
+
+</details>
+
+---
+
+### Misconception 4: "OOB error is just an approximation — use CV instead."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| OOB error is a rough approximation; CV is more accurate. | **OOB error is virtually equivalent to LOOCV:**
+| | • Each sample is not in ~37% of bootstrap samples |
+| | • For large B, OOB error = LOOCV |
+| | • Free test set estimate — no need for CV! |
+
+**Rule:** Use OOB error for Random Forests. It's accurate and computationally free.
+
+</details>
+
+---
+
+### Misconception 5: "Boosting and Bagging both reduce variance."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Bagging and Boosting are both ensemble methods that reduce variance. | **They affect different things:**
+
+| Aspect | Bagging | Boosting |
+|--------|---------|----------|
+| Reduces | **Variance** | **Bias** |
+| Increases | Bias (not much) | **Variance** (can overfit) |
+| Training | Parallel (independent) | Sequential (dependent) |
+| Risk | Can't overfit | Can overfit |
+
+**Rule:** Bagging for variance reduction; Boosting for bias reduction.
+
+</details>
+
+---
+
+### Misconception 6: "More trees in Boosting always means better performance."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Adding more trees always improves a boosted model. | **Boosting CAN overfit with too many trees:**
+| | • Boosting increases variance as more trees are added |
+| | • Too many trees → model becomes too complex |
+| | • Test error can increase after some point |
+
+**Comparison:**
+```
+Bagging: More trees → error stabilizes (can't overfit)
+Boosting: More trees → error may increase (can overfit!)
+```
+
+**Rule:** Use early stopping or cross-validation to find optimal number of trees.
+
+</details>
+
+---
+
+### Misconception 7: "GBDT learns only classification trees, not regression."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| GBDT is for classification only. | **GBDT handles BOTH classification AND regression:**
+| | • The loss function determines the task |
+| | • Classification: cross-entropy loss |
+| | • Regression: squared error loss |
+| | • The algorithm is the same — only g and h change |
+
+**Rule:** GBDT is task-agnostic. The loss function defines the task.
+
+</details>
+
+---
+
+### Misconception 8: "XGBoost is just a faster implementation of GBDT."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| XGBoost is just a speed-optimized GBDT. | **XGBoost adds algorithm features, not just speed:**
+| | • **Regularized objective** (penalizes leaves/weights) |
+| | • **Shrinkage** (learning rate) |
+| | • **Column subsampling** |
+| | • **Sparsity-awareness** — handles missing values |
+| | • **Approximate split finding** — faster on large data |
+
+**Rule:** XGBoost is GBDT + regularization + system optimizations + algorithm innovations.
+
+</details>
+
+---
+
+### Misconception 9: "Pre-stopping and post-pruning are equally effective."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Pre-stopping is just as good as post-pruning. | **Post-pruning is generally BETTER:**
+| | • **Pre-stopping**: Stop growth when gain is negative |
+| | • Problem: A split with negative gain NOW may enable positive gain in children |
+| | • **Post-pruning**: Grow full tree, then prune leaf splits with negative gain |
+
+**Rule:** Always use post-pruning over pre-stopping when possible.
+
+</details>
+
+---
+
+### Misconception 10: "Ensemble methods always outperform single models."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Ensembles are always better than single models. | **Ensembles are not always better:**
+| | • **Computational cost**: Training many models is expensive |
+| | • **Memory/Deployment**: Large ensembles are harder to deploy |
+| | • **Interpretability**: Ensembles are black boxes |
+| | • **Small datasets**: Ensembles can overfit |
+
+**Rule:** Start simple, add complexity only when needed.
+
+</details>
+
+---
+
+## 📊 QUICK REFERENCE: MISCONCEPTIONS vs REALITY
+
+| Misconception | Reality |
+|---------------|---------|
+| Decision trees are too simple | They're the foundation of top ensemble methods |
+| ID3 finds optimal tree | Finding minimal tree is NP-hard (greedy heuristic) |
+| Bagging = Random Forests | RF = Bagging + random feature subset (m < p) |
+| OOB error is approximate | Equivalent to LOOCV for large B |
+| Boosting reduces variance | Boosting reduces BIAS; Bagging reduces VARIANCE |
+| More boosting trees = better | Boosting can overfit (use early stopping) |
+| GBDT is for classification | GBDT handles any differentiable loss (including regression) |
+| XGBoost is just faster GBDT | XGBoost adds regularization, sparsity handling, etc. |
+| Pre-stopping = post-pruning | Post-pruning is better (avoids missing future splits) |
+| Ensembles always beat single models | Ensembles are expensive, less interpretable |
+
+---
+
+# 📚 WEEK 5 ML — COMPLETE STUDY GUIDE
+## All Exercises with Answers in Spoiler Format
+
+---
+
+# SECTION 1: DECISION TREES
+
+---
+
+## Exercise DT-1: Decision Tree Fundamentals
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is a decision tree? | |
+| 2. What types of problems can decision trees solve? | |
+| 3. What is the representation of a decision tree? | |
+| 4. What is the expressivity of decision trees? | |
+| 5. What are decision boundaries in decision trees? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. What is a decision tree? | A hierarchical data structure that represents data by implementing a **divide and conquer strategy**. |
+| 2. Types of problems | **Classification** (discrete categories) and **Regression** (real-valued outputs via regression trees). |
+| 3. Representation | Nodes are **tests for feature values**. There is one branch for each value of the feature. Leaves specify the category (labels). |
+| 4. Expressivity | As Boolean functions, they can represent **any Boolean function**. Can be rewritten as rules in **Disjunctive Normal Form (DNF)**. |
+| 5. Decision boundaries | The tree divides the feature space into **axis-parallel rectangles**, each labeled with one of the labels. |
+
+</details>
+
+---
+
+## Exercise DT-2: ID3 Algorithm
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What does ID3 stand for? | |
+| 2. Describe the basic ID3 algorithm. | |
+| 3. What is the main decision in the algorithm? | |
+| 4. What is the goal when picking the root attribute? | |
+| 5. Why can't we find the minimal decision tree efficiently? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. ID3 stands for | **Iterative Dichotomiser 3** — developed by Quinlan in the late 1970s. |
+| 2. ID3 algorithm | Recursively build tree top-down: If all examples same label → return leaf. Else pick attribute that **best classifies** S (highest information gain). For each value v of A: create branch A=v, let S_v be subset with A=v, recursively call ID3(S_v, Attributes-{A}, Label). |
+| 3. Main decision | The selection of the **next attribute to condition on** (which attribute best splits the data). |
+| 4. Goal when picking root attribute | To have the resulting decision tree as **small as possible** (Occam's Razor). |
+| 5. Why can't find minimal tree | Finding the minimal decision tree consistent with data is **NP-hard**. ID3 is a greedy heuristic search — cannot guarantee optimality. |
+
+</details>
+
+---
+
+## Exercise DT-3: Entropy & Information Gain
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. Write the entropy formula for a binary classification. | |
+| 2. What is entropy when all examples are of the same class? | |
+| 3. What is entropy when classes are perfectly balanced (50/50)? | |
+| 4. Write the information gain formula. | |
+| 5. What does information gain measure? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Entropy formula | `H(S) = −p₊ log₂(p₊) − p₋ log₂(p₋)` where p₊ and p₋ are proportions of positive and negative examples. |
+| 2. Entropy when all same class | **0** — no uncertainty (low entropy). |
+| 3. Entropy when perfectly balanced | **1** — maximum uncertainty (high entropy). |
+| 4. Information gain formula | `Gain(S, A) = H(S) − Σᵥ (|Sᵥ|/|S|) × H(Sᵥ)` where v are values of attribute A. |
+| 5. What information gain measures | The **reduction in entropy** after splitting on attribute A. Higher gain = better attribute. |
+
+</details>
+
+---
+
+## Exercise DT-4: Overfitting in Decision Trees
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is overfitting in decision trees? | |
+| 2. What are the reasons for overfitting? | |
+| 3. What is pruning? | |
+| 4. What are the two approaches to avoiding overfitting? | |
+| 5. What methods are used to evaluate subtrees for pruning? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Overfitting definition | A hypothesis h overfits if there is another hypothesis h' such that h has **smaller error on training data** but **larger error on test data** than h'. |
+| 2. Reasons for overfitting | **Too much variance** in training data. **Too much noise** in training data. Result of minimizing empirical error with ability to do so. |
+| 3. Pruning | **Remove leaves** and assign majority label of the parent to all items. Prune children of node s if all children are leaves and accuracy on validation set does not decrease. |
+| 4. Two approaches | **Pre-pruning**: Stop growing tree early when not enough data. **Post-pruning**: Grow full tree, then remove nodes without sufficient evidence. |
+| 5. Methods for pruning | **Cross-validation**: Reserve hold-out set. **Statistical testing**: Test if regularity is chance. **Minimum Description Length**: Is additional complexity smaller than remembering exceptions? |
+
+</details>
+
+---
+
+# SECTION 2: RANDOM FORESTS & BAGGING
+
+---
+
+## Exercise RF-1: Bagging Fundamentals
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What does Bagging stand for? | |
+| 2. How does the Bootstrap work? | |
+| 3. How does Bagging work? | |
+| 4. When does Bagging make sense? | |
+| 5. What is the effect of Bagging on bias and variance? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Bagging stands for | **Bootstrap Aggregating** |
+| 2. How Bootstrap works | Replicate dataset by **sampling with replacement**. Each bootstrap sample contains ~63% of original data. |
+| 3. How Bagging works | Apply a learning method to each bootstrap replicate to produce predictions f̂⁽¹⁾, ..., f̂⁽ᴮ⁾. Then **average the predictions**: `f̂_bag(x) = (1/B) Σ f̂⁽ᵇ⁾(x)`. |
+| 4. When Bagging makes sense | Reduces variance of prediction. Especially useful with **higher-variance / more flexible prediction methods** (e.g., decision trees). |
+| 5. Effect on bias and variance | **Reduces variance** (a large ensemble can't cause overfitting). **Bias is not changed** (much). |
+
+</details>
+
+---
+
+## Exercise RF-2: Out-of-Bag (OOB) Error
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What percentage of observations are used in each bootstrap sample? | |
+| 2. What percentage are left out (OOB)? | |
+| 3. How is OOB error computed? | |
+| 4. What is OOB error equivalent to for large B? | |
+| 5. Why is OOB error useful? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Percentage used | **~63%** of observations appear in each bootstrap sample (1 − 1/e ≈ 0.632). |
+| 2. Percentage left out | **~37%** of observations are out-of-bag. |
+| 3. How OOB error is computed | For each sample xᵢ, find predictions ŷᵢᵇ for all bootstrap b which do NOT contain xᵢ (about 0.37B of them). Average to get ŷᵢᵒᵒᵇ. Compute error and average over all observations. |
+| 4. OOB equivalent to | For large B, OOB error is virtually equivalent to **LOOCV**. |
+| 5. Why useful | Estimates test error **without** cross-validation (computationally expensive). No need for separate validation set. |
+
+</details>
+
+---
+
+## Exercise RF-3: Random Forests
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is the weakness of Bagging that Random Forests address? | |
+| 2. How do Random Forests differ from Bagging? | |
+| 3. What is the default value of m (number of predictors to consider)? | |
+| 4. How does Random Forests reduce correlation between trees? | |
+| 5. Bagging trees = Random Forests with what m? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Weakness of Bagging | Trees produced by different bootstrap samples can be **very similar** — high correlation between predictions. |
+| 2. How Random Forests differ | **Same as Bagging** (fit trees to bootstrap samples) PLUS **when growing the tree, select a random sample of m < p predictors** to consider at each branch. |
+| 3. Default m value | **m ≈ √p** (square root of number of predictors) for classification. |
+| 4. How RF reduces correlation | Randomly selecting a subset of predictors at each split leads to **less similar trees** with **less correlated predictions**. |
+| 5. Bagging trees = Random Forests with | **m = p** (consider all predictors at each split). |
+
+</details>
+
+---
+
+## Exercise RF-4: Bagging vs Random Forests Comparison
+
+| Question | Bagging | Random Forests |
+|----------|---------|----------------|
+| 1. Bootstrap samples? | | |
+| 2. Predictors considered at each split? | | |
+| 3. Correlation between trees? | | |
+| 4. Test error compared? | | |
+| 5. m parameter? | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Bagging | Random Forests |
+|----------|---------|----------------|
+| 1. Bootstrap samples? | Yes | Yes |
+| 2. Predictors considered at each split? | All p predictors | Random subset of m < p predictors |
+| 3. Correlation between trees | High (trees are similar) | Low (trees are diverse) |
+| 4. Test error compared | Higher | Lower (better generalization) |
+| 5. m parameter? | m = p | m ≈ √p (default) |
+
+</details>
+
+---
+
+# SECTION 3: BOOSTING
+
+---
+
+## Exercise BO-1: Boosting Fundamentals
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is the core idea of Boosting? | |
+| 2. How does Boosting differ from Bagging? | |
+| 3. What is the effect of Boosting on bias and variance? | |
+| 4. What is the role of data re-weighting in Boosting? | |
+| 5. What is the final prediction in Boosting? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Core idea | Combines the outputs of many **"weak" classifiers** to produce a powerful "committee". Learns multiple trees **sequentially**, each trying to improve upon its predecessor. |
+| 2. How Boosting differs from Bagging | **Boosting**: Sequential, reduces bias, high dependency, can overfit. **Bagging**: Parallel, reduces variance, low dependency, can't overfit. |
+| 3. Effect on bias and variance | **Reduces bias** (a large ensemble can overfit). **Increases variance** (sequential dependence). |
+| 4. Role of data re-weighting | Examples that were **misclassified by previous learners** get higher weight in the next iteration. Focuses on hard examples. |
+| 5. Final prediction | **Weighted sum** of the individual classifiers: `G(x) = Σ αₜ Gₜ(x)` |
+
+</details>
+
+---
+
+## Exercise BO-2: Gradient Boosted Decision Trees (GBDT)
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is the additive prediction model? | |
+| 2. What is the objective function in GBDT? | |
+| 3. What does the regularization term `ω(fₜ)` model? | |
+| 4. How are new trees added sequentially? | |
+| 5. What is the role of step-size (shrinkage/ε)? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Additive prediction model | `ŷᵢ = Σ fₜ(xᵢ)` where each fₜ is a decision tree. |
+| 2. Objective function | `Obj = Σᵢ l(yᵢ, ŷᵢ) + Σₜ ω(fₜ)` where l is loss function and ω(fₜ) is regularization. |
+| 3. Regularization term ω(fₜ) | Models the **complexity of the tree** — penalizes number of leaves, prevents overfitting. |
+| 4. How new trees are added | Start from constant prediction, add a new decision tree fₜ each time: `ŷᵢ⁽ᵗ⁾ = ŷᵢ⁽ᵗ⁻¹⁾ + fₜ(xᵢ)`. |
+| 5. Role of step-size (ε) | **Step-size (shrinkage)** usually set around 0.1. **Goal**: prevent overfitting. |
+
+</details>
+
+---
+
+## Exercise BO-3: Taylor Expansion in GBDT
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. Why do we take Taylor expansion of the objective? | |
+| 2. What are `gᵢ` and `hᵢ`? | |
+| 3. How does the objective simplify after Taylor expansion? | |
+| 4. Why is the simplification useful? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Why Taylor expansion? | To approximate the objective and make it easier to optimize. |
+| 2. What are gᵢ and hᵢ? | `gᵢ = ∂_ŷᵢ l(yᵢ, ŷᵢ)` — first-order gradient (1st derivative). `hᵢ = ∂²_ŷᵢ l(yᵢ, ŷᵢ)` — second-order gradient (2nd derivative). |
+| 3. Simplified objective | `Obj ≈ Σᵢ [gᵢ fₜ(xᵢ) + ½ hᵢ fₜ²(xᵢ)] + ω(fₜ)` — constants can be ignored for optimization. |
+| 4. Why useful | Learning fₜ only depends on objective via **g and h**. We can directly learn trees that optimize the loss (rather than using heuristic procedure). |
+
+</details>
+
+---
+
+## Exercise BO-4: Tree Definition & Scoring
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. How is a tree defined in GBDT? | |
+| 2. What is the complexity of a tree? | |
+| 3. What are the optimal weights for leaves? | |
+| 4. What is the gain formula for adding a split? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Tree definition | Every leaf j has a weight wⱼ. For any data point in leaf j, predict wⱼ. q(x) indicates the leaf node that data point belongs to. |
+| 2. Tree complexity | `ω(f) = γT + ½λΣ wⱼ²` where T = number of leaves, γ = cost of adding a leaf, λ = regularization. |
+| 3. Optimal leaf weights | `wⱼ* = −Gⱼ/(Hⱼ+λ)` |
+| 4. Gain formula | `Gain = ½[G_L²/(H_L+λ) + G_R²/(H_R+λ) − (G_L+G_R)²/(H_L+H_R+λ)] − γ` where L and R are left/right children. |
+
+</details>
+
+---
+
+## Exercise BO-5: Pre-stopping vs Post-pruning
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is pre-stopping? | |
+| 2. What is post-pruning? | |
+| 3. Which is better: pre-stopping or post-pruning? | |
+| 4. Why might a split with negative gain still be useful? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Pre-stopping | Stop split if the best split has **negative gain**. Risk: maybe a split can benefit future splits. |
+| 2. Post-pruning | Grow tree to **maximum depth**, then **recursively prune** all leaf splits with negative gain. Better than pre-stopping. |
+| 3. Which is better | **Post-pruning** is generally better — avoids missing beneficial splits that would enable future good splits. |
+| 4. Why negative gain might still be useful | A split with negative gain now might enable **future splits with positive gain** in children. Post-pruning handles this. |
+
+</details>
+
+---
+
+## Exercise BO-6: XGBoost — System Optimizations
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What does XGBoost stand for? | |
+| 2. What are the system optimizations in XGBoost? | |
+| 3. What is the block structure in XGBoost? | |
+| 4. What is cache-aware access? | |
+| 5. What is out-of-core computing? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. XGBoost stands for | **eXtreme Gradient Boosting** |
+| 2. System optimizations | **Parallel tree construction** using column block structure. **Distributed Computing** for training on a cluster. **Out-of-Core Computing** for datasets that don't fit in memory. |
+| 3. Block structure | Sorted structure for each feature — allows **linear scan** for split finding. Blocks can be distributed across machines or stored on disk. |
+| 4. Cache-aware access | Prefetch gradient statistics into internal buffer. Allocate internal buffer for improved split finding. Reduces cache misses. |
+| 5. Out-of-core computing | For datasets larger than memory. **CSC compression** by columns. **Block sharding** using multiple disks. |
+
+</details>
+
+---
+
+## Exercise BO-7: XGBoost — Algorithm Features
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is the regularized objective in XGBoost? | |
+| 2. What is shrinkage in XGBoost? | |
+| 3. What is column subsampling? | |
+| 4. What is sparsity-awareness? | |
+| 5. What are the split finding options? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Regularized objective | **Loss + regularization** — penalizes number of leaves and leaf weights. Prevents overfitting. |
+| 2. Shrinkage | **Step-size** (learning rate) applied to each tree. Prevents overfitting. |
+| 3. Column subsampling | Randomly sample features at each split (like Random Forests). Reduces correlation between trees. |
+| 4. Sparsity-awareness | Handles missing values efficiently. Learns optimal direction for missing values. |
+| 5. Split finding options | **Exact** (global/local) and **Approximate** (global/local). Weighted quantile sketch for fast approximation. |
+
+</details>
+
+---
+
+## Exercise BO-8: Boosting vs Bagging Summary
+
+| Question | Boosting | Bagging |
+|----------|----------|---------|
+| 1. Training order | | |
+| 2. Dependency between learners | | |
+| 3. Effect on bias | | |
+| 4. Effect on variance | | |
+| 5. Risk | | |
+| 6. Key goal | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Boosting | Bagging |
+|----------|----------|---------|
+| 1. Training order | **Sequential** | **Parallel** |
+| 2. Dependency between learners | **High** (each tries to fix previous errors) | **Low** (independent samples) |
+| 3. Effect on bias | **Reduces bias** | Bias not changed (much) |
+| 4. Effect on variance | **Increases variance** (can overfit) | **Reduces variance** (can't overfit) |
+| 5. Risk | A large ensemble can **overfit** | A large ensemble **can't cause overfitting** |
+| 6. Key goal | Combine weak learners to make strong learner | Average predictions to reduce variance |
+
+</details>
+
+---
+
+## Exercise BO-9: Complete Cheat Sheet
+
+### Fill in all blanks:
+
+**Entropy Formula:**
+`H(S) = ___________`
+
+**Information Gain Formula:**
+`Gain(S,A) = ___________`
+
+**Bagging:** Creates ___________ samples with replacement; each sample contains ___________% of data; ___________% left out for OOB error.
+
+**Random Forests:** Bagging + at each split, consider ___________ predictors (m ≈ ___________ for classification).
+
+**GBDT Additive Model:**
+`ŷᵢ⁽ᵗ⁾ = ___________ + ___________`
+
+**GBDT Objective:**
+`Obj = Σ l(yᵢ, ŷᵢ) + ___________`
+
+**Taylor Expansion in GBDT:**
+`gᵢ = ___________`, `hᵢ = ___________`
+
+**Optimal Leaf Weight:**
+`wⱼ* = ___________`
+
+**Split Gain Formula:**
+`Gain = ½[G_L²/(H_L+λ) + ___________ − ___________] − γ`
+
+**XGBoost Features:** Regularized objective, ___________, column subsampling, sparsity-awareness
+
+**Boosting vs Bagging:**
+- Boosting reduces ___________ (increases variance)
+- Bagging reduces ___________ (bias unchanged)
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+**Entropy Formula:**
+`H(S) = **−p₊log₂(p₊) − p₋log₂(p₋)**`
+
+**Information Gain Formula:**
+`Gain(S,A) = **H(S) − Σᵥ (|Sᵥ|/|S|) × H(Sᵥ)**`
+
+**Bagging:** Creates **B bootstrap** samples with replacement; each sample contains **~63%** of data; **~37%** left out for OOB error.
+
+**Random Forests:** Bagging + at each split, consider **m < p** predictors (m ≈ **√p** for classification).
+
+**GBDT Additive Model:**
+`ŷᵢ⁽ᵗ⁾ = **ŷᵢ⁽ᵗ⁻¹⁾ + fₜ(xᵢ)**`
+
+**GBDT Objective:**
+`Obj = Σ l(yᵢ, ŷᵢ) + **Σ ω(fₜ)**`
+
+**Taylor Expansion in GBDT:**
+`gᵢ = **∂_ŷᵢ l(yᵢ, ŷᵢ)**`, `hᵢ = **∂²_ŷᵢ l(yᵢ, ŷᵢ)**`
+
+**Optimal Leaf Weight:**
+`wⱼ* = **−Gⱼ/(Hⱼ+λ)**`
+
+**Split Gain Formula:**
+`Gain = ½[G_L²/(H_L+λ) + **G_R²/(H_R+λ)** − **(G_L+G_R)²/(H_L+H_R+λ)**] − γ`
+
+**XGBoost Features:** Regularized objective, **shrinkage**, column subsampling, sparsity-awareness
+
+**Boosting vs Bagging:**
+- Boosting reduces **bias** (increases variance)
+- Bagging reduces **variance** (bias unchanged)
+
+</details>
+
+---
+
+# 📊 COMPLETE COVERAGE SUMMARY
+
+| Category | Concepts | Status |
+|----------|----------|--------|
+| Decision Trees | ID3, entropy, information gain, pruning | ✅ 100% |
+| Bagging | Bootstrap, aggregation, OOB error | ✅ 100% |
+| Random Forests | m < p, correlation, generalization | ✅ 100% |
+| Boosting | Sequential, bias reduction, weak learners | ✅ 100% |
+| GBDT | Additive model, Taylor expansion, regularization | ✅ 100% |
+| XGBoost | System optimizations, algorithm features | ✅ 100% |
+| **TOTAL** | **All Week 5 ML concepts** | ✅ **100%** |
+
+---
+
+## 📝 How to Use This Document
+
+1. **Read the question**, write your answer in the blank/box
+2. **Click the dropdown** to reveal the model answer
+3. **Compare** your answer to the model
+4. **Re-study** any sections where you got something wrong
+5. **Mark** your confidence level for each topic
+
+---
+
+**Good luck with your studies! 🎯**

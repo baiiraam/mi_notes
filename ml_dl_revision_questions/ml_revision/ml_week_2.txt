@@ -1,0 +1,1670 @@
+# Week 2 ML — Complete Revision Materials
+
+Based on your ML Week 2 slides covering **Linear Regression, Regularization & Tuning, and Logistic Regression & Naive Bayes**, here are comprehensive revision materials following the established format.
+
+---
+
+## 1. CONFIDENCE TRACKER — WEEK 2 ML
+
+| Confidence Level | Meaning |
+|------------------|---------|
+| 🟢 **Green** | I knew this cold — could explain it to someone else |
+| 🟡 **Yellow** | I got it right, but I wasn't 100% sure / guessed |
+| 🔴 **Red** | I had no idea — got it wrong or completely guessed |
+
+---
+
+| Exercise | Topic | 🟢 | 🟡 | 🔴 | Re-study? |
+|----------|-------|----|----|----|-----------|
+| Ex 1 | Linear Model Fundamentals | | | | ☐ |
+| Ex 2 | Normal Equations & OLS Solution | | | | ☐ |
+| Ex 3 | Geometric Interpretation of OLS | | | | ☐ |
+| Ex 4 | Probabilistic Interpretation & MLE | | | | ☐ |
+| Ex 5 | Gauss-Markov Theorem | | | | ☐ |
+| Ex 6 | Polynomial Regression & Feature Expansion | | | | ☐ |
+| Ex 7 | Bias-Variance Tradeoff | | | | ☐ |
+| Ex 8 | Model Selection via Cross-Validation | | | | ☐ |
+| Ex 9 | Regularization — Ridge (L2), Lasso (L1), ElasticNet | | | | ☐ |
+| Ex 10 | Parameters vs Hyperparameters | | | | ☐ |
+| Ex 11 | Grid Search vs Random Search | | | | ☐ |
+| Ex 12 | Nested Cross-Validation | | | | ☐ |
+| Ex 13 | Learning Curves — Diagnosis | | | | ☐ |
+| Ex 14 | Logistic Regression Fundamentals | | | | ☐ |
+| Ex 15 | Training Logistic Regression | | | | ☐ |
+| Ex 16 | Interpreting Logistic Regression Coefficients | | | | ☐ |
+| Ex 17 | Multiclass Logistic Regression | | | | ☐ |
+| Ex 18 | Thresholds & Decision Making | | | | ☐ |
+| Ex 19 | ROC Curve & AUC | | | | ☐ |
+| Ex 20 | Discriminative vs Generative Models | | | | ☐ |
+| Ex 21 | Naive Bayes — Bayes' Rule & "Naive" Assumption | | | | ☐ |
+| Ex 22 | Naive Bayes Variants | | | | ☐ |
+| Ex 23 | Multinomial Naive Bayes for Text | | | | ☐ |
+| Ex 24 | Laplace Smoothing | | | | ☐ |
+| Ex 25 | Logistic Regression vs Naive Bayes | | | | ☐ |
+| Ex 26 | Text Classification Pipeline & TF-IDF | | | | ☐ |
+| Ex 27 | Leakage Avoidance in Text Classification | | | | ☐ |
+| Ex 28 | Complete Cheat Sheet | | | | ☐ |
+
+---
+
+## 2. 🎯 TEACH IT SUMMARY
+
+### The Big Picture — Week 2 ML
+
+Week 2 covers the **core linear models** of machine learning — from the simplest regression through regularization to classification, and the probabilistic foundations behind them.
+
+**Part 1: Linear Regression.** The simplest and most interpretable model: `ŷ = wᵀx + b`. The **algebraic view** minimizes Mean Squared Error (MSE) via the **normal equations** `w* = (XᵀX)⁻¹Xᵀy` — a closed-form solution, but fails when `XᵀX` is not invertible. The **geometric view** sees `ŷ` as the projection of `y` onto the column space of `X`, with residuals perpendicular to every feature. The **probabilistic view** assumes Gaussian noise `ε ∼ N(0, σ²)`, and MLE of `w` is exactly least squares. The **Gauss-Markov theorem** guarantees OLS is the Best Linear Unbiased Estimator (BLUE) under classical assumptions. **Polynomial regression** extends linear models via feature expansion `φ(x) = [1, x, x², ...]` — still linear in parameters `w`, so the normal equations still apply. The **bias-variance tradeoff** controls model complexity: as polynomial degree increases, bias falls but variance rises; cross-validation finds the sweet spot.
+
+**Part 2: Regularization & Tuning.** Regularization adds a penalty to the loss to prevent overfitting: `Loss(w) + λ·Penalty(w)`. **Ridge (L2)** shrinks coefficients smoothly toward zero (`λ·||w||₂²`) — useful for correlated features. **Lasso (L1)** can set coefficients exactly to zero (`λ·||w||₁`) — automatic feature selection. **ElasticNet** combines both. Parameters (weights) are learned; hyperparameters (α, λ, degree) are chosen via validation. **Grid search** exhaustively tries combinations; **random search** samples random values and is often more efficient. **Cross-validation** inside hyperparameter search prevents overfitting to one validation split. **Nested CV** gives an unbiased estimate of the entire model-selection procedure. **Learning curves** diagnose bias (both errors high) vs variance (train low, val high) vs data-limited (val still rising) vs noise-limited (both plateau).
+
+**Part 3: Logistic Regression & Naive Bayes.** Logistic regression is a **classifier**, despite the name: `p(y=1|x) = σ(wᵀx+b) = 1/(1+e⁻⁽wᵀx+b⁾)`. Training uses **binary cross-entropy** (derived from MLE under Bernoulli distribution). Coefficients are linear effects on **log-odds** (`log(p/(1-p)) = wᵀx+b`), not probabilities directly. For multiclass, use **One-vs-Rest** or **Softmax**. **Naive Bayes** is a **generative** classifier: it models `P(x|y)` and `P(y)`, then applies Bayes' rule. The "naive" assumption is **conditional independence** given the class: `P(x₁, ..., x_d|y) = Π P(xⱼ|y)` — often false but works surprisingly well. **Multinomial Naive Bayes** is the standard baseline for text classification, with **Laplace smoothing** to handle unseen words. **Logistic regression** is discriminative (models `P(y|x)`), while **Naive Bayes** is generative (models `P(x|y)`). They have different assumptions and strengths; try both as baselines on text problems.
+
+**The Connecting Thread:** Linear regression is the foundation — regularization extends it to high-dimensional settings, logistic regression adapts it to classification, and Naive Bayes offers a probabilistic alternative. All are linear models with different assumptions about the data-generating process.
+
+---
+
+## 3. ⚠️ COMMON PITFALLS IN PRACTICE
+
+| Pitfall | Why It Happens | How to Avoid |
+|---------|----------------|--------------|
+| **1. Forgetting to scale features for regularization** | L1/L2 penalties act on coefficients, not feature scales | Use `StandardScaler` inside a Pipeline |
+| **2. Using L1 (Lasso) with correlated features** | Arbitrarily selects one, ignores the other | Use **ElasticNet** instead |
+| **3. Tuning α on a linear scale** | α matters over orders of magnitude | Search on **log scale**: `10⁻⁴` to `10⁴` |
+| **4. Confusing parameters and hyperparameters** | Both called "parameters" informally | Parameters = learned (w); Hyperparameters = chosen (α, degree) |
+| **5. Data leakage in target encoding** | Target means computed on full dataset | Use **K-fold cross-fitting** |
+| **6. Using accuracy for imbalanced classification** | 99% negative → 99% accuracy trivial | Use **Precision, Recall, F1, PR-AUC** |
+| **7. Not tuning the decision threshold** | Default 0.5 is arbitrary | Tune threshold on validation data |
+| **8. Forgetting Laplace smoothing in Naive Bayes** | Unseen words → zero probability | Add `α` smoothing |
+| **9. Using Naive Bayes when features are highly correlated** | Independence assumption badly violated | Logistic regression may be better |
+| **10. Leakage in text vectorization** | Fit vectorizer on full dataset | Fit on **train only**, transform all |
+
+---
+
+## 4. ONE-SENTENCE SUMMARY — WEEK 2 ML
+
+**How to use:** For each concept, try to write your own one-sentence summary *before* clicking to reveal the model answer.
+
+---
+
+### Linear Regression
+
+<details>
+<summary><b>Linear Model</b> — Try your own first</summary>
+
+**Model Answer:** `ŷ = wᵀx + b` — a weighted sum of input features plus bias, where `w` are slopes and `b` is the intercept.
+
+</details>
+
+---
+
+<details>
+<summary><b>MSE Cost Function</b> — Try your own first</summary>
+
+**Model Answer:** `L(w) = (1/n)||y - Xw||²` — the average squared difference between predictions and actual targets.
+
+</details>
+
+---
+
+<details>
+<summary><b>Normal Equations</b> — Try your own first</summary>
+
+**Model Answer:** `XᵀXw = Xᵀy` — the system of equations that gives optimal weights by setting the gradient to zero.
+
+</details>
+
+---
+
+<details>
+<summary><b>OLS Closed-Form Solution</b> — Try your own first</summary>
+
+**Model Answer:** `w* = (XᵀX)⁻¹Xᵀy` — the analytical solution for linear regression, but fails when `XᵀX` is not invertible.
+
+</details>
+
+---
+
+<details>
+<summary><b>Geometric Interpretation of OLS</b> — Try your own first</summary>
+
+**Model Answer:** `ŷ = Xw*` is the projection of `y` onto the column space of `X`, and residuals are perpendicular to every column of `X`.
+
+</details>
+
+---
+
+<details>
+<summary><b>Probabilistic Interpretation of Linear Regression</b> — Try your own first</summary>
+
+**Model Answer:** Assuming Gaussian noise `ε ~ N(0, σ²)`, MLE of `w` is equivalent to ordinary least squares.
+
+</details>
+
+---
+
+<details>
+<summary><b>Gauss-Markov Theorem</b> — Try your own first</summary>
+
+**Model Answer:** Under classical OLS assumptions, `w*` is the Best Linear Unbiased Estimator (BLUE) — minimum variance among all linear unbiased estimators.
+
+</details>
+
+---
+
+<details>
+<summary><b>Polynomial Regression</b> — Try your own first</summary>
+
+**Model Answer:** Mapping input `x` to `φ(x) = [1, x, x², ..., xᵈ]` gives non-linear decision boundaries in `x`-space while keeping convex optimization in `w`-space.
+
+</details>
+
+---
+
+### Regularization
+
+<details>
+<summary><b>Regularized Objective</b> — Try your own first</summary>
+
+**Model Answer:** `argmin_w [Loss(w) + λ·Penalty(w)]` — add a penalty to discourage overly complex models and improve generalization.
+
+</details>
+
+---
+
+<details>
+<summary><b>Ridge Regression (L2)</b> — Try your own first</summary>
+
+**Model Answer:** `argmin_w [Loss(w) + λ·||w||₂²]` — shrinks coefficients smoothly toward zero; useful for correlated features.
+
+</details>
+
+---
+
+<details>
+<summary><b>Lasso Regression (L1)</b> — Try your own first</summary>
+
+**Model Answer:** `argmin_w [Loss(w) + λ·||w||₁]` — can set coefficients exactly to zero, performing automatic feature selection.
+
+</details>
+
+---
+
+<details>
+<summary><b>ElasticNet</b> — Try your own first</summary>
+
+**Model Answer:** Combines L1 sparsity with L2 stability — `Loss(w) + λ·(ρ·||w||₁ + (1−ρ)·||w||₂²)` — better than pure Lasso for correlated features.
+
+</details>
+
+---
+
+<details>
+<summary><b>Parameters vs Hyperparameters</b> — Try your own first</summary>
+
+**Model Answer:** Parameters (like `w`) are learned during training; hyperparameters (like `α`, polynomial degree) are chosen before training using validation.
+
+</details>
+
+---
+
+<details>
+<summary><b>Grid Search</b> — Try your own first</summary>
+
+**Model Answer:** Exhaustively evaluates every combination of a fixed set of hyperparameter values — cost grows multiplicatively.
+
+</details>
+
+---
+
+<details>
+<summary><b>Random Search</b> — Try your own first</summary>
+
+**Model Answer:** Samples hyperparameter values from distributions at random — often more efficient than grid search under the same budget.
+
+</details>
+
+---
+
+<details>
+<summary><b>Nested Cross-Validation</b> — Try your own first</summary>
+
+**Model Answer:** Outer loop evaluates model performance, inner loop tunes hyperparameters — gives an unbiased estimate of the entire model-selection procedure.
+
+</details>
+
+---
+
+<details>
+<summary><b>Learning Curve</b> — Try your own first</summary>
+
+**Model Answer:** Model performance as a function of training set size — helps diagnose whether more data would help or if the model is noise-limited.
+
+</details>
+
+---
+
+### Logistic Regression
+
+<details>
+<summary><b>Logistic Regression Model</b> — Try your own first</summary>
+
+**Model Answer:** `p(y=1|x) = σ(wᵀx + b) = 1/(1 + e⁻⁽wᵀx+b⁾)` — maps a linear score to a probability between 0 and 1.
+
+</details>
+
+---
+
+<details>
+<summary><b>Binary Cross-Entropy Loss</b> — Try your own first</summary>
+
+**Model Answer:** `−[y·log(p) + (1−y)·log(1−p)]` — penalizes confident wrong predictions heavily; derived from MLE under Bernoulli distribution.
+
+</details>
+
+---
+
+<details>
+<summary><b>Logit (Log-Odds) Interpretation</b> — Try your own first</summary>
+
+**Model Answer:** `logit(p) = log(p/(1−p)) = wᵀx + b` — coefficients are linear effects on log-odds, not directly on probability.
+
+</details>
+
+---
+
+<details>
+<summary><b>Softmax (Multiclass)</b> — Try your own first</summary>
+
+**Model Answer:** `p(y=k|x) = exp(zⱼ) / Σⱼ exp(zⱼ)` — turns logits into a valid probability distribution for multiclass classification.
+
+</details>
+
+---
+
+<details>
+<summary><b>ROC Curve & AUC</b> — Try your own first</summary>
+
+**Model Answer:** ROC plots TPR vs FPR across all thresholds; AUC is threshold-independent, with 0.5 = random, 1.0 = perfect.
+
+</details>
+
+---
+
+### Naive Bayes
+
+<details>
+<summary><b>Discriminative vs Generative</b> — Try your own first</summary>
+
+**Model Answer:** Discriminative (Logistic Regression) models `P(y|x)`; generative (Naive Bayes) models `P(x|y)` and `P(y)` and uses Bayes' rule.
+
+</details>
+
+---
+
+<details>
+<summary><b>Bayes' Rule for Classification</b> — Try your own first</summary>
+
+**Model Answer:** `P(y|x) = P(x|y)·P(y) / P(x)` — choose class maximizing `P(x|y)·P(y)` since `P(x)` is the same for all classes.
+
+</details>
+
+---
+
+<details>
+<summary><b>The "Naive" Assumption</b> — Try your own first</summary>
+
+**Model Answer:** Features are conditionally independent given the class: `P(x₁, ..., x_d|y) = Πⱼ P(xⱼ|y)` — often false but works well in practice.
+
+</details>
+
+---
+
+<details>
+<summary><b>Naive Bayes Variants</b> — Try your own first</summary>
+
+**Model Answer:** Gaussian NB (continuous), Bernoulli NB (binary indicators), Multinomial NB (counts/frequencies — the standard for text).
+
+</details>
+
+---
+
+<details>
+<summary><b>Multinomial Naive Bayes</b> — Try your own first</summary>
+
+**Model Answer:** Scores as `score(y) = log P(y) + Σⱼ countⱼ·log P(wordⱼ|y)` using log probabilities to avoid underflow.
+
+</details>
+
+---
+
+<details>
+<summary><b>Laplace Smoothing</b> — Try your own first</summary>
+
+**Model Answer:** `P(word|class) = (count + α) / (total + α·|V|)` — prevents unseen words from making a whole class impossible.
+
+</details>
+
+---
+
+<details>
+<summary><b>Logistic Regression vs Naive Bayes</b> — Try your own first</summary>
+
+**Model Answer:** Logistic regression is discriminative with a linear decision boundary; Naive Bayes is generative with conditional independence; try both as baselines on text.
+
+</details>
+
+---
+
+<details>
+<summary><b>TF-IDF</b> — Try your own first</summary>
+
+**Model Answer:** `tf-idf(term, doc) = tf × log(N / df)` — counts words but discounts very common corpus words like "the".
+
+</details>
+
+---
+
+<details>
+<summary><b>Bag-of-Words (BoW)</b> — Try your own first</summary>
+
+**Model Answer:** Ignores word order, counts how often each vocabulary term appears — simple, interpretable, fast, often strong.
+
+</details>
+
+---
+
+## 5. QUICK REFERENCE CHEAT SHEET — WEEK 2 ML
+
+### Linear Regression Formulas
+
+<details>
+<summary><b>Linear Model & MSE</b> — Try to recall first</summary>
+
+| Aspect | Formula |
+|--------|---------|
+| **Single prediction** | `ŷ = wᵀx + b` |
+| **Batch form** | `ŷ = Xw` |
+| **MSE** | `L(w) = (1/n)||y - Xw||²` |
+| **Gradient of MSE** | `∇w L = −(2/n)Xᵀ(y - Xw)` |
+
+</details>
+
+---
+
+<details>
+<summary><b>Normal Equations & Solution</b> — Try to recall first</summary>
+
+| Aspect | Formula |
+|--------|---------|
+| **Normal equations** | `XᵀXw = Xᵀy` |
+| **OLS solution** | `w* = (XᵀX)⁻¹Xᵀy` |
+| **Fails when** | `XᵀX` is not invertible (multicollinearity or d > n) |
+
+</details>
+
+---
+
+<details>
+<summary><b>MLE for σ²</b> — Try to recall first</summary>
+
+**Formula:** `σ²* = (1/n)||y - Xw*||²`
+
+</details>
+
+---
+
+### Polynomial Regression
+
+<details>
+<summary><b>Polynomial Feature Expansion</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Feature map** | `φ(x) = [1, x, x², x³, ..., xᵈ]ᵀ` |
+| **Model** | `ŷ = wᵀφ(x)` — linear in w, non-linear in x |
+| **Complexity** | Controlled by degree `d` |
+
+</details>
+
+---
+
+### Regularization Formulas
+
+<details>
+<summary><b>Ridge (L2), Lasso (L1), ElasticNet</b> — Try to recall first</summary>
+
+| Method | Objective |
+|--------|-----------|
+| **Ridge (L2)** | `Loss(w) + λ·||w||₂²` |
+| **Lasso (L1)** | `Loss(w) + λ·||w||₁` |
+| **ElasticNet** | `Loss(w) + λ·(ρ·||w||₁ + (1−ρ)·||w||₂²)` |
+
+</details>
+
+---
+
+<details>
+<summary><b>scikit-learn Parameters</b> — Try to recall first</summary>
+
+| Parameter | Meaning |
+|-----------|---------|
+| **`alpha`** | Regularization strength (`λ`) — larger = stronger |
+| **`C`** | `1/λ` — smaller = stronger |
+| **`l1_ratio`** | `ρ` — 0 = Ridge, 1 = Lasso, between = ElasticNet |
+
+</details>
+
+---
+
+### Bias-Variance Decomposition
+
+<details>
+<summary><b>Bias-Variance</b> — Try to recall first</summary>
+
+| Aspect | Formula |
+|--------|---------|
+| **Total Error** | `Bias² + Variance + σ²` |
+| **High Bias** | Underfitting — train error and val error both high |
+| **High Variance** | Overfitting — train error low, val error high |
+| **σ²** | Irreducible noise — cannot be eliminated |
+
+</details>
+
+---
+
+### Hyperparameter Tuning
+
+<details>
+<summary><b>Grid Search vs Random Search</b> — Try to recall first</summary>
+
+| Method | How It Works | Best For |
+|--------|--------------|----------|
+| **Grid Search** | Evaluates all combinations | Small search space |
+| **Random Search** | Samples random values | Large search space; often more efficient |
+
+**Key Principle:** Search `α` on **log scale** (`10⁻⁴` to `10⁴`).
+
+</details>
+
+---
+
+### Logistic Regression Formulas
+
+<details>
+<summary><b>Sigmoid, Logit, Cross-Entropy</b> — Try to recall first</summary>
+
+| Aspect | Formula |
+|--------|---------|
+| **Sigmoid** | `σ(z) = 1/(1 + e⁻ᶻ)` |
+| **Logit** | `log(p/(1−p)) = wᵀx + b` |
+| **Decision boundary** | `wᵀx + b = 0` |
+| **BCE** | `−[y·log(p) + (1−y)·log(1−p)]` |
+| **Softmax** | `p(y=k|x) = exp(zⱼ)/Σ exp(zⱼ)` |
+
+</details>
+
+---
+
+### Naive Bayes Formulas
+
+<details>
+<summary><b>Bayes' Rule & Naive Assumption</b> — Try to recall first</summary>
+
+| Aspect | Formula |
+|--------|---------|
+| **Bayes' rule** | `P(y|x) = P(x|y)·P(y) / P(x)` |
+| **Classification** | `argmaxᵧ P(x|y)·P(y)` |
+| **Naive assumption** | `P(x₁, ..., x_d|y) = Πⱼ P(xⱼ|y)` |
+| **Multinomial NB** | `score(y) = log P(y) + Σ countⱼ·log P(wordⱼ|y)` |
+| **Laplace smoothing** | `P(word|class) = (count + α) / (total + α·|V|)` |
+
+</details>
+
+---
+
+### LR vs NB Comparison
+
+<details>
+<summary><b>Logistic Regression vs Naive Bayes</b> — Try to recall first</summary>
+
+| Aspect | Logistic Regression | Naive Bayes |
+|--------|---------------------|-------------|
+| **Models** | `P(y|x)` | `P(x|y)` and `P(y)` |
+| **Assumption** | Linear decision boundary | Conditional independence |
+| **Scaling needed?** | ✅ Important | Variant dependent |
+| **Small data** | Can overfit | Strong baseline |
+| **Text performance** | Good with enough data | Good with small data |
+
+</details>
+
+---
+
+### Text Classification
+
+<details>
+<summary><b>TF-IDF & Pipeline</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Pipeline** | `raw → tokenize → vectorize → classifier → label` |
+| **TF-IDF** | `tf-idf(term, doc) = tf × log(N / df)` |
+| **Key rule** | Always fit vectorizer on **training data only** |
+
+</details>
+
+---
+
+### Diagnosis Quick Reference
+
+<details>
+<summary><b>Learning Curve Diagnosis</b> — Try to recall first</summary>
+
+| Symptom | Diagnosis | Fix |
+|---------|-----------|-----|
+| Train low, Val low, small gap | **High Bias** | More complexity, more features, reduce regularization |
+| Train high, Val lower, large gap | **High Variance** | More data, stronger regularization, simpler model |
+| Val still rising with data | **Data-limited** | Collect more data |
+| Both plateau below target | **Noise-limited** | Improve labels/features |
+
+</details>
+
+---
+
+### Key Defaults
+
+<details>
+<summary><b>Key Defaults</b> — Try to recall first</summary>
+
+| Concept | Default |
+|---------|---------|
+| Ridge/Lasso α search | `10⁻⁴` to `10⁴` (log scale) |
+| ElasticNet `l1_ratio` | 0.5 |
+| Cross-validation folds | 5 or 10 |
+| Logistic regression threshold | 0.5 (tune on validation) |
+| Laplace smoothing α | 1.0 |
+| TF-IDF `ngram_range` | (1, 1) or (1, 2) |
+
+</details>
+
+---
+
+## 6. CONNECTIONS MAP — WEEK 2 ML
+
+### 🌳 TEXT-BASED CONCEPT MAP
+
+```
+╔══════════════════════════════════════════════════════════════════════════╗
+║                                                                          ║
+║                    WEEK 2 ML: LINEAR MODELS & CLASSIFICATION           ║
+║                                                                          ║
+║                    ┌─────────────────────────────────────┐              ║
+║                    │   LINEAR REGRESSION                 │              ║
+║                    │   ŷ = wᵀx + b                      │              ║
+║                    └──────────────┬──────────────────────┘              ║
+║                                   │                                      ║
+║    ┌──────────────────────────────┼──────────────────────────────┐      ║
+║    │                              │                              │      ║
+║    ▼                              ▼                              ▼      ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │  ALGEBRAIC   │          │ PROBABILISTIC │          │  GEOMETRIC   │  ║
+║ │  (MSE)       │          │  (MLE)        │          │  (Projection)│  ║
+║ └──────┬───────┘          └──────┬───────┘          └──────┬───────┘  ║
+║        │                         │                         │          ║
+║        └─────────────────────────┼─────────────────────────┘          ║
+║                                  │                                     ║
+║                                  ▼                                     ║
+║                    ┌─────────────────────────────────────┐             ║
+║                    │   GAUSS-MARKOV THEOREM              │             ║
+║                    │   w* = BLUE                         │             ║
+║                    └──────────────┬──────────────────────┘             ║
+║                                   │                                     ║
+║                                   ▼                                     ║
+║                    ┌─────────────────────────────────────┐             ║
+║                    │   POLYNOMIAL REGRESSION             │             ║
+║                    │   φ(x) = [1, x, x², ...]           │             ║
+║                    └──────────────┬──────────────────────┘             ║
+║                                   │                                     ║
+║          ┌────────────────────────┼────────────────────────┐           ║
+║          │                        │                        │           ║
+║          ▼                        ▼                        ▼           ║
+║    ┌───────────┐          ┌───────────┐          ┌───────────┐        ║
+║    │UNDERFITTING│          │OVERFITTING│          │ BIAS-     │        ║
+║    │(High Bias)│          │(High Var) │          │ VARIANCE  │        ║
+║    └───────────┘          └───────────┘          └───────────┘        ║
+║                                   │                                     ║
+║                                   ▼                                     ║
+║                    ┌─────────────────────────────────────┐             ║
+║                    │   REGULARIZATION                    │             ║
+║                    │   Loss + λ·Penalty(w)               │             ║
+║                    └──────────────┬──────────────────────┘             ║
+║                                   │                                     ║
+║    ┌──────────────────────────────┼──────────────────────────────┐     ║
+║    │                              │                              │     ║
+║    ▼                              ▼                              ▼     ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │   RIDGE      │          │   LASSO      │          │  ELASTICNET  │  ║
+║ │   (L2)       │          │   (L1)       │          │  (L1 + L2)   │  ║
+║ │  Shrinkage   │          │  Sparsity    │          │  Sparse +    │  ║
+║ │              │          │              │          │  Stable      │  ║
+║ └──────────────┘          └──────────────┘          └──────────────┘  ║
+║                                   │                                     ║
+║                                   ▼                                     ║
+║                    ┌─────────────────────────────────────┐             ║
+║                    │   HYPERPARAMETER TUNING             │             ║
+║                    │   Grid Search · Random Search      │             ║
+║                    │   CV · Nested CV                   │             ║
+║                    └──────────────┬──────────────────────┘             ║
+║                                   │                                     ║
+║                                   ▼                                     ║
+║                    ┌─────────────────────────────────────┐             ║
+║                    │   CLASSIFICATION                    │             ║
+║                    │   LOGISTIC REGRESSION · NB         │             ║
+║                    └──────────────┬──────────────────────┘             ║
+║                                   │                                     ║
+║    ┌──────────────────────────────┼──────────────────────────────┐     ║
+║    │                              │                              │     ║
+║    ▼                              ▼                              ▼     ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │  DISCRIMINA- │          │   GENERATIVE │          │   TEXT       │  ║
+║ │  TIVE        │          │   (NB)       │          │   CLASSIFI-  │  ║
+║ │  (LogReg)    │          │   P(x|y)     │          │   CATION     │  ║
+║ └──────────────┘          └──────────────┘          └──────────────┘  ║
+║        │                         │                         │          ║
+║        └─────────────────────────┼─────────────────────────┘          ║
+║                                  │                                     ║
+║                                  ▼                                     ║
+║                    ┌─────────────────────────────────────┐             ║
+║                    │   EVALUATION METRICS                │             ║
+║                    │   Confusion Matrix · Precision/Recall│             ║
+║                    │   F1 · ROC · AUC                   │             ║
+║                    └─────────────────────────────────────┘             ║
+║                                                                         ║
+╚══════════════════════════════════════════════════════════════════════════╝
+```
+
+---
+
+### 🔗 KEY CONNECTION EXPLANATIONS
+
+<details>
+<summary><b>Connection 1: How do the three views of linear regression connect?</b></summary>
+
+```
+ALGEBRAIC VIEW                    PROBABILISTIC VIEW
+Minimize MSE                       Assume ε ~ N(0, σ²)
+L(w) = (1/n)||y - Xw||²            y = wᵀx + b + ε
+
+Set gradient = 0                   Maximize likelihood
+Xᵀ(y - Xw) = 0                     MLE of w = OLS
+
+Both give: w* = (XᵀX)⁻¹Xᵀy
+
+GEOMETRIC VIEW
+ŷ = Xw* is the projection of y onto Col(X)
+Residual e = y - ŷ is perpendicular to Col(X)
+Normal equations Xᵀe = 0 are the orthogonality condition
+
+All three views lead to the same solution!
+```
+
+**Key insight:** The algebraic view tells you how to compute it; the probabilistic view tells you why it's a good idea (MLE); the geometric view tells you what it actually does (projection).
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 2: How does polynomial regression connect to bias-variance?</b></summary>
+
+```
+POLYNOMIAL DEGREE (d)
+    │
+    ├── d = 1 (Too Simple)
+    │       ├── High Bias → Underfitting
+    │       ├── Train Error: HIGH, Val Error: HIGH (similar)
+    │       └── Fix: Increase d, add features
+    │
+    ├── d = Optimal (Just Right)
+    │       ├── Balanced Bias/Variance
+    │       ├── Train Error: MODERATE, Val Error: LOWEST
+    │       └── Found by cross-validation
+    │
+    └── d = 9 (Too Complex)
+            ├── High Variance → Overfitting
+            ├── Train Error: VERY LOW, Val Error: HIGH
+            └── Fix: Regularization, more data
+
+MSE = Bias² + Variance + σ² (Irreducible Noise)
+```
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 3: How do L1, L2, and ElasticNet relate?</b></summary>
+
+```
+REGULARIZATION: Loss(w) + λ·Penalty(w)
+    │
+    ├── L2 (Ridge): λ·||w||₂²
+    │   ├── Smooth shrinkage
+    │   ├── Keeps all features
+    │   └── Best for: correlated features
+    │
+    ├── L1 (Lasso): λ·||w||₁
+    │   ├── Sparse selection
+    │   ├── Sets weights to zero
+    │   └── Best for: feature selection
+    │
+    └── ElasticNet: λ·(ρ·||w||₁ + (1−ρ)·||w||₂²)
+        ├── Sparse + Stable
+        ├── Better than pure Lasso for correlated features
+        └── l1_ratio: 0 = Ridge, 1 = Lasso
+```
+
+**Key insight:** L1 = feature selection; L2 = smooth shrinkage; ElasticNet = both.
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 4: How does validation connect to all other concepts?</b></summary>
+
+```
+MODEL COMPLEXITY → VALIDATION → CHOOSE BEST
+    │
+    ├── Polynomial degree: CV chooses optimal d
+    ├── Regularization λ: CV chooses optimal α
+    ├── Model selection: CV compares Ridge vs Lasso
+    ├── Hyperparameter search: CV inside Grid/Random Search
+    └── Nested CV: Inner loop tunes; Outer loop evaluates
+
+LEARNING CURVES → DIAGNOSE → FIX
+    ├── High Bias (both errors high) → increase complexity
+    ├── High Variance (train low, val high) → more data/regularization
+    ├── Data-limited (val still rising) → collect more data    └── Noise-limited (both plateau) → improve labels/features
+
+Without validation, you're guessing — CV is the compass.
+```
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 5: How do Logistic Regression and Naive Bayes relate?</b></summary>
+
+```
+DISCRIMINATIVE (Logistic Regression)     GENERATIVE (Naive Bayes)
+─────────────────────────────────────────────────────────────────
+Models P(y|x)                            Models P(x|y) and P(y)
+Learns decision boundary directly        Models how each class generates data
+"Which class is this?"                   "How likely is this class to generate this?"
+Linear decision boundary                 Conditional independence assumed
+Needs scaling                            Scaling less important
+Works well with enough data              Works well with small data
+
+Both are classifiers, but answer different probability questions
+with different assumptions.
+
+Rule of thumb: Try both as baselines on text problems.
+```
+
+</details>
+
+---
+
+### 📊 CONNECTION MATRIX
+
+| Concept A | Connects To | Why |
+|-----------|-------------|-----|
+| **MLE** | Linear Regression | MLE under Gaussian = OLS |
+| **Normal Equations** | OLS Solution | Setting gradient to zero gives closed form |
+| **Polynomial Features** | Bias-Variance | Higher degree = lower bias, higher variance |
+| **Bias-Variance** | Regularization | Regularization trades bias for lower variance |
+| **Ridge (L2)** | Correlated Features | L2 stabilizes correlated features |
+| **Lasso (L1)** | Feature Selection | L1 drives coefficients to zero |
+| **ElasticNet** | Correlated + Sparse | Combines L1 sparsity with L2 stability |
+| **Hyperparameters** | Cross-Validation | CV chooses optimal hyperparameters |
+| **Grid/Random Search** | CV | Search uses CV scores to select best model |
+| **Nested CV** | Unbiased Estimate | Inner loop tunes; outer loop evaluates |
+| **Learning Curves** | Diagnosis | Diagnose bias, variance, data needs |
+| **Logistic Regression** | Classification | Sigmoid maps linear score to probability |
+| **Naive Bayes** | Bayes' Rule | Generative classifier based on Bayes |
+| **TF-IDF** | Text Classification | Weighted bag-of-words for text |
+| **Precision/Recall/F1** | Imbalanced Data | Better than accuracy for imbalanced classes |
+| **ROC/AUC** | Threshold-Independent | Measures ranking ability |
+
+---
+
+## 7. COMMON MISCONCEPTIONS — WEEK 2 ML
+
+**How to use:** Read each misconception first. Try to identify what's wrong. Then click to reveal the reality.
+
+---
+
+### Misconception 1: "Linear regression is just fitting a line — nothing more."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Linear regression is a simple, trivial method. | Linear regression is **rich and powerful**: |
+| | • **Probabilistic interpretation**: MLE under Gaussian noise |
+| | • **BLUE property**: Best Linear Unbiased Estimator (Gauss-Markov) |
+| | • **Geometric interpretation**: Projection onto column space |
+| | • **Extensible**: Polynomial features → non-linear boundaries |
+| | • **Convex**: Guaranteed global minimum |
+| | • **Regularizable**: Ridge, Lasso, ElasticNet extensions |
+
+**Key insight:** Linear regression is the foundation for many advanced methods. Understanding it deeply helps you understand everything else.
+
+</details>
+
+---
+
+### Misconception 2: "Polynomial regression is a completely different model."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Polynomial regression is a separate, non-linear model. | Polynomial regression is **linear regression on transformed features**:
+| | • Feature map: `φ(x) = [1, x, x², x³, ..., xᵈ]` |
+| | • Model: `ŷ = wᵀφ(x)` — still linear in w! |
+| | • Same normal equations apply |
+| | • Convex optimization in w-space |
+
+**Key insight:** "Linear" refers to linearity in parameters (w), not in the input features (x).
+
+</details>
+
+---
+
+### Misconception 3: "Ridge and Lasso do the same thing."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Ridge and Lasso are essentially the same regularization method. | **They are fundamentally different:** |
+
+| Aspect | Ridge (L2) | Lasso (L1) |
+|--------|------------|------------|
+| Effect | Smooth shrinkage | Sparse selection |
+| Coefficients | Shrinks toward zero | Can set exactly to zero |
+| Feature selection | ❌ No | ✅ Yes |
+| Correlated features | Stable | Arbitrary selection |
+| Geometric shape | Circle | Diamond |
+
+</details>
+
+---
+
+### Misconception 4: "Grid search is always the best tuning method."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Grid search is comprehensive and should be used whenever possible. | **Random search is often more efficient:**
+| | • Grid search explores **fewer distinct values** under the same budget |
+| | • Many hyperparameters don't matter much — random search finds the important ones |
+| | • Grid search suffers from the **curse of dimensionality** in hyperparameter space |
+
+**Key insight:** Use grid for small spaces (1-2 hyperparameters). Use random for larger spaces. Search α on log scale!
+
+</details>
+
+---
+
+### Misconception 5: "Cross-validation is just for small datasets."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| CV is a technique for small datasets — large datasets only need a single split. | **CV is useful for ALL dataset sizes:**
+| | • **Small datasets**: Maximizes training data per fold |
+| | • **Large datasets**: Reduces variance of performance estimate |
+| | • **Hyperparameter tuning**: Prevents overfitting to one validation split |
+| | • **Model selection**: Fair comparison between models |
+
+</details>
+
+---
+
+### Misconception 6: "Logistic regression is a regression algorithm, not a classifier."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Because it has "regression" in the name, it's for regression tasks. | **Logistic regression is a CLASSIFIER:**
+| | • Outputs **probabilities** (p(y=1|x)) |
+| | • Applied to **classification** tasks |
+| | • Uses **classification loss** (cross-entropy), not MSE |
+| | • The name is historical — it's really a classifier |
+
+</details>
+
+---
+
+### Misconception 7: "Naive Bayes is too simplistic — it never works in practice."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| The "naive" independence assumption makes the model useless for real data. | **Naive Bayes works surprisingly well:**
+| | • **Text classification**: Strong baseline, especially with small data |
+| | • **Fast training**: No iterative optimization |
+| | • **Good with small data**: Doesn't overfit as much as logistic regression |
+| | • **Interpretable**: Word probabilities are intuitive |
+| | • **Smoothing**: Laplace smoothing handles unseen words |
+
+</details>
+
+---
+
+### Misconception 8: "The 'naive' assumption is about features being independent in the data."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Naive Bayes assumes features are independent in the overall dataset. | **It assumes conditional independence GIVEN the class:**
+| | • **Wrong**: `P(x₁, x₂) = P(x₁)·P(x₂)` (unconditional independence) |
+| | • **Correct**: `P(x₁, x₂ | y) = P(x₁ | y)·P(x₂ | y)` (conditional independence) |
+
+**Key insight:** Conditional independence is a MUCH weaker assumption!
+
+</details>
+
+---
+
+### Misconception 9: "TF-IDF is always better than raw word counts."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| TF-IDF is the superior feature representation for text classification. | **TF-IDF helps, but it's not always better:**
+| | • **Short documents**: TF-IDF can over-penalize |
+| | • **Long documents**: TF-IDF often helps |
+| | • **Some domains**: Common words matter (e.g., style classification) |
+
+**Rule:** Try both — let validation decide.
+
+</details>
+
+---
+
+### Misconception 10: "Accuracy is the only classification metric that matters."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Higher accuracy = better classifier. Period. | **Accuracy can be dangerously misleading:**
+| | • **Imbalanced classes**: 99% accuracy from predicting majority class |
+| | • **Different error costs**: FP and FN have different consequences |
+| | • **Business alignment**: Accuracy doesn't measure business impact |
+
+**Example:**
+```
+Fraud detection: 99% legit, 1% fraud
+Model A: always predicts "legit" → 99% accuracy (bad!)
+Model B: catches 90% fraud, 95% legit → 94.95% accuracy (good!)
+```
+
+</details>
+
+---
+
+### Misconception 11: "Laplace smoothing adds noise to the data."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Laplace smoothing corrupts the data by adding artificial counts. | **Laplace smoothing is principled Bayesian inference:**
+| | • It adds **pseudo-counts**, not noise |
+| | • It prevents **zero probabilities** for unseen words |
+| | • It's a form of **Bayesian prior** (uniform over words) |
+
+**Key insight:** Smoothing is about **robustness**, not corruption.
+
+</details>
+
+---
+
+### Misconception 12: "More regularization is always better."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Adding more regularization always improves the model. | **Too much regularization = underfitting!**
+| | • λ too large → coefficients too small → model too simple |
+| | • Underfitting: train error high, val error high |
+
+**The sweet spot:**
+```
+If train loss ≫ val loss → Too much regularization (underfitting)
+If train loss ≪ val loss → Too little regularization (overfitting)
+```
+
+</details>
+
+---
+
+## 📊 QUICK REFERENCE: MISCONCEPTIONS vs REALITY
+
+| Misconception | Reality |
+|---------------|---------|
+| Linear regression = just fitting a line | Rich model with probabilistic/geometric interpretations |
+| Polynomial regression ≠ linear regression | It's linear regression on transformed features |
+| Ridge = Lasso | Ridge = smooth shrinkage; Lasso = sparse selection |
+| Grid search is always best | Random search often more efficient |
+| CV is only for small datasets | CV helps with robust estimates at any size |
+| Logistic regression is for regression | It's a classifier (outputs probabilities) |
+| Naive Bayes never works | Works surprisingly well, especially for text |
+| "Naive" = independent in data | Conditional independence given class |
+| TF-IDF always better than counts | Let validation decide; both have tradeoffs |
+| Accuracy is the only metric | Precision/Recall/F1 often more important |
+| Laplace smoothing = noise | It's a principled Bayesian prior |
+| More regularization = always better | Too much = underfitting |
+
+---
+
+# 📚 WEEK 2 ML — COMPLETE STUDY GUIDE
+## All Exercises with Answers in Spoiler Format
+
+---
+
+# SECTION 1: LINEAR REGRESSION
+
+---
+
+## Exercise LR-1: Linear Model Fundamentals
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. Write the linear model equation for a single prediction. | |
+| 2. What is the matrix (batch) form of the linear model? | |
+| 3. What is the cost function for linear regression? | |
+| 4. Why is MSE a good choice for the cost function? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Linear model equation | `ŷ = wᵀx + b` where x ∈ ℝᵈ (input features), w ∈ ℝᵈ (weights), b ∈ ℝ (bias) |
+| 2. Matrix form | `ŷ = Xw` where X ∈ ℝⁿˣ⁽ᵈ⁺¹⁾ (design matrix with bias column appended) |
+| 3. Cost function | `L(w) = (1/n)||y - Xw||² = (1/n) Σᵢ (yᵢ - ŷᵢ)²` |
+| 4. Why MSE is good | Penalizes large errors more heavily; differentiable everywhere; convex → unique global minimum; consistent with Gaussian noise (probabilistic view) |
+
+</details>
+
+---
+
+## Exercise LR-2: Normal Equations & OLS Solution
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. Derive the gradient of the MSE cost function. | |
+| 2. Set the gradient to zero and derive the normal equations. | |
+| 3. What is the closed-form solution for w*? | |
+| 4. When does the closed-form solution fail? | |
+| 5. What is the computational cost of the normal equations? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Gradient of MSE | `∇w L = −(2/n)Xᵀ(y - Xw)` |
+| 2. Normal equations | `Xᵀ(y - Xw) = 0 → XᵀXw = Xᵀy` |
+| 3. Closed-form solution | `w* = (XᵀX)⁻¹Xᵀy` |
+| 4. When it fails | When `XᵀX` is not invertible (multicollinearity or d > n) |
+| 5. Computational cost | `O(nd² + d³)`. For d > 10⁴, prefer iterative gradient descent. |
+
+</details>
+
+---
+
+## Exercise LR-3: Geometric Interpretation
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What does ŷ = Xw* represent geometrically? | |
+| 2. What is the residual vector e = y − ŷ? What property does it satisfy? | |
+| 3. What do the normal equations represent geometrically? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. What is ŷ = Xw*? | The **projection of y onto the column space of X (Col(X))**. |
+| 2. Residual vector | `e = y − ŷ`. It is **perpendicular to every column of X** (orthogonality condition). |
+| 3. Normal equations geometrically | `Xᵀe = 0` is exactly the orthogonality condition — residuals are perpendicular to all features. |
+
+</details>
+
+---
+
+## Exercise LR-4: Probabilistic Interpretation & MLE
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. Write the Gaussian noise model for linear regression. | |
+| 2. Derive the log-likelihood and show that MLE = least squares. | |
+| 3. What are the noise assumptions? | |
+| 4. Derive the MLE for σ² given w*. | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Gaussian noise model | `y = wᵀx + b + ε, ε ~ N(0, σ²)` |
+| 2. MLE = Least Squares | Log-likelihood: `ℓ(w) = constants - ||y-Xw||²/2σ²`. Maximizing ℓ ↔ minimizing ||y-Xw||². So **MLE = OLS**. |
+| 3. Noise assumptions | **Zero mean**: E[ε] = 0; **Constant variance**: Var(ε) = σ²; **Independence**: εᵢ ⟂ εⱼ for i≠j; **Gaussian**: ε ~ N(0, σ²) |
+| 4. MLE for σ² | `σ²* = (1/n)||y - Xw*||²` = MSE |
+
+</details>
+
+---
+
+## Exercise LR-5: Gauss-Markov Theorem
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What does the Gauss-Markov theorem state? | |
+| 2. What does "BLUE" stand for and what does it mean? | |
+| 3. What are the 5 classical assumptions? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Gauss-Markov theorem | Under the classical OLS assumptions, **w* is the Best Linear Unbiased Estimator (BLUE)**. |
+| 2. BLUE meaning | **Best** = Minimum variance among all linear unbiased estimators; **Linear** = Linear function of y; **Unbiased** = E[w*] equals true parameter vector. |
+| 3. 5 classical assumptions | **A1**: Linearity; **A2**: Random sample (i.i.d.); **A3**: No multicollinearity; **A4**: Zero conditional mean; **A5**: Homoscedasticity. |
+
+</details>
+
+---
+
+## Exercise LR-6: Polynomial Regression
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. How does polynomial regression extend linear regression? | |
+| 2. Write the polynomial feature expansion for degree d. | |
+| 3. What controls model complexity in polynomial regression? | |
+| 4. What is the key insight about polynomial regression? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Extension | Map input x → feature vector `φ(x) = [1, x, x², x³, ..., xᵈ]ᵀ`. Then `ŷ = wᵀφ(x)`. |
+| 2. Feature expansion | `φ(x) = [1, x, x², x³, ..., xᵈ]ᵀ` |
+| 3. Complexity control | The **degree d** controls model complexity. Higher d = more flexible = more overfitting risk. |
+| 4. Key insight | Non-linear decision boundaries in x-space, but **convex optimization in w-space** — best of both worlds! |
+
+</details>
+
+---
+
+## Exercise LR-7: Bias-Variance Tradeoff
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. Write the bias-variance decomposition of MSE. | |
+| 2. What does each term mean? | |
+| 3. How does increasing model complexity affect bias and variance? | |
+| 4. What do training and validation error curves look like for underfitting, good fit, and overfitting? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Bias-variance decomposition | `MSE = Bias² + Variance + σ²` |
+| 2. Meaning of each term | **Bias²**: How far off average prediction is from true value (systematic error). **Variance**: How much predictions change across training sets (instability). **σ²**: Noise inherent in the data (irreducible). |
+| 3. Complexity effects | As d increases: **Bias decreases** (more flexible, captures patterns), **Variance increases** (more sensitive to training data). |
+| 4. Error curves | **Underfitting**: Both errors high, close together. **Good fit**: Train moderate, val lowest. **Overfitting**: Train very low, val very high (large gap). |
+
+</details>
+
+---
+
+# SECTION 2: REGULARIZATION & TUNING
+
+---
+
+## Exercise R-1: Ridge, Lasso, ElasticNet
+
+| Question | Ridge (L2) | Lasso (L1) | ElasticNet |
+|----------|------------|------------|------------|
+| 1. Penalty term | | | |
+| 2. Effect on coefficients | | | |
+| 3. Feature selection? | | | |
+| 4. Best for | | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Ridge (L2) | Lasso (L1) | ElasticNet |
+|----------|------------|------------|------------|
+| 1. Penalty term | `λ·||w||₂²` | `λ·||w||₁` | `λ·(ρ·||w||₁ + (1−ρ)·||w||₂²)` |
+| 2. Effect on coefficients | Shrinks smoothly toward zero | Sets coefficients exactly to zero | Sparse + stable |
+| 3. Feature selection? | ❌ No | ✅ Yes | ✅ Yes (with stability) |
+| 4. Best for | Many small effects, correlated features | Sparse feature set | Correlated features + sparsity desired |
+
+</details>
+
+---
+
+## Exercise R-2: Parameters vs Hyperparameters
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is the difference between parameters and hyperparameters? | |
+| 2. Give examples of each. | |
+| 3. How are parameters learned? How are hyperparameters chosen? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Difference | **Parameters**: Learned by fitting the model. **Hyperparameters**: Chosen outside ordinary fitting (set before training). |
+| 2. Examples | **Parameters**: regression coefficients w, intercept b. **Hyperparameters**: alpha, l1_ratio, polynomial degree, k in KNN. |
+| 3. How they're learned/chosen | **Training** learns parameters. **Validation** chooses hyperparameters. |
+
+</details>
+
+---
+
+## Exercise R-3: Grid Search vs Random Search
+
+| Question | Grid Search | Random Search |
+|----------|-------------|---------------|
+| 1. How it works | | |
+| 2. Cost | | |
+| 3. Best for | | |
+| 4. Efficiency | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Grid Search | Random Search |
+|----------|-------------|---------------|
+| 1. How it works | Exhaustively evaluates every combination | Samples hyperparameter values at random |
+| 2. Cost | Grows multiplicatively with each hyperparameter | Fixed compute budget (n_iter) |
+| 3. Best for | Few hyperparameters, good prior ranges | Large search space |
+| 4. Efficiency | Less efficient | Often more efficient — covers more distinct values per hyperparameter |
+
+**Key Principle:** Search `alpha` on **log scale** (e.g., 10⁻⁴, 10⁻³, ..., 10⁴).
+
+</details>
+
+---
+
+## Exercise R-4: Learning Curves — Diagnosis
+
+| Symptom | Diagnosis | Fix |
+|---------|-----------|-----|
+| Train low, Val low, small gap | | |
+| Train high, Val lower, large gap | | |
+| Val still rising with data | | |
+| Both plateau below target | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Symptom | Diagnosis | Fix |
+|---------|-----------|-----|
+| Train low, Val low, small gap | **High Bias** (Underfitting) | Increase complexity, add features, reduce regularization |
+| Train high, Val lower, large gap | **High Variance** (Overfitting) | More data, stronger regularization, simpler model |
+| Val still rising with data | **Data-limited** | Collect more data; use augmentation |
+| Both plateau below target | **Noise / Missing signal** | Improve labels, features, objective |
+
+</details>
+
+---
+
+# SECTION 3: LOGISTIC REGRESSION & NAIVE BAYES
+
+---
+
+## Exercise LRG-1: Logistic Regression Fundamentals
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is the logistic (sigmoid) function? | |
+| 2. How does logistic regression convert a linear score to a probability? | |
+| 3. What is the decision boundary for logistic regression? | |
+| 4. What is the loss function (binary cross-entropy)? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Sigmoid function | `σ(z) = 1/(1 + e⁻ᶻ)` — maps any real number to (0,1). |
+| 2. Linear score → probability | `z = wᵀx + b`, then `p(y=1|x) = σ(z) = 1/(1 + e⁻⁽wᵀx+b⁾)` |
+| 3. Decision boundary | `wᵀx + b = 0` (a hyperplane). At threshold 0.5: σ(z) ≥ 0.5 ⇔ z ≥ 0. |
+| 4. Binary cross-entropy loss | `−[y·log(p) + (1−y)·log(1−p)]` — penalizes confident wrong predictions heavily. |
+
+</details>
+
+---
+
+## Exercise LRG-2: Interpreting Coefficients
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is the logit (log-odds)? | |
+| 2. How do we interpret a coefficient in logistic regression? | |
+| 3. If hours studied coefficient = +0.7, what does that mean? | |
+| 4. If missed assignments coefficient = −1.2, what does that mean? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Logit | `logit(p) = log(p/(1−p)) = wᵀx + b` |
+| 2. Coefficient interpretation | Increase feature xⱼ by 1 ⇒ **log-odds changes by wⱼ**. Coeffs are linear effects on log-odds, not directly on probability. |
+| 3. hours studied = +0.7 | Each additional hour of study increases the log-odds of passing by 0.7 (higher odds of passing). |
+| 4. missed assignments = −1.2 | Each additional missed assignment decreases the log-odds of passing by 1.2 (lower odds of passing). |
+
+</details>
+
+---
+
+## Exercise LRG-3: ROC Curve & AUC
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What does ROC stand for and what does it plot? | |
+| 2. What does the AUC represent? | |
+| 3. What is AUC for a random classifier? | |
+| 4. What is AUC for a perfect classifier? | |
+| 5. Why is AUC threshold-independent? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. ROC | **Receiver Operating Characteristic**. Plots **True Positive Rate** vs **False Positive Rate** across all thresholds. |
+| 2. AUC | Area Under the ROC Curve. Higher is better. |
+| 3. Random classifier AUC | **0.5** (diagonal line). |
+| 4. Perfect classifier AUC | **1.0** (perfect separation). |
+| 5. Threshold-independent | Summarizes performance across **all thresholds**, not just one. |
+
+</details>
+
+---
+
+## Exercise LRG-4: Discriminative vs Generative
+
+| Question | Logistic Regression | Naive Bayes |
+|----------|---------------------|-------------|
+| 1. What is modeled? | | |
+| 2. Main assumption | | |
+| 3. Typical text behavior | | |
+| 4. Feature scaling needed? | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Logistic Regression | Naive Bayes |
+|----------|---------------------|-------------|
+| 1. What is modeled? | `P(y|x)` | `P(x|y)` and `P(y)` |
+| 2. Main assumption | Linear decision boundary | Conditional independence |
+| 3. Typical text behavior | Strong with enough data + regularization | Fast, strong with small data |
+| 4. Feature scaling needed? | **Important** for numeric features | Variant dependent |
+
+**Rule of thumb:** Try both as baselines on text problems; let validation decide.
+
+</details>
+
+---
+
+## Exercise LRG-5: Naive Bayes — Bayes' Rule & "Naive" Assumption
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. Write Bayes' rule for classification. | |
+| 2. What is the "naive" assumption in Naive Bayes? | |
+| 3. Write the mathematical expression for the assumption. | |
+| 4. Is the assumption true in real data? | |
+| 5. Why does Naive Bayes still work well? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Bayes' rule | `P(y|x) = P(x|y)·P(y) / P(x)` |
+| 2. "Naive" assumption | Features are **conditionally independent given the class**. |
+| 3. Mathematical expression | `P(x₁, x₂, ..., x_d | y) ≈ Πⱼ P(xⱼ | y)` |
+| 4. Is it true? | **Often false in real data**. Text: words are not independent. |
+| 5. Why still works? | Can still work surprisingly well for classification. Decoupling features makes estimation easy. |
+
+</details>
+
+---
+
+## Exercise LRG-6: Naive Bayes Variants & Laplace Smoothing
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What are the three common Naive Bayes variants? | |
+| 2. Which is usually the first choice for text classification? | |
+| 3. Write the Laplace smoothing formula. | |
+| 4. Why do we need Laplace smoothing? | |
+| 5. What happens to P(word|class) for an unseen word without smoothing? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Three variants | **Gaussian NB** (continuous), **Bernoulli NB** (binary), **Multinomial NB** (counts). |
+| 2. First choice for text | **Multinomial NB** is usually the first Naive Bayes model to try for text classification. |
+| 3. Laplace smoothing | `P(word|class) = (count + α) / (total + α·|V|)` where |V| is vocabulary size. |
+| 4. Why smoothing | Prevents **zero probabilities** for words not seen in training. |
+| 5. Without smoothing | If "quantum" never appears in training spam, P(quantum|spam)=0. A spam document containing "quantum" gets score 0. |
+
+</details>
+
+---
+
+## Exercise LRG-7: Text Classification & TF-IDF
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is the text classification pipeline? | |
+| 2. What is Bag-of-Words (BoW)? | |
+| 3. What is TF-IDF? | |
+| 4. What is the effect of TF-IDF? | |
+| 5. Why must validation include the vectorizer inside the pipeline? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Pipeline | `raw documents → tokenize → vectorize → classifier → label` |
+| 2. Bag-of-Words | Ignore word order; count how often each vocabulary term appears. |
+| 3. TF-IDF | `tf-idf(term, doc) = tf(term, doc) × idf(term)` where `idf(term) ≈ log(N / df(term))` — discounts very common words. |
+| 4. Effect | High-frequency corpus words like "the" get small weights. Rare but document-relevant terms get larger weights. |
+| 5. Why include vectorizer in pipeline | Vocabulary and IDF are learned from data. Must be fit on **training data only** to prevent leakage. |
+
+</details>
+
+---
+
+## Exercise LRG-8: Complete Cheat Sheet
+
+### Fill in all blanks:
+
+**Linear Regression Model:**
+`ŷ = ___________` (single prediction), `ŷ = ___________` (batch form)
+
+**MSE Cost Function:**
+`L(w) = ___________`
+
+**OLS Solution:**
+`w* = ___________` (fails when ___________)
+
+**Polynomial Feature Expansion:**
+`φ(x) = ___________`
+
+**Ridge (L2) Objective:**
+`argmin_w [Loss(w) + ___________]`
+
+**Lasso (L1) Objective:**
+`argmin_w [Loss(w) + ___________]`
+
+**ElasticNet Objective:**
+`argmin_w [Loss(w) + ___________]`
+
+**Logistic Regression Model:**
+`p(y=1|x) = ___________`
+
+**Binary Cross-Entropy:**
+`L = ___________`
+
+**Logit (Log-Odds):**
+`log(p/(1-p)) = ___________`
+
+**Softmax (Multiclass):**
+`p(y=k|x) = ___________`
+
+**Bayes' Rule:**
+`P(y|x) = ___________`
+
+**Naive Assumption:**
+`P(x₁, ..., x_d | y) = ___________`
+
+**Laplace Smoothing:**
+`P(word|class) = ___________`
+
+**TF-IDF:**
+`tf-idf(term, doc) = ___________`
+
+**Bias-Variance Decomposition:**
+`Total Error = ___________ + ___________ + ___________`
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+**Linear Regression Model:**
+`ŷ = **wᵀx + b**` (single prediction), `ŷ = **Xw**` (batch form)
+
+**MSE Cost Function:**
+`L(w) = **(1/n)||y - Xw||²**`
+
+**OLS Solution:**
+`w* = **(XᵀX)⁻¹Xᵀy**` (fails when **XᵀX is not invertible**)
+
+**Polynomial Feature Expansion:**
+`φ(x) = **[1, x, x², x³, ..., xᵈ]ᵀ**`
+
+**Ridge (L2) Objective:**
+`argmin_w [Loss(w) + **λ·||w||₂²**]`
+
+**Lasso (L1) Objective:**
+`argmin_w [Loss(w) + **λ·||w||₁**]`
+
+**ElasticNet Objective:**
+`argmin_w [Loss(w) + **λ·(ρ·||w||₁ + (1−ρ)·||w||₂²)**]`
+
+**Logistic Regression Model:**
+`p(y=1|x) = **σ(wᵀx + b) = 1/(1 + e⁻⁽wᵀx+b⁾)**`
+
+**Binary Cross-Entropy:**
+`L = **−[y·log(p) + (1−y)·log(1−p)]**`
+
+**Logit (Log-Odds):**
+`log(p/(1-p)) = **wᵀx + b**`
+
+**Softmax (Multiclass):**
+`p(y=k|x) = **exp(zⱼ) / Σⱼ exp(zⱼ)**`
+
+**Bayes' Rule:**
+`P(y|x) = **P(x|y)·P(y) / P(x)**`
+
+**Naive Assumption:**
+`P(x₁, ..., x_d | y) = **Πⱼ P(xⱼ | y)**`
+
+**Laplace Smoothing:**
+`P(word|class) = **(count + α) / (total + α·|V|)**`
+
+**TF-IDF:**
+`tf-idf(term, doc) = **tf(term, doc) × log(N / df(term))**`
+
+**Bias-Variance Decomposition:**
+`Total Error = **Bias² + Variance + Irreducible Error (σ²)**`
+
+</details>
+
+---
+
+# 📊 COMPLETE COVERAGE SUMMARY
+
+| Category | Concepts | Status |
+|----------|----------|--------|
+| Linear Regression | Model, MSE, normal equations, OLS | ✅ 100% |
+| Linear Regression | Geometric, probabilistic, Gauss-Markov | ✅ 100% |
+| Polynomial Regression | Feature expansion, bias-variance | ✅ 100% |
+| Regularization | Ridge, Lasso, ElasticNet | ✅ 100% |
+| Hyperparameter Tuning | Grid search, random search, CV, nested CV | ✅ 100% |
+| Learning Curves | Diagnosis, bias, variance, data/noise-limited | ✅ 100% |
+| Logistic Regression | Sigmoid, cross-entropy, logit, interpretation | ✅ 100% |
+| Multiclass | One-vs-Rest, Softmax | ✅ 100% |
+| ROC/AUC | ROC curve, AUC interpretation | ✅ 100% |
+| Naive Bayes | Bayes' rule, naive assumption, variants | ✅ 100% |
+| Text Classification | BoW, TF-IDF, pipeline, leakage | ✅ 100% |
+| **TOTAL** | **All Week 2 ML concepts** | ✅ **100%** |
+
+---
+
+## 📝 How to Use This Document
+
+1. **Read the question**, write your answer in the blank/box
+2. **Click the dropdown** to reveal the model answer
+3. **Compare** your answer to the model
+4. **Re-study** any sections where you got something wrong
+5. **Mark** your confidence level for each topic
+
+---
+
+**Good luck with your studies! 🎯**

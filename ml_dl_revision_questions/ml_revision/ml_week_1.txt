@@ -1,0 +1,1656 @@
+# Week 1 ML — Complete Revision Materials
+
+Based on your ML Week 1 slides covering **Introduction to ML, Supervised Learning, and Model Validation & Evaluation**, here are comprehensive revision materials following the established format.
+
+---
+
+## 1. CONFIDENCE TRACKER — WEEK 1 ML
+
+| Confidence Level | Meaning |
+|------------------|---------|
+| 🟢 **Green** | I knew this cold — could explain it to someone else |
+| 🟡 **Yellow** | I got it right, but I wasn't 100% sure / guessed |
+| 🔴 **Red** | I had no idea — got it wrong or completely guessed |
+
+---
+
+| Exercise | Topic | 🟢 | 🟡 | 🔴 | Re-study? |
+|----------|-------|----|----|----|-----------|
+| Ex 1 | Traditional Code vs ML Decision Tree | | | | ☐ |
+| Ex 2 | The Three Paradigms — Supervised, Unsupervised, RL | | | | ☐ |
+| Ex 3 | ML Pipeline & Definitions | | | | ☐ |
+| Ex 4 | KNN Fundamentals | | | | ☐ |
+| Ex 5 | Distance Metrics — Euclidean, Manhattan, Cosine | | | | ☐ |
+| Ex 6 | Feature Scaling — Min-Max, Z-Score | | | | ☐ |
+| Ex 7 | Curse of Dimensionality & ANN | | | | ☐ |
+| Ex 8 | Train/Validation/Test Split | | | | ☐ |
+| Ex 9 | Data Leakage | | | | ☐ |
+| Ex 10 | Bias-Variance Tradeoff | | | | ☐ |
+| Ex 11 | Underfitting vs Overfitting | | | | ☐ |
+| Ex 12 | Cross-Validation — K-Fold, Stratified, LOOCV | | | | ☐ |
+| Ex 13 | Confusion Matrix & Metrics — Accuracy, Precision, Recall, F1 | | | | ☐ |
+| Ex 14 | ROC Curve & AUC | | | | ☐ |
+| Ex 15 | Regression Metrics — RMSE, MAE, R², MAPE | | | | ☐ |
+| Ex 16 | Expert Systems — MYCIN, Deep Blue, ELIZA | | | | ☐ |
+| Ex 17 | Ethics & Responsible ML | | | | ☐ |
+| Ex 18 | The ML Development Workflow | | | | ☐ |
+| Ex 19 | Common ML Pitfalls | | | | ☐ |
+| Ex 20 | Complete Cheat Sheet | | | | ☐ |
+
+---
+
+## 2. 🎯 TEACH IT SUMMARY
+
+### The Big Picture — Week 1 ML
+
+Week 1 introduces the **foundations of machine learning** — what it is, why we need it, how to evaluate models, and when to use ML vs traditional code.
+
+**Part 1: What is ML & Why Do We Need It?** Traditional software works when we can write explicit rules (sorting, arithmetic). ML is needed when problems are too complex, fuzzy, or evolving to encode in rules — fraud detection, image recognition, speech transcription. The ML pipeline is: **Data + Algorithm + Compute → Model → Predictions**. The three paradigms are **Supervised Learning** (labeled data, map inputs to outputs), **Unsupervised Learning** (unlabeled data, find hidden structure), and **Reinforcement Learning** (learn by trial and error with rewards). **Semi-supervised, self-supervised, and transfer learning** blur these boundaries.
+
+**Part 2: Supervised Learning — KNN.** KNN is the simplest supervised learning algorithm: "similar inputs tend to have similar outputs." It's **instance-based** (stores all training data) and **non-parametric** (no fixed model parameters). Prediction requires computing distances — **Euclidean (L2)** for continuous features, **Manhattan (L1)** for grid-like movement, **Cosine** for text. **Feature scaling** is essential — unscaled features dominate distance calculations. The **curse of dimensionality** makes KNN fail in high dimensions (distances equalize, data becomes sparse). **Approximate Nearest Neighbors** (KD-Trees, LSH, HNSW) provide sub-linear search at the cost of exactness.
+
+**Part 3: Model Validation & Evaluation.** The key question is: "How well will our model perform on data it has never seen?" We split data into **Training** (fit model), **Validation** (tune hyperparameters), and **Test** (final evaluation, used ONCE). **Data leakage** occurs when test information influences training — always fit scalers on train only. The **bias-variance tradeoff** explains underfitting (high bias, model too simple) vs overfitting (high variance, model too complex). **Cross-validation** (K-Fold, Stratified, LOOCV) gives more reliable estimates than a single validation split. **Evaluation metrics** depend on the problem: for classification, use **Precision/Recall/F1** (not just Accuracy, especially for imbalanced data); for regression, use **RMSE/MAE/R²/MAPE**. The **confusion matrix** is the foundation of all classification metrics. **ROC-AUC** provides a threshold-independent view of classifier performance.
+
+**The Connecting Thread:** ML is not magic — it's systematic decision-making under uncertainty. The workflow is iterative: define problem → collect data → explore/engineer features → train/evaluate → deploy/monitor. Always start with the simplest model that works, and always validate honestly.
+
+---
+
+## 3. ⚠️ COMMON PITFALLS IN PRACTICE
+
+| Pitfall | Why It Happens | How to Avoid |
+|---------|----------------|--------------|
+| **1. Using accuracy for imbalanced data** | 99% negative → 99% accuracy trivial | Use **Precision, Recall, F1, PR-AUC** |
+| **2. Data leakage from scaling before splitting** | Fit scaler on full dataset → test stats leak | Fit scaler on **TRAIN only**; transform all |
+| **3. Shuffling time-series data** | Future leaks into past | Split **chronologically** |
+| **4. Tuning hyperparameters on test set** | Test set becomes part of training decisions | Use **validation set** or CV for tuning |
+| **5. Not using stratified split for imbalanced data** | Minor class missing from splits | Use **StratifiedSplit** |
+| **6. Forgetting feature scaling for KNN/SVM** | Large-range features dominate distance | Always **scale** features for distance-based models |
+| **7. Using KNN in high dimensions** | Curse of dimensionality → distances meaningless | Use **ANN** or reduce dimensions |
+| **8. Confusing validation and test sets** | Same purpose — wrong! | Val = tune; Test = final ONCE |
+| **9. Ignoring bias-variance tradeoff** | Model too simple or too complex | Use learning curves to diagnose |
+| **10. Over-relying on R² without checking residuals** | R² can be misleading | Also check RMSE, MAE, residual plots |
+
+---
+
+## 4. ONE-SENTENCE SUMMARY — WEEK 1 ML
+
+**How to use:** For each concept, try to write your own one-sentence summary *before* clicking to reveal the model answer.
+
+---
+
+### Intro to ML
+
+<details>
+<summary><b>Machine Learning (Arthur Samuel, 1959)</b> — Try your own first</summary>
+
+**Model Answer:** "A field of study that gives computers the ability to learn without being explicitly programmed."
+
+</details>
+
+---
+
+<details>
+<summary><b>ML Pipeline</b> — Try your own first</summary>
+
+**Model Answer:** `Data + Algorithm + Compute → Model → Predictions` — the end-to-end process of building and deploying ML systems.
+
+</details>
+
+---
+
+<details>
+<summary><b>Traditional Code vs ML</b> — Try your own first</summary>
+
+**Model Answer:** Use traditional code when perfect deterministic rules exist (sorting, formulas); use ML when problems are too complex for explicit rules (fraud detection, image recognition).
+
+</details>
+
+---
+
+<details>
+<summary><b>Supervised Learning</b> — Try your own first</summary>
+
+**Model Answer:** Learning from labeled data where the model maps inputs to known outputs — the most common paradigm in ML.
+
+</details>
+
+---
+
+<details>
+<summary><b>Unsupervised Learning</b> — Try your own first</summary>
+
+**Model Answer:** Finding hidden patterns in unlabeled data without predefined outputs — clustering, anomaly detection, topic modeling.
+
+</details>
+
+---
+
+<details>
+<summary><b>Reinforcement Learning</b> — Try your own first</summary>
+
+**Model Answer:** Learning by trial and error through rewards and punishments in sequential decision-making environments — game playing, robotics.
+
+</details>
+
+---
+
+<details>
+<summary><b>Semi-Supervised Learning</b> — Try your own first</summary>
+
+**Model Answer:** Uses a small amount of labeled data plus a large amount of unlabeled data — common in practice because labeling is expensive.
+
+</details>
+
+---
+
+<details>
+<summary><b>Self-Supervised Learning</b> — Try your own first</summary>
+
+**Model Answer:** Creates supervision signals from the data itself (e.g., GPT predicts next word) — no human labels needed.
+
+</details>
+
+---
+
+<details>
+<summary><b>Transfer Learning</b> — Try your own first</summary>
+
+**Model Answer:** Pre-training a model on a large dataset and fine-tuning it on a smaller, task-specific dataset — works great with limited data.
+
+</details>
+
+---
+
+### KNN & Distance
+
+<details>
+<summary><b>KNN (K-Nearest Neighbors)</b> — Try your own first</summary>
+
+**Model Answer:** A lazy, instance-based, non-parametric algorithm that classifies new points by majority vote of their K nearest neighbors.
+
+</details>
+
+---
+
+<details>
+<summary><b>KNN — Lazy Learner</b> — Try your own first</summary>
+
+**Model Answer:** No training phase — stores the entire training set and does computation at query time; "lazy" because it postpones learning until prediction.
+
+</details>
+
+---
+
+<details>
+<summary><b>Non-Parametric (KNN)</b> — Try your own first</summary>
+
+**Model Answer:** No fixed model parameters; the data itself IS the model — no assumptions about the underlying data distribution.
+
+</details>
+
+---
+
+<details>
+<summary><b>Euclidean Distance (L2)</b> — Try your own first</summary>
+
+**Model Answer:** Straight-line distance between two points in feature space — default for continuous features after scaling.
+
+</details>
+
+---
+
+<details>
+<summary><b>Manhattan Distance (L1)</b> — Try your own first</summary>
+
+**Model Answer:** Sum of absolute differences per axis — grid-like movement; more robust to outliers than Euclidean.
+
+</details>
+
+---
+
+<details>
+<summary><b>Cosine Similarity</b> — Try your own first</summary>
+
+**Model Answer:** Measures the angle (direction) between vectors, ignoring magnitude — ideal for text documents and embeddings.
+
+</details>
+
+---
+
+<details>
+<summary><b>Min-Max Normalization</b> — Try your own first</summary>
+
+**Model Answer:** Scales features to `[0,1]` using `(x - min)/(max - min)` — sensitive to outliers.
+
+</details>
+
+---
+
+<details>
+<summary><b>Z-Score Standardization</b> — Try your own first</summary>
+
+**Model Answer:** Transforms features to zero mean and unit variance using `(x - μ)/σ` — robust to outliers, most commonly used.
+
+</details>
+
+---
+
+<details>
+<summary><b>Curse of Dimensionality</b> — Try your own first</summary>
+
+**Model Answer:** In high-dimensional spaces, distances equalize, data becomes sparse, and every point is an outlier — breaking distance-based algorithms.
+
+</details>
+
+---
+
+<details>
+<summary><b>ANN (Approximate Nearest Neighbors)</b> — Try your own first</summary>
+
+**Model Answer:** Sub-linear time algorithms (O(log n)) that sacrifice perfect accuracy for scalability — powers modern vector databases (HNSW, FAISS).
+
+</details>
+
+---
+
+### Model Validation
+
+<details>
+<summary><b>Train/Validation/Test Split</b> — Try your own first</summary>
+
+**Model Answer:** Three-way split: Training fits the model, Validation tunes hyperparameters, Test provides the final unbiased performance estimate.
+
+</details>
+
+---
+
+<details>
+<summary><b>Data Leakage</b> — Try your own first</summary>
+
+**Model Answer:** When information from outside the training set (test data, future information) leaks into training, causing over-optimistic performance estimates.
+
+</details>
+
+---
+
+<details>
+<summary><b>Stratified Split</b> — Try your own first</summary>
+
+**Model Answer:** Preserves class proportions in each split — essential for imbalanced datasets.
+
+</details>
+
+---
+
+<details>
+<summary><b>K-Fold Cross-Validation</b> — Try your own first</summary>
+
+**Model Answer:** Divide data into K folds; train on K-1 folds, validate on the held-out fold, repeat K times for a reliable performance estimate.
+
+</details>
+
+---
+
+<details>
+<summary><b>LOOCV (Leave-One-Out CV)</b> — Try your own first</summary>
+
+**Model Answer:** K-Fold where K=N (number of samples); trains on N-1, validates on 1, repeated N times — useful for tiny datasets but computationally expensive.
+
+</details>
+
+---
+
+### Bias-Variance & Metrics
+
+<details>
+<summary><b>Bias-Variance Tradeoff</b> — Try your own first</summary>
+
+**Model Answer:** As model complexity increases, bias decreases but variance increases; the goal is to find the sweet spot minimizing total error.
+
+</details>
+
+---
+
+<details>
+<summary><b>Underfitting (High Bias)</b> — Try your own first</summary>
+
+**Model Answer:** Model too simple to capture underlying patterns — high error on both training and test data.
+
+</details>
+
+---
+
+<details>
+<summary><b>Overfitting (High Variance)</b> — Try your own first</summary>
+
+**Model Answer:** Model memorizes training data (including noise) — performs well on train but poorly on test.
+
+</details>
+
+---
+
+<details>
+<summary><b>Bias-Variance Decomposition</b> — Try your own first</summary>
+
+**Model Answer:** Total expected error = Bias² + Variance + Irreducible Error (noise inherent in the data).
+
+</details>
+
+---
+
+<details>
+<summary><b>Confusion Matrix</b> — Try your own first</summary>
+
+**Model Answer:** A `K×K` table showing counts of true vs predicted labels — foundation of all classification metrics.
+
+</details>
+
+---
+
+<details>
+<summary><b>Precision</b> — Try your own first</summary>
+
+**Model Answer:** `TP/(TP+FP)` — "Of all positive predictions, how many were actually positive?" Prioritize when false positives are costly.
+
+</details>
+
+---
+
+<details>
+<summary><b>Recall (Sensitivity)</b> — Try your own first</summary>
+
+**Model Answer:** `TP/(TP+FN)` — "Of all actual positives, how many did we catch?" Prioritize when false negatives are costly.
+
+</details>
+
+---
+
+<details>
+<summary><b>F1 Score</b> — Try your own first</summary>
+
+**Model Answer:** `2×(P×R)/(P+R)` — harmonic mean of precision and recall; balances both, ideal for imbalanced classes.
+
+</details>
+
+---
+
+<details>
+<summary><b>ROC Curve & AUC</b> — Try your own first</summary>
+
+**Model Answer:** Plots TPR (Recall) vs FPR across all thresholds; AUC measures ranking ability — 0.5 = random, 1.0 = perfect ranking.
+
+</details>
+
+---
+
+<details>
+<summary><b>RMSE (Root Mean Squared Error)</b> — Try your own first</summary>
+
+**Model Answer:** `√((1/N)Σ(y-ŷ)²)` — measures average prediction error in target units, penalizing large errors more heavily.
+
+</details>
+
+---
+
+<details>
+<summary><b>MAE (Mean Absolute Error)</b> — Try your own first</summary>
+
+**Model Answer:** `(1/N)Σ|y-ŷ|` — average absolute error; robust to outliers compared to RMSE.
+
+</details>
+
+---
+
+<details>
+<summary><b>R² (Coefficient of Determination)</b> — Try your own first</summary>
+
+**Model Answer:** `1 - (SS_res/SS_total)` — proportion of variance explained by the model; intuitive for stakeholders.
+
+</details>
+
+---
+
+### Ethics & History
+
+<details>
+<summary><b>Expert Systems</b> — Try your own first</summary>
+
+**Model Answer:** Hand-crafted systems where domain experts encode rules — powerful for narrow tasks but don't scale (e.g., MYCIN medical diagnosis).
+
+</details>
+
+---
+
+<details>
+<summary><b>MYCIN</b> — Try your own first</summary>
+
+**Model Answer:** A 1970s medical diagnosis system with 600+ hand-coded rules; impressive for its time but failed because manual rule updates don't scale.
+
+</details>
+
+---
+
+<details>
+<summary><b>Deep Blue</b> — Try your own first</summary>
+
+**Model Answer:** A 1997 chess engine that beat Kasparov using handcrafted evaluation functions and brute force search — couldn't generalize to other games.
+
+</details>
+
+---
+
+<details>
+<summary><b>ELIZA</b> — Try your own first</summary>
+
+**Model Answer:** A 1966 chatbot with scripted pattern-matched responses — not true AI because it had zero understanding, just mirrored user input.
+
+</details>
+
+---
+
+<details>
+<summary><b>Biased Training Data</b> — Try your own first</summary>
+
+**Model Answer:** Historical data containing societal biases gets inherited and amplified by the model, creating fairness violations.
+
+</details>
+
+---
+
+<details>
+<summary><b>Distribution Shift (Concept Drift)</b> — Try your own first</summary>
+
+**Model Answer:** When the data distribution changes after deployment (e.g., COVID changed economic patterns), making the model outdated.
+
+</details>
+
+---
+
+## 5. QUICK REFERENCE CHEAT SHEET — WEEK 1 ML
+
+### ML Definition & Pipeline
+
+<details>
+<summary><b>ML Definition & Pipeline</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **ML Definition (Arthur Samuel)** | "A field of study that gives computers the ability to learn without being explicitly programmed." |
+| **ML Pipeline** | `Data + Algorithm + Compute → Model → Predictions` |
+
+</details>
+
+---
+
+### Three Paradigms
+
+<details>
+<summary><b>Supervised, Unsupervised, RL</b> — Try to recall first</summary>
+
+| Paradigm | Data | Goal | Examples |
+|----------|------|------|----------|
+| **Supervised** | Labeled | Map inputs to outputs | Spam detection, price prediction |
+| **Unsupervised** | Unlabeled | Find hidden structure | Clustering, anomaly detection |
+| **Reinforcement** | Rewards | Learn by trial and error | Game playing, robotics |
+
+</details>
+
+---
+
+### KNN — Core Concepts
+
+<details>
+<summary><b>KNN Summary</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Type** | Instance-based, lazy learner, non-parametric |
+| **Prediction (Classification)** | Majority vote of K nearest neighbors |
+| **Prediction (Regression)** | Average of K nearest neighbors |
+| **Training Time** | O(1) — just store data |
+| **Prediction Time** | O(n·d) — naive; O(log n) with ANN |
+| **Memory** | O(n·d) — stores entire dataset |
+
+</details>
+
+---
+
+### Distance Metrics
+
+<details>
+<summary><b>Distance Metrics</b> — Try to recall first</summary>
+
+| Metric | Formula | Best For |
+|--------|---------|----------|
+| **Euclidean (L2)** | `√Σ(xᵢ-yᵢ)²` | Continuous features, default choice |
+| **Manhattan (L1)** | `Σ|xᵢ-yᵢ|` | Grid-based movement, robust to outliers |
+| **Cosine** | `x·y/(||x||||y||)` | Text documents, embeddings |
+| **Jaccard** | `|A∩B|/|A∪B|` | Binary purchase history, sets |
+
+</details>
+
+---
+
+### Feature Scaling
+
+<details>
+<summary><b>Scaling Methods</b> — Try to recall first</summary>
+
+| Method | Formula | Best For | Outlier Sensitivity |
+|--------|---------|----------|---------------------|
+| **Min-Max** | `(x-min)/(max-min)` | NNs, KNN, SVM, images | High |
+| **Z-Score** | `(x-μ)/σ` | Linear/logistic regression, PCA, SVM | Low (most common) |
+
+</details>
+
+---
+
+### Curse of Dimensionality
+
+<details>
+<summary><b>Curse of Dimensionality</b> — Try to recall first</summary>
+
+| Effect | What It Means |
+|--------|---------------|
+| **Distances equalize** | Max/min distance ratio → 1; "nearest" and "farthest" indistinguishable |
+| **Data becomes sparse** | Every point is an outlier |
+| **Volume explosion** | 2^d corners in a unit hypercube |
+| **KD-Trees break** | Pruning ineffective beyond d > 20 |
+
+</details>
+
+---
+
+### Train/Validation/Test Split
+
+<details>
+<summary><b>Three-Way Split</b> — Try to recall first</summary>
+
+| Split | Purpose | When to Use |
+|-------|---------|-------------|
+| **Training Set** | Fit model parameters | Always |
+| **Validation Set** | Tune hyperparameters | Always |
+| **Test Set** | Final unbiased estimate | Used ONCE at the end |
+
+**Typical ratios:** 60/20/20 or 70/15/15
+
+</details>
+
+---
+
+### Cross-Validation Methods
+
+<details>
+<summary><b>CV Methods</b> — Try to recall first</summary>
+
+| Method | Compute Cost | Estimate Bias | Estimate Variance | Best For |
+|--------|--------------|---------------|-------------------|----------|
+| **Holdout** | Low | Higher | Higher | Large datasets, fast iteration |
+| **5-Fold CV** | Medium | Moderate | Moderate | General purpose default |
+| **10-Fold CV** | Medium-High | Lower | Moderate | When accuracy matters |
+| **LOOCV** | Very High | Lowest | Highest | Tiny datasets (<100 samples) |
+
+</details>
+
+---
+
+### Bias-Variance Tradeoff
+
+<details>
+<summary><b>Bias-Variance</b> — Try to recall first</summary>
+
+| Concept | Definition | Fix |
+|---------|------------|-----|
+| **High Bias (Underfitting)** | Model too simple → high train & test error | Increase complexity, add features, reduce regularization |
+| **High Variance (Overfitting)** | Model too complex → low train, high test error | More data, regularization, simpler model |
+| **Total Error** | Bias² + Variance + Irreducible Error (σ²) | — |
+
+</details>
+
+---
+
+### Classification Metrics
+
+<details>
+<summary><b>Confusion Matrix Metrics</b> — Try to recall first</summary>
+
+| Metric | Formula | What It Measures |
+|--------|---------|------------------|
+| **Accuracy** | `(TP+TN)/(TP+TN+FP+FN)` | Overall correctness |
+| **Precision** | `TP/(TP+FP)` | Quality of positive predictions |
+| **Recall (Sensitivity)** | `TP/(TP+FN)` | Coverage of actual positives |
+| **F1 Score** | `2·P·R/(P+R)` | Harmonic mean of P and R |
+| **Specificity** | `TN/(TN+FP)` | Correctness on negatives |
+
+</details>
+
+---
+
+<details>
+<summary><b>ROC & AUC</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **ROC Curve** | Plots TPR (Recall) vs FPR at every threshold |
+| **AUC** | Area under ROC curve |
+| **AUC = 0.5** | Random classifier |
+| **AUC = 1.0** | Perfect classifier |
+| **Why AUC is useful** | Threshold-independent |
+
+</details>
+
+---
+
+### Regression Metrics
+
+<details>
+<summary><b>Regression Metrics</b> — Try to recall first</summary>
+
+| Metric | Formula | Unit | Notes |
+|--------|---------|------|-------|
+| **MAE** | `(1/N)Σ|y-ŷ|` | Same as target | Robust to outliers |
+| **MSE** | `(1/N)Σ(y-ŷ)²` | Squared | Penalizes large errors |
+| **RMSE** | `√MSE` | Same as target | Most popular |
+| **R²** | `1-SS_res/SS_total` | Unitless [0,1] | Variance explained |
+| **MAPE** | `(1/N)Σ|(y-ŷ)/y|×100` | Percentage | Business-friendly |
+
+</details>
+
+---
+
+### Key Defaults
+
+<details>
+<summary><b>Key Defaults</b> — Try to recall first</summary>
+
+| Concept | Default |
+|---------|---------|
+| KNN K value | √n (rough starting point), tuned via CV |
+| IoU threshold | 0.5 |
+| Train/Val/Test split | 60/20/20 or 70/15/15 |
+| Cross-validation K | 5 or 10 |
+| Dropout default | 0.5 |
+
+</details>
+
+---
+
+## 6. CONNECTIONS MAP — WEEK 1 ML
+
+### 🌳 TEXT-BASED CONCEPT MAP
+
+```
+╔══════════════════════════════════════════════════════════════════════════╗
+║                                                                          ║
+║                    WEEK 1 ML: INTRODUCTION TO ML                       ║
+║                                                                          ║
+║                    ┌─────────────────────────────────────┐              ║
+║                    │   WHAT IS ML?                       │              ║
+║                    │   "Learn without being             │              ║
+║                    │   explicitly programmed"            │              ║
+║                    └──────────────┬──────────────────────┘              ║
+║                                   │                                      ║
+║    ┌──────────────────────────────┼──────────────────────────────┐      ║
+║    │                              │                              │      ║
+║    ▼                              ▼                              ▼      ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │  WHY ML?     │          │  3 PARADIGMS  │          │ TRADITIONAL  │  ║
+║ │  Problems too│          │  Supervised   │          │ CODE vs ML   │  ║
+║ │  fuzzy/evolv-│          │  Unsupervised │          │  Rules vs    │  ║
+║ │  ing for     │          │  Reinforcement│          │  Learning    │  ║
+║ │  rules       │          └──────┬───────┘          └──────────────┘  ║
+║ └──────────────┘                 │                                      ║
+║        │                         │                                      ║
+║        └─────────────────────────┼──────────────────────────────────┐   ║
+║                                  │                                  │   ║
+║                                  ▼                                  │   ║
+║                    ┌─────────────────────────────────────┐          │   ║
+║                    │   KNN (Lazy, Instance-Based)       │          │   ║
+║                    │   Similar inputs → similar outputs │          │   ║
+║                    └──────────────┬──────────────────────┘          │   ║
+║                                   │                                 │   ║
+║    ┌──────────────────────────────┼──────────────────────────────┐  │   ║
+║    │                              │                              │  │   ║
+║    ▼                              ▼                              ▼  │   ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐│   ║
+║ │  DISTANCE    │          │  FEATURE     │          │  CURSE OF    ││   ║
+║ │  METRICS     │          │  SCALING     │          │  DIMENSION-  ││   ║
+║ │  Euclidean   │          │  Min-Max     │          │  ALITY       ││   ║
+║ │  Manhattan   │          │  Z-Score     │          │  Distances   ││   ║
+║ │  Cosine      │          └──────────────┘          │  equalize    ││   ║
+║ └──────────────┘                                    │  → ANN       ││   ║
+║        │                                            └──────────────┘│   ║
+║        └──────────────────────────────────────────────────────────┘   ║
+║                                      │                                 ║
+║                                      ▼                                 ║
+║                    ┌─────────────────────────────────────┐             ║
+║                    │   HOW DO WE KNOW IT WORKS?         │             ║
+║                    │   VALIDATION & EVALUATION          │             ║
+║                    └──────────────┬──────────────────────┘             ║
+║                                   │                                     ║
+║    ┌──────────────────────────────┼──────────────────────────────┐     ║
+║    │                              │                              │     ║
+║    ▼                              ▼                              ▼     ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │  DATA        │          │  BIAS-       │          │  EVALUATION  │  ║
+║ │  SPLITTING   │          │  VARIANCE    │          │  METRICS     │  ║
+║ │  Train/Val/  │          │  Tradeoff    │          │  Classifica- │  ║
+║ │  Test        │          │  Under/Over- │          │  tion (Prec, │  ║
+║ │  CV (K-Fold, │          │  fitting     │          │  Rec, F1,    │  ║
+║ │  LOOCV)      │          └──────────────┘          │  AUC)        │  ║
+║ │  Data Leakage│                                    │  Regression  │  ║
+║ └──────────────┘                                    │  (RMSE, MAE, │  ║
+║        │                                            │  R²)         │  ║
+║        └─────────────────────────────────────────────┴──────────────┘  ║
+║                                      │                                 ║
+║                                      ▼                                 ║
+║                    ┌─────────────────────────────────────┐             ║
+║                    │   DEPLOYMENT & ETHICS               │             ║
+║                    │   Distribution Shift · Bias        │             ║
+║                    │   Explainability · Accountability  │             ║
+║                    └─────────────────────────────────────┘             ║
+║                                                                         ║
+╚══════════════════════════════════════════════════════════════════════════╝
+```
+
+---
+
+### 🔗 KEY CONNECTION EXPLANATIONS
+
+<details>
+<summary><b>Connection 1: How does the ML Pipeline connect everything?</b></summary>
+
+```
+Data + Algorithm + Compute → Model → Predictions
+    │           │              │
+    │           │              └── KNN (Algorithm choice)
+    │           │
+    │           └── KNN, scaling, distance metrics
+    │
+    └── Data splitting, preprocessing, leakage prevention
+```
+
+**Key insight:** Every step in the pipeline must be executed correctly — a break anywhere leads to a failed model.
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 2: How does data quality connect to model success?</b></summary>
+
+```
+Data Quality → Model Performance → Generalization
+    │
+    ├── Imbalanced data → Accuracy misleading → Use F1/PR-AUC
+    ├── Data leakage → Over-optimistic results → Strict splitting
+    ├── No scaling → Distance-based models fail → Scale features
+    └── Too many features → Curse of dimensionality → Feature selection/ANN
+```
+
+**Key insight:** "Garbage in, garbage out" — data quality matters more than algorithm choice.
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 3: How does bias-variance tradeoff connect to KNN?</b></summary>
+
+```
+K = 1                      K = √n                      K = N
+    │                           │                           │
+    ▼                           ▼                           ▼
+Low Bias                    Balanced                    High Bias
+High Variance               Moderate Variance           Low Variance
+Overfitting                 Good Fit                    Underfitting
+```
+
+**Key insight:** The K value controls model complexity — find the sweet spot via cross-validation.
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 4: How does validation connect to everything?</b></summary>
+
+```
+Train/Val/Test Split
+    │
+    ├── Prevents Data Leakage
+    ├── Enables Hyperparameter Tuning (K, α, etc.)
+    ├── Detects Overfitting (train vs val gap)
+    ├── Guides Model Selection (choose best K)
+    └── Provides Final Honest Estimate (test set)
+
+    If you skip proper validation, you don't know if your model actually works.
+```
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 5: How do evaluation metrics connect to business requirements?</b></summary>
+
+```
+Business Need                    →   ML Metric
+─────────────────────────────────────────────────────────
+"Don't miss fraud"               →   Recall (minimize FN)
+"Don't falsely accuse customers" →   Precision (minimize FP)
+"Balance both"                   →   F1 Score
+"Compare models"                 →   AUC-ROC
+"Explain to business"            →   Accuracy or R²
+```
+
+</details>
+
+---
+
+### 📊 CONNECTION MATRIX
+
+| Concept A | Connects To | Why |
+|-----------|-------------|-----|
+| **KNN** | Distance Metrics | KNN needs distance to find neighbors |
+| **Distance Metrics** | Feature Scaling | Unscaled features dominate distance |
+| **Feature Scaling** | KNN/SVM | Required for distance-based models |
+| **Curse of Dimensionality** | ANN | Exact KNN fails → use ANN |
+| **Data Splitting** | CV | CV helps when data is limited |
+| **Data Leakage** | Test Set | Leakage → over-optimistic test results |
+| **Bias-Variance** | KNN K value | K controls bias-variance tradeoff |
+| **Precision** | Recall | Tradeoff via F1 Score |
+| **Confusion Matrix** | All Metrics | Foundation of classification metrics |
+| **Distribution Shift** | Deployment | Model fails when data changes |
+| **Bias in Data** | Ethics | Model inherits and amplifies bias |
+
+---
+
+## 7. COMMON MISCONCEPTIONS — WEEK 1 ML
+
+**How to use:** Read each misconception first. Try to identify what's wrong. Then click to reveal the reality.
+
+---
+
+### Misconception 1: "ML is always better than traditional code."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| ML should always be used when you have data. | ML is NOT always the right tool. Use **traditional code** for problems with perfect deterministic rules (sorting, arithmetic, formulas). ML adds complexity and opacity without benefit in these cases. |
+
+**Key insight:** ML is a tool, not a hammer for every nail.
+
+</details>
+
+---
+
+### Misconception 2: "Accuracy is the only metric I need."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Higher accuracy = better model. | Accuracy can be **dangerously misleading** for imbalanced data. A model that always predicts the majority class gets 99% accuracy but is completely useless. Use **Precision, Recall, F1, and PR-AUC** for imbalanced problems. |
+
+**Key insight:** The right metric aligns with your business objective and error costs.
+
+</details>
+
+---
+
+### Misconception 3: "Validation and test sets are the same thing."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Validation and test sets are interchangeable. | They serve **different purposes**: |
+| | • **Validation**: tune hyperparameters, model selection (used many times) |
+| | • **Test**: final unbiased evaluation (used ONCE at the very end) |
+| | Tuning on the test set = **data leakage** — invalidates your final estimate. |
+
+</details>
+
+---
+
+### Misconception 4: "KNN doesn't actually learn anything."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| KNN is a lazy learner — it doesn't learn. | KNN "learns" by **storing the training data**. The decision boundary is implicitly defined by the data. It's a different form of learning — learning happens at query time rather than training time. It can approximate any decision boundary and works well on small, low-dimensional data. |
+
+</details>
+
+---
+
+### Misconception 5: "Feature scaling is only needed for KNN."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Only distance-based models need scaling. | **Many algorithms need scaling:** |
+| | • **Linear/Logistic Regression** — coefficients depend on scale |
+| | • **SVM** — distances to hyperplane depend on scale |
+| | • **PCA** — variance dominated by larger scales |
+| | • **Neural Networks** — gradients affected by input scales |
+| | • **Only tree-based models** are scale-invariant. |
+
+</details>
+
+---
+
+### Misconception 6: "The curse of dimensionality only matters for very high dimensions."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Curse of dimensionality only affects 10,000+ dimensions. | The curse kicks in much earlier — **around d > 20**: |
+| | • KD-Trees break at d > 20 |
+| | • Distances start to equalize at d > 30-50 |
+| | • Volume explodes: 2^d corners in a unit hypercube |
+| | • Even d=100 is enough for severe sparsity |
+
+</details>
+
+---
+
+### Misconception 7: "Cross-validation is only for small datasets."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| CV is a crutch for small datasets. | CV is useful for **ALL** dataset sizes: |
+| | • **Small datasets**: maximizes training data per fold |
+| | • **Large datasets**: reduces variance of performance estimate |
+| | • **Hyperparameter tuning**: prevents overfitting to one validation split |
+| | • **Model selection**: fair comparison between models |
+
+</details>
+
+---
+
+### Misconception 8: "More data always helps."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| More data = always better model. | **Not necessarily:**
+| | • **Low-quality data** → garbage in, garbage out |
+| | • **Imbalanced data** → more data can make it worse |
+| | • **Label noise** → more wrong labels = worse model |
+| | • **Dataset shift** → data from wrong distribution hurts |
+| | • **Diminishing returns** → at some point, more data barely helps |
+
+</details>
+
+---
+
+### Misconception 9: "All distance metrics work equally well for KNN."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Euclidean is the default — use it for everything. | Different data types need different distance metrics: |
+| | • **Continuous features** → Euclidean (L2) |
+| | • **Text documents** → Cosine |
+| | • **Grid-based movement** → Manhattan (L1) |
+| | • **Binary purchase history** → Jaccard |
+| | • **High-dimensional embeddings** → Cosine |
+
+</details>
+
+---
+
+### Misconception 10: "ANN (Approximate NN) always gives worse results."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| ANN sacrifices too much accuracy for speed. | ANN can be **nearly as accurate** while being **1000× faster** — HNSW achieves ~99% recall with O(log n) query time. In production, ANN is the practical choice at scale; exact KNN is for research/small datasets. |
+
+</details>
+
+---
+
+### Misconception 11: "Expert systems were a failure because they were poorly designed."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Expert systems failed because the rules were incomplete. | Expert systems (MYCIN, Deep Blue, ELIZA) failed because **encoding all human knowledge in rules doesn't scale**. Updating rules manually is impossible as domains grow and change. This is exactly why ML — which learns patterns from data — emerged. |
+
+</details>
+
+---
+
+### Misconception 12: "R² of 0.95 means the model is excellent."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| High R² = good model. | R² can be misleading: |
+| | • R² = 0.95 with poor predictions if the scale is wrong |
+| | • R² can be high but residuals have patterns |
+| | • R² can be negative for models worse than predicting the mean |
+| | • Always check **RMSE/MAE** AND residual plots |
+
+</details>
+
+---
+
+## 📊 QUICK REFERENCE: MISCONCEPTIONS vs REALITY
+
+| Misconception | Reality |
+|---------------|---------|
+| ML is always better | Traditional code is better for deterministic problems |
+| Accuracy is the only metric | Precision/Recall/F1 often more important |
+| Validation = Test set | They serve different purposes; test is final |
+| KNN doesn't learn | It learns by storing data; decision boundary implicit |
+| Scaling only for KNN | Many algorithms need scaling (Reg, SVM, PCA) |
+| Curse only at 10,000+ dimensions | Curse kicks in at d > 20 |
+| CV only for small datasets | CV helps with robust estimates at any size |
+| More data always helps | Quality, balance, and relevance matter more |
+| All distance metrics work equally | Choose metric based on data type |
+| ANN always worse than exact | ANN can be 99% accurate, 1000× faster |
+| Expert systems failed due to design | They failed because rules don't scale |
+| R² of 0.95 = excellent | Also check RMSE/MAE and residual plots |
+
+---
+
+# 📚 WEEK 1 ML — COMPLETE STUDY GUIDE
+## All Exercises with Answers in Spoiler Format
+
+---
+
+# SECTION 1: INTRO TO ML
+
+---
+
+## Exercise ML-1: Traditional Code vs ML
+
+For each scenario, write **"Traditional Code"** or **"Machine Learning"** and **why**:
+
+| Scenario | Your Answer | Why? |
+|----------|-------------|------|
+| Sort 1 million numbers | | |
+| Detect credit card fraud | | |
+| Convert Celsius to Fahrenheit | | |
+| Predict if a customer will churn | | |
+| Identify objects in a photo | | |
+| Calculate a mortgage payment | | |
+| Transcribe speech to text | | |
+| Recommend products to a user | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Scenario | Answer | Why? |
+|----------|--------|------|
+| Sort 1 million numbers | **Traditional Code** | Perfect rules exist (quicksort, mergesort). Deterministic, no ambiguity. ML adds no value. |
+| Detect credit card fraud | **Machine Learning** | Fraud patterns are complex, evolving, and subtle. Can't write explicit rules for all cases. |
+| Convert Celsius to Fahrenheit | **Traditional Code** | Exact mathematical formula: `°F = °C × 9/5 + 32`. Deterministic and perfect. |
+| Predict if a customer will churn | **Machine Learning** | Complex behavioral signals. No simple rule exists. Patterns are learned from data. |
+| Identify objects in a photo | **Machine Learning** | 150,000+ pixel values. Can't enumerate rules for all objects, lighting, angles, variations. |
+| Calculate a mortgage payment | **Traditional Code** | Formula is deterministic and exact (principal, interest rate, term). |
+| Transcribe speech to text | **Machine Learning** | Infinite variation in accent, tone, noise. Can't write rules for all pronunciations. |
+| Recommend products to a user | **Machine Learning** | Complex preference patterns. Collaborative/content-based filtering learned from data. |
+
+</details>
+
+---
+
+## Exercise ML-2: The Three Paradigms
+
+| Problem | Paradigm |
+|---------|----------|
+| Group customers by purchasing behavior | |
+| Teach a robot to walk | |
+| Predict house prices from features | |
+| Find topics in a collection of news articles | |
+| Detect spam emails | |
+| Train an agent to play chess | |
+| Segment images by similar visual features | |
+| Predict tomorrow's temperature | |
+| Identify anomalies in network traffic | |
+| Optimize a supply chain with delayed rewards | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Problem | Paradigm |
+|---------|----------|
+| Group customers by purchasing behavior | **Unsupervised** (Clustering) |
+| Teach a robot to walk | **Reinforcement Learning** (Trial and error with rewards) |
+| Predict house prices from features | **Supervised** (Regression) |
+| Find topics in a collection of news articles | **Unsupervised** (Topic modeling) |
+| Detect spam emails | **Supervised** (Classification) |
+| Train an agent to play chess | **Reinforcement Learning** (Rewards for winning) |
+| Segment images by similar visual features | **Unsupervised** (Clustering) |
+| Predict tomorrow's temperature | **Supervised** (Regression) |
+| Identify anomalies in network traffic | **Unsupervised** (Anomaly detection) |
+| Optimize a supply chain with delayed rewards | **Reinforcement Learning** (Sequential decisions) |
+
+</details>
+
+---
+
+# SECTION 2: KNN & SUPERVISED LEARNING
+
+---
+
+## Exercise KNN-1: KNN Fundamentals
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What does KNN stand for? | |
+| 2. What type of learning is KNN? | |
+| 3. What does "lazy learner" mean? | |
+| 4. What does "non-parametric" mean? | |
+| 5. What is the core intuition of KNN? | |
+| 6. What happens when K=1? | |
+| 7. What happens when K=N (all data)? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. KNN stands for | **K-Nearest Neighbors** |
+| 2. Type of learning | **Instance-based**, **lazy learner**, **non-parametric** supervised learning. |
+| 3. Lazy learner | No training phase — stores the entire training set and does computation at query time. |
+| 4. Non-parametric | No fixed model parameters; the data itself IS the model. No assumptions about the underlying data distribution. |
+| 5. Core intuition | **"Similar inputs tend to have similar outputs."** |
+| 6. K=1 | Very low bias, very high variance — decision boundary is jagged, captures noise → **overfitting**. |
+| 7. K=N | High bias, low variance — predicts majority class for everything → **underfitting**. |
+
+</details>
+
+---
+
+## Exercise KNN-2: Distance Metrics
+
+| Scenario | Best Distance Metric | Why? |
+|----------|---------------------|------|
+| Text documents represented as word count vectors | | |
+| House price prediction with continuous features | | |
+| User embeddings from a neural network (d=512) | | |
+| Grid-based movement (robot navigating a warehouse) | | |
+| Customer purchase history (binary: bought or not) | | |
+| Gene expression data with many zeros | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Scenario | Best Distance Metric | Why? |
+|----------|---------------------|------|
+| Text documents (word count vectors) | **Cosine Similarity** | Focuses on direction, ignores document length. |
+| House price prediction | **Euclidean (L2)** | Default choice for continuous features after scaling. |
+| User embeddings (d=512) | **Euclidean (L2)** or **Cosine** | Both work well; Cosine is common for normalized embeddings. |
+| Grid-based movement (robot) | **Manhattan (L1)** | Moves in grid patterns (up/down/left/right). |
+| Customer purchase history (binary) | **Jaccard** or **Cosine** | Measures overlap of purchased items. |
+| Gene expression data with many zeros | **Manhattan (L1)** or **Cosine** | L1 is robust to zeros; Cosine works on sparse vectors. |
+
+</details>
+
+---
+
+## Exercise KNN-3: Feature Scaling
+
+**Scenario:** You have a dataset with Age (25-45) and Salary ($50,000-$90,000).
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. If you use Euclidean distance without scaling, which feature dominates? Show the math. | |
+| 2. Apply **Min-Max Normalization** to both features. | |
+| 3. Apply **Z-Score Standardization** to both features. | |
+| 4. Which scaling method is more robust to outliers? Why? | |
+| 5. For KNN, is scaling always necessary? | |
+| 6. What happens if you scale *after* splitting vs *before* splitting? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Which feature dominates? | **Salary dominates completely**. Distance = √((30-25)² + (60000-50000)²) ≈ 10,000. Age difference (25) is negligible compared to salary difference (10,000). |
+| 2. Min-Max | Age: [25→0, 30→0.25, 35→0.5, 40→0.75, 45→1]; Salary: [50k→0, 60k→0.25, 70k→0.5, 80k→0.75, 90k→1]. |
+| 3. Z-Score | Mean Age=35, Std Age≈7.91; Mean Salary=70k, Std Salary≈15,811. Age: [25→-1.26, 30→-0.63, 35→0, 40→0.63, 45→1.26]; Salary: [50k→-1.26, 60k→-0.63, 70k→0, 80k→0.63, 90k→1.26]. |
+| 4. More robust to outliers | **Z-Score Standardization** — standard deviation is less sensitive to extreme outliers than min/max range. |
+| 5. Is scaling always necessary? | **YES** when features have different units/magnitudes. If already on the same scale (e.g., all percentages), scaling may not be needed. |
+| 6. Scale after vs before splitting | **After splitting (correct)**: fit scaler on train only, transform both train and test. **Before splitting (wrong)**: test information leaks into training — performance estimates become unrealistic. |
+
+</details>
+
+---
+
+## Exercise KNN-4: Curse of Dimensionality
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is the time complexity of predicting **one** query with naive KNN? | |
+| 2. If you have 1,000,000 samples and 100 features, roughly how many operations per query? | |
+| 3. What happens to distances in high-dimensional space? | |
+| 4. At what dimensionality do KD-Trees typically become ineffective? | |
+| 5. Why would you choose ANN over exact KNN? | |
+| 6. What is the memory complexity of KNN? | |
+| 7. Name one ANN method and briefly explain how it works. | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Time complexity of naive KNN per query | **O(n · d)** — need to compute distance to every training point, across d features. |
+| 2. Operations for 1M samples, 100 features | **100 million operations** (1,000,000 × 100). Too slow for production. |
+| 3. What happens to distances in high-D? | **Distances equalize**. The ratio of max distance to min distance approaches 1. "Nearest" and "farthest" become indistinguishable. Volume explodes exponentially. Data becomes sparse — every point is an outlier. |
+| 4. KD-Trees break at | **d < 20**. Beyond 20 dimensions, pruning becomes ineffective. |
+| 5. ANN vs exact KNN | **ANN**: sub-linear query time (O(log n)), scales to billions of points, but sacrifices **perfect accuracy** (returns "probably correct" answers). |
+| 6. Memory complexity of KNN | **O(n · d)** — must store the entire training dataset. |
+| 7. ANN method (HNSW) | **HNSW (Hierarchical Navigable Small World)**: Builds a multi-layer graph. Top layers have few nodes with long-range links (coarse navigation). Bottom layers have all nodes with short-range links (fine search). Query starts at top and greedily descends. O(log n) query time. Powers vector databases (Pinecone, Weaviate, FAISS). |
+
+</details>
+
+---
+
+# SECTION 3: MODEL VALIDATION & EVALUATION
+
+---
+
+## Exercise VAL-1: Data Splitting
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What are the three datasets in a standard ML workflow? | |
+| 2. What is each used for? | |
+| 3. What are typical split ratios? | |
+| 4. When would you use stratified splitting? | |
+| 5. What is temporal splitting and when is it needed? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Three datasets | **Training Set**, **Validation Set**, **Test Set**. |
+| 2. What each is used for | **Training**: fit model parameters. **Validation**: tune hyperparameters and select best model. **Test**: final unbiased performance estimate (used ONCE). |
+| 3. Typical split ratios | 60/20/20 or 70/15/15. |
+| 4. Stratified splitting | Preserves class proportions in each split — essential for imbalanced datasets. |
+| 5. Temporal splitting | Split by time (older for training, newer for testing) — critical for time series to prevent future data leaking into the past. |
+
+</details>
+
+---
+
+## Exercise VAL-2: Data Leakage
+
+| Practice | Leakage? | Why/Why not? |
+|----------|----------|--------------|
+| A. Scaling features using mean/std from the full dataset *before* splitting | | |
+| B. Shuffling time-series data randomly | | |
+| C. Using cross-validation to tune hyperparameters | | |
+| D. Having duplicate rows across train and test sets | | |
+| E. Using test set performance to decide when to stop training | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Practice | Leakage? | Why/Why not? |
+|----------|----------|--------------|
+| A. Scaling before splitting | **YES** | Test set mean/std leaks into training. Fit scaler on TRAIN only, then transform both. |
+| B. Shuffling time-series data | **YES** | Future data leaks into past. Temporal data must be split chronologically. |
+| C. Using CV to tune hyperparameters | **NO** | Proper use of validation. CV uses only training folds, test set remains untouched. |
+| D. Duplicate rows across splits | **YES** | Model effectively sees test data during training. Must deduplicate before splitting. |
+| E. Using test set to stop training | **YES** | Test set should NEVER be used for any decision. Use validation set for early stopping. |
+
+</details>
+
+---
+
+## Exercise VAL-3: Bias-Variance Tradeoff
+
+| Scenario | Diagnosis | What would you do to fix it? |
+|----------|-----------|------------------------------|
+| Train error: 2%, Validation error: 25% | | |
+| Train error: 40%, Validation error: 42% | | |
+| K=1 on KNN: perfect on Train, terrible on Test | | |
+| K=100 on KNN: 60% on both Train and Test | | |
+| Learning curves: both converge to high error | | |
+| Learning curves: training error low, validation error high, gap widening | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Scenario | Diagnosis | Fix |
+|----------|-----------|-----|
+| Train error: 2%, Val error: 25% | **Overfitting** (High Variance) | More data, simpler model, add regularization, feature selection, early stopping |
+| Train error: 40%, Val error: 42% | **Underfitting** (High Bias) | More complex model, add features, reduce regularization, train longer |
+| K=1: perfect on Train, terrible on Test | **Overfitting** | Increase K to smooth decision boundary |
+| K=100: 60% on both Train and Test | **Underfitting** | Decrease K (too many neighbors smooths away patterns) |
+| Learning curves: both converge to high error | **Underfitting** | Need better model architecture or more informative features |
+| Learning curves: train low, val high, gap widening | **Overfitting** | More data will help close the gap, or add regularization |
+
+</details>
+
+---
+
+## Exercise VAL-4: Cross-Validation
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is K-Fold Cross-Validation? | |
+| 2. Why would you use stratified K-Fold? | |
+| 3. What is LOOCV (Leave-One-Out CV)? | |
+| 4. Which method has the highest computational cost? | |
+| 5. Which method has the lowest estimate bias? | |
+| 6. What is nested cross-validation? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. K-Fold CV | Divide data into K folds; train on K-1 folds, validate on the held-out fold; repeat K times; average scores. |
+| 2. Stratified K-Fold | Preserves class proportions in each fold — critical for imbalanced data. |
+| 3. LOOCV | K=N (number of samples). Train on N-1, validate on 1; repeat N times. Useful for tiny datasets, but computationally expensive. |
+| 4. Highest computational cost | **LOOCV** (N training runs). |
+| 5. Lowest estimate bias | **LOOCV** (uses nearly all data for training each time). |
+| 6. Nested CV | Outer loop evaluates model performance; inner loop tunes hyperparameters. Unbiased estimate when both selecting hyperparameters AND evaluating performance. |
+
+</details>
+
+---
+
+## Exercise VAL-5: Confusion Matrix & Classification Metrics
+
+| Metric | Formula | What It Measures | When to Prioritize |
+|--------|---------|------------------|-------------------|
+| Accuracy | | | |
+| Precision | | | |
+| Recall (Sensitivity) | | | |
+| F1 Score | | | |
+| Specificity | | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Metric | Formula | What It Measures | When to Prioritize |
+|--------|---------|------------------|-------------------|
+| Accuracy | `(TP+TN)/(TP+TN+FP+FN)` | Overall correctness | Balanced classes |
+| Precision | `TP/(TP+FP)` | Quality of positives — minimize FP | When false positives are costly |
+| Recall | `TP/(TP+FN)` | Coverage — minimize FN | When false negatives are costly |
+| F1 Score | `2·P·R/(P+R)` | Harmonic mean of P and R | Imbalanced classes, balance needed |
+| Specificity | `TN/(TN+FP)` | Correctness on negatives | When false positives are costly |
+
+</details>
+
+---
+
+## Exercise VAL-6: ROC Curve & AUC
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What does ROC stand for? | |
+| 2. What does ROC plot? | |
+| 3. What is AUC? | |
+| 4. What is AUC for a random classifier? | |
+| 5. What is AUC for a perfect classifier? | |
+| 6. Why is AUC threshold-independent? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. ROC stands for | **Receiver Operating Characteristic** |
+| 2. What ROC plots | **True Positive Rate (Recall)** vs **False Positive Rate** at every threshold. |
+| 3. AUC | **Area Under the ROC Curve** — higher is better. |
+| 4. Random classifier AUC | **0.5** (diagonal line). |
+| 5. Perfect classifier AUC | **1.0** (perfect separation). |
+| 6. Threshold-independent | Summarizes performance across **all thresholds**, not just one — no need to pick a threshold for comparison. |
+
+</details>
+
+---
+
+## Exercise VAL-7: Regression Metrics
+
+| Metric | Formula | Unit | Notes |
+|--------|---------|------|-------|
+| MAE | | | |
+| MSE | | | |
+| RMSE | | | |
+| R² | | | |
+| MAPE | | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Metric | Formula | Unit | Notes |
+|--------|---------|------|-------|
+| MAE | `(1/N)Σ|y-ŷ|` | Same as target | Robust to outliers |
+| MSE | `(1/N)Σ(y-ŷ)²` | Squared | Penalizes large errors |
+| RMSE | `√MSE` | Same as target | Most popular regression metric |
+| R² | `1 - SS_res/SS_total` | Unitless [0,1] | Proportion of variance explained |
+| MAPE | `(1/N)Σ|(y-ŷ)/y|×100` | Percentage | Business-friendly, but undefined when y=0 |
+
+</details>
+
+---
+
+# SECTION 4: ETHICS & HISTORY
+
+---
+
+## Exercise ETH-1: Expert Systems
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is an expert system? | |
+| 2. What was MYCIN? What was its limitation? | |
+| 3. What was Deep Blue? How did it differ from modern ML? | |
+| 4. What was ELIZA? Why wasn't it "true" AI? | |
+| 5. What's the key lesson from expert systems? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Expert system | Hand-crafted system where domain experts encode rules. |
+| 2. MYCIN | A 1970s medical diagnosis system with 600+ hand-coded rules about bacterial infections. **Limitation**: doctors had to update every rule manually — doesn't scale. |
+| 3. Deep Blue | A 1997 chess engine that beat Kasparov using **handcrafted evaluation functions** and brute force search (200M positions/sec), not learned from data. Couldn't generalize to other games. |
+| 4. ELIZA | A 1966 chatbot with scripted pattern-matched responses. **Not true AI** because it had zero understanding — just mirrored user input with simple rules. |
+| 5. Key lesson | **Encoding all human knowledge in rules doesn't scale.** ML learns patterns from data instead. |
+
+</details>
+
+---
+
+## Exercise ETH-2: Ethics & Responsible ML
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is "biased training data"? | |
+| 2. What is "distribution shift" (concept drift)? | |
+| 3. Why is explainability important in high-stakes domains? | |
+| 4. What is the "right to explanation" in GDPR? | |
+| 5. What is accountability in ML? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Biased training data | Historical data containing societal biases gets inherited and amplified by the model, creating fairness violations. |
+| 2. Distribution shift | When the data distribution changes after deployment (e.g., COVID changed economic patterns), making the model outdated and inaccurate. |
+| 3. Explainability importance | In healthcare, finance, and law, we need to understand WHY a model made a decision to ensure trust, safety, and fairness. |
+| 4. GDPR right to explanation | GDPR Article 22 gives individuals the 'right to explanation' for automated decisions affecting them — requiring interpretable or explainable models. |
+| 5. Accountability | When an ML system makes a harmful decision — who is responsible? The company? The data scientists? Legal frameworks are still catching up. |
+
+</details>
+
+---
+
+## Exercise ETH-3: ML Development Workflow & Pitfalls
+
+| Step | What it is | When to do it |
+|------|------------|---------------|
+| Define the Problem | | |
+| Collect & Label Data | | |
+| Explore & Engineer Features | | |
+| Train & Evaluate Models | | |
+| Tune & Improve | | |
+| Deploy & Monitor | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Step | What it is | When to do it |
+|------|------------|---------------|
+| Define the Problem | What are we predicting? Success metric? | First |
+| Collect & Label Data | Gather raw data; clean it; label it | After problem definition |
+| Explore & Engineer Features | EDA, visualize distributions, create features | After data collection |
+| Train & Evaluate Models | Pick algorithms; train on train set; evaluate on test set | After feature engineering |
+| Tune & Improve | Hyperparameter search, feature selection, error analysis | After initial evaluation |
+| Deploy & Monitor | Serve predictions via API; watch for model drift | After tuning |
+
+</details>
+
+---
+
+## Exercise ETH-4: Complete Cheat Sheet
+
+### Fill in all blanks:
+
+**Definition of ML (Arthur Samuel, 1959):**
+"A field of study that gives computers the ability to learn without being ___________."
+
+**ML Pipeline:**
+Data + Algorithm + ________ → Model → ________
+
+**Three Paradigms:**
+
+| Paradigm | Data | Goal | Example |
+|----------|------|------|---------|
+| ___________ | Labeled | Map inputs to outputs | Spam detection |
+| ___________ | Unlabeled | Find hidden structure | Customer segmentation |
+| ___________ | Rewards | Learn by trial and error | Game playing |
+
+**Three-Way Split:**
+
+| Split | Purpose |
+|-------|---------|
+| ___________ | Fit model parameters |
+| ___________ | Tune hyperparameters |
+| ___________ | Final unbiased estimate |
+
+**Bias-Variance:**
+- High Bias = ___________ (underfitting/overfitting)
+- High Variance = ___________ (underfitting/overfitting)
+- Total Error = ___________ + ___________ + ___________
+
+**Key Classification Metrics:**
+
+| Metric | Formula | When to Use |
+|--------|---------|-------------|
+| Accuracy | | |
+| Precision | | |
+| Recall | | |
+| F1 | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+**Definition of ML (Arthur Samuel, 1959):**
+"A field of study that gives computers the ability to learn without being **explicitly programmed**."
+
+**ML Pipeline:**
+Data + Algorithm + **Compute** → Model → **Predictions**
+
+**Three Paradigms:**
+
+| Paradigm | Data | Goal | Example |
+|----------|------|------|---------|
+| **Supervised** | Labeled | Map inputs to outputs | Spam detection |
+| **Unsupervised** | Unlabeled | Find hidden structure | Customer segmentation |
+| **Reinforcement** | Rewards | Learn by trial and error | Game playing |
+
+**Three-Way Split:**
+
+| Split | Purpose |
+|-------|---------|
+| **Training Set** | Fit model parameters |
+| **Validation Set** | Tune hyperparameters |
+| **Test Set** | Final unbiased estimate |
+
+**Bias-Variance:**
+- High Bias = **Underfitting**
+- High Variance = **Overfitting**
+- Total Error = **Bias² + Variance + Irreducible Error**
+
+**Key Classification Metrics:**
+
+| Metric | Formula | When to Use |
+|--------|---------|-------------|
+| Accuracy | `(TP+TN)/(TP+TN+FP+FN)` | Balanced classes |
+| Precision | `TP/(TP+FP)` | When False Positives are costly |
+| Recall | `TP/(TP+FN)` | When False Negatives are costly |
+| F1 | `2·P·R/(P+R)` | Imbalanced classes, balance needed |
+
+</details>
+
+---
+
+# 📊 COMPLETE COVERAGE SUMMARY
+
+| Category | Concepts | Status |
+|----------|----------|--------|
+| Intro to ML | Definition, pipeline, traditional vs ML | ✅ 100% |
+| Three Paradigms | Supervised, Unsupervised, RL | ✅ 100% |
+| KNN | Fundamentals, distance metrics, scaling | ✅ 100% |
+| Curse of Dimensionality | Effects, ANN, KD-Trees, HNSW | ✅ 100% |
+| Model Validation | Splitting, CV, data leakage | ✅ 100% |
+| Bias-Variance | Tradeoff, underfitting, overfitting | ✅ 100% |
+| Classification Metrics | Confusion matrix, Precision, Recall, F1, AUC | ✅ 100% |
+| Regression Metrics | RMSE, MAE, R², MAPE | ✅ 100% |
+| Expert Systems | MYCIN, Deep Blue, ELIZA | ✅ 100% |
+| Ethics | Bias, distribution shift, explainability | ✅ 100% |
+| **TOTAL** | **All Week 1 ML concepts** | ✅ **100%** |
+
+---
+
+## 📝 How to Use This Document
+
+1. **Read the question**, write your answer in the blank/box
+2. **Click the dropdown** to reveal the model answer
+3. **Compare** your answer to the model
+4. **Re-study** any sections where you got something wrong
+5. **Mark** your confidence level for each topic
+
+---
+
+**Good luck with your studies! 🎯**

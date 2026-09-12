@@ -1,0 +1,1571 @@
+# Week 6 ML — Complete Revision Materials
+
+Based on your ML Week 6 slides covering **Dimensionality Reduction (PCA, t-SNE), Density Estimation (KDE), Clustering (K-means, Hierarchical), and Gaussian Mixture Models (GMMs)** , here are comprehensive revision materials following the established format.
+
+---
+
+## 1. CONFIDENCE TRACKER — WEEK 6 ML
+
+| Confidence Level | Meaning |
+|------------------|---------|
+| 🟢 **Green** | I knew this cold — could explain it to someone else |
+| 🟡 **Yellow** | I got it right, but I wasn't 100% sure / guessed |
+| 🔴 **Red** | I had no idea — got it wrong or completely guessed |
+
+---
+
+| Exercise | Topic | 🟢 | 🟡 | 🔴 | Re-study? |
+|----------|-------|----|----|----|-----------|
+| Ex 1 | Dimensionality Reduction — Motivation & Overview | | | | ☐ |
+| Ex 2 | PCA — Overview & Projection | | | | ☐ |
+| Ex 3 | PCA — Learning the Subspace (Two Criteria) | | | | ☐ |
+| Ex 4 | PCA — The Solution (Eigenvectors) | | | | ☐ |
+| Ex 5 | PCA — Applications & Eigenfaces | | | | ☐ |
+| Ex 6 | t-SNE — Overview & Motivation | | | | ☐ |
+| Ex 7 | t-SNE — Pairwise Similarities & Perplexity | | | | ☐ |
+| Ex 8 | t-SNE — Cost Function & Crowding Problem | | | | ☐ |
+| Ex 9 | t-SNE — Applications & Limitations | | | | ☐ |
+| Ex 10 | Kernel Density Estimation (KDE) — Fundamentals | | | | ☐ |
+| Ex 11 | KDE — Common Kernels & Bandwidth Selection | | | | ☐ |
+| Ex 12 | KDE — Silverman's Rule & ISJ | | | | ☐ |
+| Ex 13 | Clustering — Fundamentals | | | | ☐ |
+| Ex 14 | K-Means Clustering | | | | ☐ |
+| Ex 15 | Hierarchical Clustering | | | | ☐ |
+| Ex 16 | Linkage Methods — Complete, Average, Single, Centroid | | | | ☐ |
+| Ex 17 | Clustering — Questions & Choices | | | | ☐ |
+| Ex 18 | Correlation Distance | | | | ☐ |
+| Ex 19 | Gaussian Mixture Models — Generative View | | | | ☐ |
+| Ex 20 | GMMs — Maximum Likelihood & EM Algorithm | | | | ☐ |
+| Ex 21 | GMMs — E-step & M-step Updates | | | | ☐ |
+| Ex 22 | K-means vs GMMs | | | | ☐ |
+| Ex 23 | Complete Cheat Sheet | | | | ☐ |
+
+---
+
+## 2. 🎯 TEACH IT SUMMARY
+
+### The Big Picture — Week 6 ML
+
+Week 6 covers **unsupervised learning** — finding structure in data without labels. The three main areas are dimensionality reduction, density estimation, and clustering.
+
+**Part 1: Dimensionality Reduction.** The goal is to map high-dimensional data to a lower-dimensional space while preserving important structure. **PCA (Principal Component Analysis)** is a linear method that finds the directions of maximum variance — the principal components are the top eigenvectors of the covariance matrix. PCA has **two equivalent criteria**: minimize reconstruction error OR maximize projected variance — they're equivalent by the Pythagorean Theorem (`total variance = projected variance + reconstruction error`). PCA is fast, linear, and preserves global variance, making it great for preprocessing and visualization. **t-SNE** is a non-linear method specialized for **visualization**. It converts Euclidean distances to probabilities (Gaussian in high-D, Student-t in low-D) and minimizes KL divergence to preserve local topology. The **crowding problem** (more space in high dimensions) is solved by Student-t's heavier tails. **Perplexity** controls the effective number of neighbors (typical range 5-50). t-SNE is stochastic — different runs give different results — and is for visualization only, not for preprocessing other models.
+
+**Part 2: Density Estimation.** **Kernel Density Estimation (KDE)** is a non-parametric density estimator that places a kernel function on every data point: `f̂(x) = (1/(nh)) Σᵢ K((x − xᵢ)/h)`. The **bandwidth h** controls smoothness — small h = under-smoothing (high variance), large h = over-smoothing (high bias). **Silverman's rule** (`h ≈ 1.06 × σ × n⁻¹/⁵`) is a good starting point but assumes normality. The **Improved Sheather Jones (ISJ)** algorithm is more robust for multimodal data.
+
+**Part 3: Clustering.** Clustering assigns observations to homogeneous subgroups without labels. **K-means** minimizes within-cluster variation via iterative assignment and centroid updates. It requires K a-priori, converges to a local minimum (not global), and is random (different initializations → different results). **Hierarchical clustering** produces a dendrogram (tree structure) via agglomerative (bottom-up) merging. **Linkage methods** define inter-cluster distance: Complete (maximum), Average (mean), Single (minimum — causes chaining), Centroid (distance between centroids — causes inversions). **Correlation distance** clusters by patterns rather than magnitudes — useful for market segmentation where purchase patterns matter more than total volume.
+
+**Part 4: Gaussian Mixture Models.** GMMs are a **probabilistic** (generative) view of clustering. The generative process: choose cluster z with probability πₖ, then sample x ∼ N(µₖ, Σₖ). The marginal is `p(x) = Σₖ πₖ N(x|µₖ, Σₖ)`. GMMs provide **soft assignments** (responsibilities `rₙₖ = p(zₙ=k|xₙ)`) via the EM algorithm. **EM** alternates: E-step computes responsibilities given current parameters; M-step updates parameters (πₖ, µₖ, Σₖ) given responsibilities. GMMs generalize K-means — K-means is the limiting case with hard assignments and spherical clusters. GMMs are universal density approximators and can model ellipsoidal clusters with different shapes.
+
+**The Connecting Thread:** All three topics are unsupervised — finding structure without labels. PCA and t-SNE reduce dimensions for visualization/preprocessing; KDE estimates densities; clustering and GMMs find groups. GMMs are the probabilistic generalization of K-means, and EM is the optimization engine for latent variable models.
+
+---
+
+## 3. ⚠️ COMMON PITFALLS IN PRACTICE
+
+| Pitfall | Why It Happens | How to Avoid |
+|---------|----------------|--------------|
+| **1. Using PCA to find clusters** | PCA finds variance, not clusters | Use t-SNE, K-means, or GMMs for clusters |
+| **2. t-SNE without fixed random seed** | t-SNE is stochastic → non-reproducible | Set `random_state` for reproducibility |
+| **3. Using t-SNE for preprocessing** | t-SNE doesn't preserve global distances | Use PCA for preprocessing; t-SNE for visualization only |
+| **4. Not trying multiple perplexities** | Perplexity changes the visualization | Try perplexity 5, 30, 50 |
+| **5. Over-interpreting t-SNE distances** | t-SNE preserves local structure, not global | Don't compare distances between clusters |
+| **6. Using Silverman's rule for multimodal data** | Assumes normality → over-smooths | Use ISJ or cross-validation |
+| **7. Using Euclidean distance for all clustering** | Patterns matter more than magnitudes | Use correlation distance for market segmentation |
+| **8. Assuming K-means finds global optimum** | K-means converges to local minimum | Run multiple initializations |
+| **9. Using too many clusters in K-means** | More clusters = lower inertia but less interpretable | Use elbow method or domain knowledge |
+| **10. Assuming GMMs always outperform K-means** | GMMs are more flexible but need more data | Use K-means for simplicity; GMMs for ellipsoidal clusters |
+| **11. Not checking cluster robustness** | Clusters may be artifacts | Run on random subsets; try different algorithms |
+| **12. Not scaling variables before clustering** | Larger variance features dominate distance | Scale features before clustering |
+
+---
+
+## 4. ONE-SENTENCE SUMMARY — WEEK 6 ML
+
+**How to use:** For each concept, try to write your own one-sentence summary *before* clicking to reveal the model answer.
+
+---
+
+### Dimensionality Reduction
+
+<details>
+<summary><b>Dimensionality Reduction</b> — Try your own first</summary>
+
+**Model Answer:** Mapping data to a lower-dimensional space while preserving important structure — reduces overfitting, saves computation, mitigates the curse of dimensionality, and enables visualization.
+
+</details>
+
+---
+
+<details>
+<summary><b>PCA (Principal Component Analysis)</b> — Try your own first</summary>
+
+**Model Answer:** A linear method that finds the directions of maximum variance (principal components — top eigenvectors of the covariance matrix), projecting data to a lower-dimensional subspace.
+
+</details>
+
+---
+
+<details>
+<summary><b>PCA — Two Equivalent Criteria</b> — Try your own first</summary>
+
+**Model Answer:** Minimize reconstruction error OR maximize projected variance — they are equivalent because `projected variance + reconstruction error = total variance` (Pythagorean Theorem).
+
+</details>
+
+---
+
+<details>
+<summary><b>PCA — Solution</b> — Try your own first</summary>
+
+**Model Answer:** The principal components are the top K eigenvectors of the empirical covariance matrix `Σ̂ = (1/n)Σ (xᵢ − µ)(xᵢ − µ)ᵀ`; for K=1, it's the direction of maximum variance.
+
+</details>
+
+---
+
+<details>
+<summary><b>t-SNE</b> — Try your own first</summary>
+
+**Model Answer:** t-Distributed Stochastic Neighbor Embedding — a non-linear method specialized for visualization that preserves local topology by converting distances to probabilities and minimizing KL divergence.
+
+</details>
+
+---
+
+<details>
+<summary><b>t-SNE — Perplexity</b> — Try your own first</summary>
+
+**Model Answer:** A smooth measure of the effective number of neighbors (typical range 5–50, commonly 30) — controls the balance between local and global structure in the visualization.
+
+</details>
+
+---
+
+<details>
+<summary><b>t-SNE — Crowding Problem</b> — Try your own first</summary>
+
+**Model Answer:** There is much more space in high dimensions than in low dimensions; t-SNE uses Student-t distribution in low-D (heavier tails) to give more space and separate points in the visualization.
+
+</details>
+
+---
+
+<details>
+<summary><b>PCA vs t-SNE</b> — Try your own first</summary>
+
+**Model Answer:** PCA is linear, preserves global variance, and is fast; t-SNE is non-linear, preserves local topology, is slower, and is specialized for visualization (stochastic runs may differ).
+
+</details>
+
+---
+
+### Density Estimation
+
+<details>
+<summary><b>KDE (Kernel Density Estimation)</b> — Try your own first</summary>
+
+**Model Answer:** A non-parametric density estimator that places a kernel function on every data point and averages them: `f̂(x) = (1/(nh)) Σᵢ K((x − xᵢ)/h)`.
+
+</details>
+
+---
+
+<details>
+<summary><b>Bandwidth (h) in KDE</b> — Try your own first</summary>
+
+**Model Answer:** Controls smoothness — small h = under-smoothing (high variance, overfitting), large h = over-smoothing (high bias, underfitting); optimal h balances bias and variance.
+
+</details>
+
+---
+
+<details>
+<summary><b>Silverman's Rule of Thumb</b> — Try your own first</summary>
+
+**Model Answer:** `h ≈ 1.06 × σ × n⁻¹/⁵` for Gaussian kernel — assumes normal distribution; a good starting point but can fail for multimodal data; ISJ algorithm is more robust.
+
+</details>
+
+---
+
+### Clustering
+
+<details>
+<summary><b>Clustering</b> — Try your own first</summary>
+
+**Model Answer:** An unsupervised learning method that assigns observations to homogeneous subgroups without class labels; algorithms include K-means, Hierarchical clustering, and GMMs.
+
+</details>
+
+---
+
+<details>
+<summary><b>K-Means Clustering</b> — Try your own first</summary>
+
+**Model Answer:** Minimizes within-cluster variation (sum of squared distances to centroids) via iterative assignment and centroid updates; requires K a-priori and converges to a local minimum.
+
+</details>
+
+---
+
+<details>
+<summary><b>Hierarchical Clustering</b> — Try your own first</summary>
+
+**Model Answer:** Produces a dendrogram (tree structure) of nested clusters; agglomerative (bottom-up) is most common — start with each point as its own cluster, iteratively fuse closest clusters.
+
+</details>
+
+---
+
+<details>
+<summary><b>Complete Linkage</b> — Try your own first</summary>
+
+**Model Answer:** Distance between two clusters = **maximum distance** between any pair of samples, one in each cluster — produces compact, stable clusters.
+
+</details>
+
+---
+
+<details>
+<summary><b>Single Linkage</b> — Try your own first</summary>
+
+**Model Answer:** Distance between two clusters = **minimum distance** between any pair of samples, one in each cluster — suffers from **chaining phenomenon** (long, stringy clusters).
+
+</details>
+
+---
+
+<details>
+<summary><b>Average Linkage</b> — Try your own first</summary>
+
+**Model Answer:** Distance between two clusters = **average of all pairwise distances** between samples in the two clusters — a good general-purpose default.
+
+</details>
+
+---
+
+<details>
+<summary><b>Correlation Distance</b> — Try your own first</summary>
+
+**Model Answer:** Clusters based on patterns/shapes rather than magnitudes — useful for market segmentation where purchase patterns matter more than total volume.
+
+</details>
+
+---
+
+### Gaussian Mixture Models
+
+<details>
+<summary><b>GMM (Gaussian Mixture Model)</b> — Try your own first</summary>
+
+**Model Answer:** A probabilistic (generative) clustering model where data is generated by choosing a cluster z with probability πₖ, then sampling x ∼ N(µₖ, Σₖ): `p(x) = Σₖ πₖ N(x|µₖ, Σₖ)`.
+
+</details>
+
+---
+
+<details>
+<summary><b>GMM Parameters</b> — Try your own first</summary>
+
+**Model Answer:** πₖ (mixing coefficients — cluster probabilities), µₖ (means), Σₖ (covariances); often assume Σₖ = I for simplicity, but full covariance allows different spatial extents.
+
+</details>
+
+---
+
+<details>
+<summary><b>Responsibility (GMM)</b> — Try your own first</summary>
+
+**Model Answer:** `rₙₖ = p(zₙ = k | xₙ)` — the probability that cluster k generated data point n; computed using Bayes rule, representing soft assignment in EM algorithm.
+
+</details>
+
+---
+
+<details>
+<summary><b>EM Algorithm for GMMs</b> — Try your own first</summary>
+
+**Model Answer:** Expectation-Maximization alternates between E-step (compute responsibilities given current parameters) and M-step (re-estimate parameters given responsibilities) until convergence.
+
+</details>
+
+---
+
+<details>
+<summary><b>K-means vs GMMs</b> — Try your own first</summary>
+
+**Model Answer:** K-means is hard assignment with spherical clusters; GMMs provide soft (probabilistic) assignments and can model clusters with different shapes and variances.
+
+</details>
+
+---
+
+## 5. QUICK REFERENCE CHEAT SHEET — WEEK 6 ML
+
+### PCA — Core Formulas
+
+<details>
+<summary><b>PCA Formulas</b> — Try to recall first</summary>
+
+| Formula | Description |
+|---------|-------------|
+| `z = Uᵀ(x − µ)` | Code/representation (projection) |
+| `x̂ = µ + Uz` | Reconstruction in original space |
+| `Σ̂ = (1/n)Σ (xᵢ−µ)(xᵢ−µ)ᵀ` | Empirical covariance matrix |
+| `‖x − µ‖² = ‖projection‖² + ‖residual‖²` | Pythagorean Theorem |
+| Principal components | Top K eigenvectors of Σ̂ |
+
+</details>
+
+---
+
+### PCA — Two Equivalent Criteria
+
+<details>
+<summary><b>Reconstruction Error vs Projected Variance</b> — Try to recall first</summary>
+
+| Criterion | Goal |
+|-----------|------|
+| **Minimize reconstruction error** | `(1/n)Σᵢ ‖xᵢ − x̂ᵢ‖²` |
+| **Maximize projected variance** | `(1/n)Σᵢ ‖zᵢ − mean(z)‖²` |
+
+**They are equivalent!** Maximizing variance ≡ minimizing reconstruction error.
+
+</details>
+
+---
+
+### t-SNE — Key Concepts
+
+<details>
+<summary><b>t-SNE Summary</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Purpose** | Visualization (2D/3D) |
+| **Preserves** | Local structure / topology |
+| **High-D similarity** | Gaussian: `pⱼ|ᵢ ∝ exp(−‖xᵢ−xⱼ‖² / 2σᵢ²)` |
+| **Low-D similarity** | Student-t: `qⱼ|ᵢ ∝ (1 + ‖yᵢ−yⱼ‖²)⁻¹` |
+| **Cost function** | `KL(P || Q) = Σ pⱼ|ᵢ log(pⱼ|ᵢ / qⱼ|ᵢ)` |
+| **Perplexity** | Typical range 5–50 (commonly 30) |
+
+</details>
+
+---
+
+### KDE — Core Formula
+
+<details>
+<summary><b>KDE Formula</b> — Try to recall first</summary>
+
+| Formula | Description |
+|---------|-------------|
+| `f̂(x) = (1/(nh)) Σᵢ K((x − xᵢ)/h)` | KDE (unweighted) |
+| `h ≈ 1.06 × σ × n⁻¹/⁵` | Silverman's rule of thumb (Gaussian kernel) |
+
+</details>
+
+---
+
+### KDE — Common Kernels
+
+<details>
+<summary><b>Kernel Functions</b> — Try to recall first</summary>
+
+| Kernel | Formula |
+|--------|---------|
+| **Gaussian** | `K(x) ∝ exp(−x²/2)` (most common) |
+| **Triangular** | `K(x) ∝ max(1−|x|, 0)` |
+| **Box** | `K(x) ∝ 1` for `|x| ≤ 1`, 0 otherwise |
+| **Triweight** | `K(x) ∝ (1−x²)³` for `|x| ≤ 1` |
+
+</details>
+
+---
+
+### K-Means
+
+<details>
+<summary><b>K-Means Summary</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Objective** | Minimize `Σⱼ Σᵢ∈Cⱼ ‖xᵢ − µⱼ‖²` |
+| **Algorithm** | (1) Random init, (2) Assign to nearest centroid, (3) Update centroids, repeat |
+| **Convergence** | Always to a local minimum |
+| **Randomness** | Different initializations → different minima |
+
+</details>
+
+---
+
+### Hierarchical Clustering
+
+<details>
+<summary><b>Linkage Methods</b> — Try to recall first</summary>
+
+| Method | Definition | Issue |
+|--------|------------|-------|
+| **Complete** | Maximum distance between pairs | - |
+| **Average** | Average of all pairwise distances | - |
+| **Single** | Minimum distance between pairs | Chaining phenomenon |
+| **Centroid** | Distance between centroids | Inversions |
+
+</details>
+
+---
+
+### GMM — EM Algorithm
+
+<details>
+<summary><b>GMM EM Steps</b> — Try to recall first</summary>
+
+| Step | Action |
+|------|--------|
+| **E-step** | Compute responsibilities: `rₙₖ = p(zₙ=k|xₙ)` given current π, µ, Σ |
+| **M-step** | Re-estimate: `πₖ = (1/n)Σrₙₖ`; `µₖ = (Σrₙₖxₙ)/(Σrₙₖ)`; `Σₖ = (Σrₙₖ(xₙ−µₖ)(xₙ−µₖ)ᵀ)/(Σrₙₖ)` |
+| **Convergence** | Log likelihood does not decrease; non-convex (different initializations) |
+
+</details>
+
+---
+
+### GMM — Marginal Distribution
+
+<details>
+<summary><b>GMM Formulas</b> — Try to recall first</summary>
+
+| Formula | Description |
+|---------|-------------|
+| `p(x) = Σᵢ πᵢ N(x|µᵢ, Σᵢ)` | Marginal distribution (GMM) |
+| `rₙₖ = p(zₙ=k|xₙ)` | Responsibility (soft assignment) |
+| `log p(X) = Σₙ log [Σₖ πₖ N(xₙ|µₖ, Σₖ)]` | Log likelihood |
+
+</details>
+
+---
+
+### K-means vs GMMs
+
+<details>
+<summary><b>K-means vs GMMs</b> — Try to recall first</summary>
+
+| Aspect | K-means | GMMs |
+|--------|---------|------|
+| **Assignment** | Hard (one cluster) | Soft (probabilities/responsibilities) |
+| **Covariance** | Spherical (implicit) | Can be full covariance |
+| **Probabilities** | No | Yes |
+| **Type** | Geometric | Probabilistic (generative) |
+
+</details>
+
+---
+
+### Key Defaults
+
+<details>
+<summary><b>Key Defaults</b> — Try to recall first</summary>
+
+| Concept | Default |
+|---------|---------|
+| t-SNE perplexity | 30 |
+| KDE bandwidth (Silverman) | `1.06 × σ × n⁻¹/⁵` |
+| K-means number of clusters | Domain knowledge / elbow method |
+| Hierarchical linkage | Average (default) |
+| GMM covariance type | 'full' (or 'diag' for high dimensions) |
+| t-SNE learning rate | 200 |
+| t-SNE iterations | 1000 |
+
+</details>
+
+---
+
+## 6. CONNECTIONS MAP — WEEK 6 ML
+
+### 🌳 TEXT-BASED CONCEPT MAP
+
+```
+╔══════════════════════════════════════════════════════════════════════════╗
+║                                                                          ║
+║                    WEEK 6 ML: UNSUPERVISED LEARNING                    ║
+║                                                                          ║
+║                    ┌─────────────────────────────────────┐              ║
+║                    │   UNSUPERVISED LEARNING             │              ║
+║                    │   No labels — find structure       │              ║
+║                    └──────────────┬──────────────────────┘              ║
+║                                   │                                      ║
+║    ┌──────────────────────────────┼──────────────────────────────┐      ║
+║    │                              │                              │      ║
+║    ▼                              ▼                              ▼      ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │ DIMENSIONALITY│          │  DENSITY     │          │  CLUSTERING  │  ║
+║ │  REDUCTION   │          │  ESTIMATION  │          │              │  ║
+║ └──────┬───────┘          └──────┬───────┘          └──────┬───────┘  ║
+║        │                         │                         │          ║
+║        ▼                         ▼                         ▼          ║
+║ ┌──────────────────────────────────────────────────────────────────┐  ║
+║ │              GAUSSIAN MIXTURE MODELS (GMMs)                     │  ║
+║ │         Probabilistic clustering with EM algorithm              │  ║
+║ └──────────────────────────────────────────────────────────────────┘  ║
+║                                                                         ║
+╚══════════════════════════════════════════════════════════════════════════╝
+```
+
+---
+
+### DIMENSIONALITY REDUCTION — DETAILED MAP
+
+```
+DIMENSIONALITY REDUCTION
+    │
+    ├── LINEAR METHODS
+    │       │
+    │       └── PCA (Principal Component Analysis)
+    │               │
+    │               ├── Goal: Find low-D subspace
+    │               │
+    │               ├── Two Equivalent Criteria
+    │               │       │
+    │               │       ├── Minimize Reconstruction Error
+    │               │       │       └── ‖x − x̂‖²
+    │               │       │
+    │               │       └── Maximize Projected Variance
+    │               │               └── ‖z − mean(z)‖²
+    │               │
+    │               ├── Pythagorean Theorem
+    │               │       └── Total Variance = Projected Var + Reconstruction Error
+    │               │
+    │               ├── Solution
+    │               │       └── Top K eigenvectors of covariance matrix Σ̂
+    │               │
+    │               └── Applications
+    │                       ├── Eigenfaces (face recognition)
+    │                       ├── Visualization
+    │                       └── Preprocessing for classifiers
+    │
+    └── NON-LINEAR METHODS
+            │
+            └── t-SNE (t-Distributed SNE)
+                    │
+                    ├── Specialized for Visualization (2D/3D)
+                    │
+                    ├── Preserves Local Topology (neighborhoods)
+                    │
+                    ├── High-D: Gaussian similarities pⱼ|ᵢ
+                    │
+                    ├── Low-D: Student-t similarities qⱼ|ᵢ
+                    │
+                    ├── Perplexity: effective # of neighbors (5-50)
+                    │
+                    ├── Cost: KL Divergence
+                    │       └── KL(Pᵢ || Qᵢ) = Σ pⱼ|ᵢ log(pⱼ|ᵢ / qⱼ|ᵢ)
+                    │
+                    ├── Crowding Problem
+                    │       └── Fixed by Student-t (heavier tails)
+                    │
+                    └── Optimization: Gradient Descent + Momentum
+```
+
+---
+
+### DENSITY ESTIMATION — DETAILED MAP
+
+```
+KERNEL DENSITY ESTIMATION (KDE)
+    │
+    ├── Non-parametric density estimation
+    │
+    ├── Formula: f̂(x) = (1/(nh)) Σᵢ K((x − xᵢ)/h)
+    │
+    ├── Common Kernels
+    │       ├── Gaussian (most common) — exp(−x²/2)
+    │       ├── Triangular — max(1−|x|, 0)
+    │       ├── Box — 1 for |x| ≤ 1
+    │       └── Triweight — (1−x²)³
+    │
+    ├── Bandwidth h (key hyperparameter)
+    │       ├── Small h → under-smoothing (high variance)
+    │       ├── Large h → over-smoothing (high bias)
+    │       └── Bias-Variance Tradeoff
+    │
+    └── Bandwidth Selection
+            ├── Silverman's Rule of Thumb
+            │       └── h ≈ 1.06 × σ × n⁻¹/⁵ (assumes normal)
+            │
+            └── Improved Sheather Jones (ISJ)
+                    └── More robust for multimodal data
+```
+
+---
+
+### CLUSTERING — DETAILED MAP
+
+```
+CLUSTERING
+    │
+    ├── K-MEANS
+    │       │
+    │       ├── Hard assignment
+    │       ├── Requires K a-priori
+    │       ├── Objective: minimize within-cluster variation
+    │       │       └── Σⱼ Σᵢ∈Cⱼ ‖xᵢ − µⱼ‖²
+    │       ├── Algorithm: Assign → Compute centroids → Repeat
+    │       ├── Converges to local minimum (not global)
+    │       └── Random initializations → different results
+    │
+    ├── HIERARCHICAL CLUSTERING
+    │       │
+    │       ├── Agglomerative (bottom-up) is most common
+    │       ├── Produces dendrogram (tree structure)
+    │       ├── Doesn't require K a-priori
+    │       ├── Linkage Methods (inter-cluster distance)
+    │       │       ├── Complete: maximum distance (stable)
+    │       │       ├── Average: mean of all pairwise (stable)
+    │       │       ├── Single: minimum distance (chaining)
+    │       │       └── Centroid: distance between centroids (inversions)
+    │       └── Cut dendrogram at desired height → K clusters
+    │
+    └── GAUSSIAN MIXTURE MODELS (GMMs)
+            │
+            ├── Probabilistic (generative) clustering
+            │       └── Each cluster = Gaussian distribution
+            │
+            ├── Generative Process
+            │       ├── Choose cluster z with prob πₖ
+            │       └── Sample x ∼ N(µₖ, Σₖ)
+            │
+            ├── Marginal: p(x) = Σₖ πₖ N(x|µₖ, Σₖ)
+            │
+            ├── Parameters: πₖ, µₖ, Σₖ
+            │
+            ├── Soft assignment (responsibilities)
+            │       └── rₙₖ = p(zₙ=k | xₙ)
+            │
+            ├── EM Algorithm
+            │       ├── E-step: compute responsibilities
+            │       ├── M-step: update parameters
+            │       └── Repeat until convergence
+            │
+            └── GMMs are universal density approximators
+```
+
+---
+
+### 🔗 KEY CONNECTION EXPLANATIONS
+
+<details>
+<summary><b>Connection 1: How are PCA's two criteria equivalent?</b></summary>
+
+```
+PCA: Two Equivalent Criteria
+    │
+    ├── CRITERION 1: Minimize Reconstruction Error
+    │       └── min (1/n) Σᵢ ‖xᵢ − x̂ᵢ‖²
+    │
+    ├── CRITERION 2: Maximize Projected Variance
+    │       └── max (1/n) Σᵢ ‖zᵢ − mean(z)‖²
+    │
+    └── WHY THEY ARE EQUIVALENT
+            │
+            ├── Total Variance = Projected Variance + Reconstruction Error
+            │       └── (Pythagorean Theorem)
+            │
+            ├── Total Variance is constant (depends only on data)
+            │
+            └── Therefore: minimizing reconstruction error
+                    ⟺ maximizing projected variance
+
+    Key Insight: Both criteria lead to the same subspace!
+```
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 2: How does t-SNE improve on SNE?</b></summary>
+
+```
+SNE → Symmetric SNE → t-SNE
+    │
+    ├── SNE (Stochastic Neighbor Embedding)
+    │       ├── Asymmetric conditional probabilities pⱼ|ᵢ
+    │       └── Gaussian in both high-D and low-D
+    │
+    ├── Symmetric SNE
+    │       ├── Symmetric similarities pᵢⱼ
+    │       └── Still Gaussian in low-D
+    │
+    └── t-SNE (t-Distributed SNE)
+            │
+            ├── Student-t distribution in low-D
+            │       └── Heavier tails → solves crowding problem
+            │
+            ├── Faster computation
+            │       └── Simpler gradients
+            │
+            └── Better behavior
+                    └── Better separation in visualization
+
+    Key Insight: Student-t's heavier tails give more space in low-D.
+```
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 3: How does bandwidth control the bias-variance tradeoff in KDE?</b></summary>
+
+```
+BANDWIDTH (h) IN KDE
+    │
+    ├── SMALL h (Under-smoothing)
+    │       │
+    │       ├── Many spikes (wiggly)
+    │       ├── Low bias (captures details)
+    │       ├── High variance (sensitive to data)
+    │       └── Risk: overfitting
+    │
+    ├── LARGE h (Over-smoothing)
+    │       │
+    │       ├── Smooth curve
+    │       ├── High bias (loses details)
+    │       ├── Low variance (stable)
+    │       └── Risk: underfitting
+    │
+    └── OPTIMAL h
+            │
+            ├── Balances bias and variance
+            │
+            ├── Silverman's Rule: h ≈ 1.06 × σ × n⁻¹/⁵
+            │       └── Assumes normal distribution
+            │
+            └── ISJ algorithm: more robust for multimodal
+
+    Key Insight: h = smoothing parameter — similar to regularization.
+```
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 4: How do K-means and GMMs relate?</b></summary>
+
+```
+K-MEANS vs GMMs
+    │
+    ├── K-MEANS
+    │       │
+    │       ├── Hard assignment (each point belongs to one cluster)
+    │       ├── Spherical clusters (implicit)
+    │       ├── No probabilities
+    │       └── Geometric (distance-based)
+    │
+    ├── GMMs
+    │       │
+    │       ├── Soft assignment (responsibilities)
+    │       ├── Ellipsoidal clusters (full covariance)
+    │       ├── Provides probabilities
+    │       └── Probabilistic (generative)
+    │
+    └── GMMs generalize K-means
+            │
+            ├── If you force hard assignments in GMM:
+            │       └── K-means = GMM with Σₖ = I and hard EM
+            │
+            ├── K-means = limiting case of GMM
+            │
+            └── GMMs are more flexible (different shapes, sizes)
+
+    Key Insight: GMMs are a probabilistic version of K-means.
+```
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 5: How does EM solve the GMM optimization problem?</b></summary>
+
+```
+GMM OPTIMIZATION
+    │
+    ├── Problem: Maximize log p(X) = Σₙ log [Σₖ πₖ N(xₙ|µₖ, Σₖ)]
+    │       │
+    │       ├── No closed-form solution
+    │       └── Sum inside log → difficult
+    │
+    ├── If we knew cluster assignments zₙ
+    │       │
+    │       └── Complete data likelihood: easy to optimize!
+    │
+    ├── EM SOLUTION
+    │       │
+    │       ├── E-step: Compute responsibilities
+    │       │       └── rₙₖ = p(zₙ=k | xₙ) using Bayes rule
+    │       │
+    │       ├── M-step: Update parameters
+    │       │       ├── πₖ = (1/n) Σₙ rₙₖ
+    │       │       ├── µₖ = (Σₙ rₙₖ xₙ) / (Σₙ rₙₖ)
+    │       │       └── Σₖ = (Σₙ rₙₖ (xₙ−µₖ)(xₙ−µₖ)ᵀ) / (Σₙ rₙₖ)
+    │       │
+    │       └── Repeat until convergence
+    │
+    └── Key Insight: Replace unknown assignments with their expectations.
+```
+
+</details>
+
+---
+
+### 📊 CONNECTION MATRIX
+
+| Concept A | Connects To | Why |
+|-----------|-------------|-----|
+| **PCA (min reconstruction)** | PCA (max variance) | Equivalent via Pythagorean Theorem |
+| **PCA** | Eigenvectors | Top eigenvectors of covariance matrix |
+| **t-SNE** | KL Divergence | Cost function measures faithfulness |
+| **t-SNE** | Student-t | Solves crowding problem (heavier tails) |
+| **t-SNE** | Perplexity | Controls # of neighbors (local vs global) |
+| **KDE** | Bandwidth | Controls smoothness (bias-variance) |
+| **KDE** | Silverman | Bandwidth selection (assumes normal) |
+| **KDE** | ISJ | More robust bandwidth selection |
+| **K-means** | GMMs | GMMs generalize K-means (soft assignment) |
+| **GMMs** | EM | EM optimizes GMM parameters |
+| **GMMs** | Responsibilities | Soft assignments in E-step |
+| **Clustering** | Scaling | Variables with larger variance dominate |
+| **Hierarchical** | Linkage | Defines inter-cluster distance |
+
+---
+
+## 7. COMMON MISCONCEPTIONS — WEEK 6 ML
+
+**How to use:** Read each misconception first. Try to identify what's wrong. Then click to reveal the reality.
+
+---
+
+### Misconception 1: "PCA finds clusters in the data."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| PCA can be used to find clusters in data. | **PCA does NOT find clusters:**
+| | • PCA finds directions of **maximum variance** — not clusters |
+| | • Clusters may or may not align with principal components |
+| | • PCA is often used for **visualization** but it doesn't separate clusters |
+| | • t-SNE is better for visualizing clusters |
+
+**Rule:** PCA is for variance, not for clustering. Use t-SNE, K-means, or GMMs for cluster discovery.
+
+</details>
+
+---
+
+### Misconception 2: "t-SNE always gives the same result for the same data."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| t-SNE is deterministic — same data = same plot. | **t-SNE is stochastic (random):**
+| | • Different **initializations** → different results |
+| | • Different **random seeds** → different results |
+| | • Results can vary significantly between runs |
+| | • Non-convex optimization (gradient descent with randomness) |
+
+**Rule:** Use a fixed random seed for reproducibility. Always interpret t-SNE plots with caution.
+
+</details>
+
+---
+
+### Misconception 3: "The crowding problem in t-SNE means the algorithm is broken."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| t-SNE's crowding problem is a flaw that makes it unreliable. | **The crowding problem is the REASON t-SNE works:**
+| | • There is more space in high dimensions than low dimensions |
+| | • Student-t distribution in low-D has heavier tails → gives more space |
+| | • This is a feature, not a bug |
+
+**Analogy:** Like trying to pack 100 people into an elevator — Student-t makes the elevator bigger (for far apart points).
+
+</details>
+
+---
+
+### Misconception 4: "Perplexity in t-SNE is just another hyperparameter to guess."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Perplexity is a magic number — just pick 30 and hope for the best. | **Perplexity has a meaningful interpretation:**
+| | • Perplexity = smooth measure of **effective number of neighbors** |
+| | • Low perplexity (5-10): focus on very local structure |
+| | • High perplexity (30-50): more global structure |
+
+**Rule:** Small dataset → lower perplexity; large dataset → higher perplexity. Always try multiple values.
+
+</details>
+
+---
+
+### Misconception 5: "KDE and histograms are basically the same thing."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| KDE is just a smooth version of a histogram. | **KDE is fundamentally different:**
+| | • **Histogram**: fixed bins → discontinuities, depends on bin boundaries |
+| | • **KDE**: continuous, smooth, no bin boundaries |
+| | • KDE places a kernel on **every data point** |
+
+**Rule:** Use KDE for smooth density estimates; use histograms for quick visualization.
+
+</details>
+
+---
+
+### Misconception 6: "The kernel in KDE must be a Gaussian."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| KDE uses Gaussian kernels — it's the only option. | **Many kernels can be used:**
+| | • **Gaussian** (most common) — smooth, infinitely differentiable |
+| | • **Triangular** — piecewise linear, finite support |
+| | • **Box** — simplest, step-like |
+| | • **Triweight** — smooth, finite support |
+| | • Kernel choice matters less than bandwidth choice |
+
+**Key Insight:** The **bandwidth h** is far more important than the kernel shape.
+
+</details>
+
+---
+
+### Misconception 7: "Silverman's rule gives the optimal bandwidth for all data."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Silverman's rule of thumb is the definitive bandwidth selection method. | **Silverman's rule makes a strong assumption:**
+| | • Assumes data is **normally distributed** |
+| | • Works well for unimodal data |
+| | • **Fails for multimodal data** (over-smooths or under-smooths) |
+| | • ISJ (Improved Sheather Jones) is more robust |
+
+**Rule:** Use Silverman as a starting point. For multimodal data, use ISJ or cross-validation.
+
+</details>
+
+---
+
+### Misconception 8: "K-means is deterministic — same data always gives the same clusters."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| K-means is deterministic. | **K-means is NOT deterministic:**
+| | • Random **initialization** of centroids |
+| | • Different initializations → different local minima |
+
+**Rule:** Run K-means multiple times with different initializations. Select the run with the lowest within-cluster variation (inertia).
+
+</details>
+
+---
+
+### Misconception 9: "More clusters in K-means always means better segmentation."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| More clusters = better model. | **Too many clusters = overfitting:**
+| | • K-means objective always decreases with more clusters |
+| | • At K=N, every point is its own cluster (inertia=0) |
+| | • But this is useless for understanding data |
+
+**Rule:** Choose K based on domain knowledge, elbow method, or gap statistic.
+
+</details>
+
+---
+
+### Misconception 10: "Hierarchical clustering always produces the same tree regardless of linkage."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Linkage method doesn't matter — the dendrogram is the same. | **Linkage method drastically affects the dendrogram:**
+| | • **Complete**: compact clusters, stable |
+| | • **Average**: balanced, good general-purpose |
+| | • **Single**: chaining phenomenon (long, stringy clusters) |
+| | • **Centroid**: inversions (dendrogram can go 'up' then 'down') |
+
+**Rule:** Choose linkage based on desired cluster shape. Complete/Average are most commonly used.
+
+</details>
+
+---
+
+### Misconception 11: "Clustering problems always have a 'correct' number of clusters."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| There is one true number of clusters in the data. | **The number of clusters is subjective:**
+| | • Depends on the **granularity** of analysis needed |
+| | • Different applications need different levels of detail |
+| | • Formal methods (elbow, gap statistic) give suggestions, not answers |
+
+**Rule:** The number of clusters is a **business decision**, not a statistical one.
+
+</details>
+
+---
+
+### Misconception 12: "GMMs and K-means are completely different algorithms."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| GMMs and K-means are unrelated algorithms. | **GMMs generalize K-means:**
+| | • K-means = GMM with **Σₖ = I** and **hard assignments** |
+| | • K-means is the limiting case of GMMs |
+| | • GMMs provide **soft assignments** (probabilities) |
+| | • GMMs can model **different cluster shapes** |
+
+**Analogy:** K-means is like a GMM wearing a straightjacket — it only allows spherical clusters.
+
+</details>
+
+---
+
+### Misconception 13: "EM for GMMs always converges to the global optimum."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| EM guarantees finding the best GMM parameters. | **EM converges to a LOCAL optimum:**
+| | • The GMM log-likelihood is **non-convex** |
+| | • Different initializations → different local optima |
+| | • EM can get stuck in poor local minima |
+
+**Rule:** Always run EM with multiple random initializations and select the best log-likelihood.
+
+</details>
+
+---
+
+## 📊 QUICK REFERENCE: MISCONCEPTIONS vs REALITY
+
+| Misconception | Reality |
+|---------------|---------|
+| PCA finds clusters | PCA finds variance — not clusters |
+| t-SNE is deterministic | t-SNE is stochastic (different runs = different results) |
+| Crowding problem = bug | Crowding problem = why Student-t is used (feature) |
+| Perplexity is just a magic number | Perplexity = effective # of neighbors |
+| KDE = smooth histogram | KDE is fundamentally different (continuous, no bins) |
+| KDE requires Gaussian kernel | Many kernels work; bandwidth matters more |
+| Silverman = optimal bandwidth | Silverman assumes normality; ISJ is more robust |
+| K-means is deterministic | K-means is random (different initializations) |
+| More clusters = better | More clusters can overfit |
+| Linkage doesn't matter | Linkage drastically affects dendrogram |
+| One true # of clusters | Number of clusters is subjective (business decision) |
+| GMM and K-means are unrelated | GMMs generalize K-means (soft + full covariance) |
+| EM converges to global optimum | EM converges to local optimum (non-convex) |
+
+---
+
+# 📚 WEEK 6 ML — COMPLETE STUDY GUIDE
+## All Exercises with Answers in Spoiler Format
+
+---
+
+# SECTION 1: DIMENSIONALITY REDUCTION
+
+---
+
+## Exercise DR-1: PCA — Overview & Projection
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What does PCA stand for? | |
+| 2. Is PCA a linear or non-linear method? | |
+| 3. What is the projection of a point onto a subspace? | |
+| 4. What is the reconstruction of a point? | |
+| 5. What is the code/representation of a point? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. PCA stands for | **Principal Component Analysis** |
+| 2. Linear or non-linear? | **Linear** — the mapping is a projection. |
+| 3. Projection onto a subspace | Projₛ(x) = **x̂** = **Uz** where **z** = **Uᵀx** and **U** is a D×K matrix with orthonormal columns. |
+| 4. Reconstruction | **x̂** = **µ** + **Uz** where **µ** is the empirical mean. |
+| 5. Code/representation | **z** = **Uᵀ(x − µ)** — the low-dimensional representation. |
+
+</details>
+
+---
+
+## Exercise DR-2: PCA — Two Equivalent Criteria
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What are the two equivalent criteria for PCA? | |
+| 2. How are the two criteria related? | |
+| 3. What does the Pythagorean Theorem tell us about PCA? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Two equivalent criteria | **Minimize reconstruction error** OR **Maximize projected variance**. They are equivalent! |
+| 2. How they relate | **Projected variance = constant − reconstruction error**. Maximizing variance ≡ minimizing reconstruction error. |
+| 3. Pythagorean Theorem | For any point: **‖x − µ‖² = ‖projection‖² + ‖residual‖²**. Total variance = projected variance + reconstruction error. |
+
+</details>
+
+---
+
+## Exercise DR-3: PCA — The Solution
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is the empirical covariance matrix? | |
+| 2. What are the principal components of PCA? | |
+| 3. For K=1, what is the optimal PCA direction? | |
+| 4. For general K, what is the optimal PCA subspace? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Empirical covariance matrix | `Σ̂ = (1/n) Σᵢ (xᵢ − µ)(xᵢ − µ)ᵀ` — symmetric and positive semidefinite. |
+| 2. Principal components | The **top K eigenvectors** of the empirical covariance matrix Σ̂. |
+| 3. For K=1 | The optimal PCA direction is the **top eigenvector** of Σ̂ (the direction of maximum variance). |
+| 4. For general K | The optimal PCA subspace is spanned by the **top K eigenvectors** of Σ̂. |
+
+</details>
+
+---
+
+## Exercise DR-4: t-SNE — Overview & Key Concepts
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What does t-SNE stand for? | |
+| 2. What is t-SNE specialized for? | |
+| 3. How does t-SNE compute pairwise similarities in high-D? | |
+| 4. How does t-SNE compute pairwise similarities in low-D? | |
+| 5. What is perplexity in t-SNE? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. t-SNE stands for | **t-Distributed Stochastic Neighbor Embedding** |
+| 2. What t-SNE is specialized for | **Visualization** — maps high-dimensional data to 2D/3D while preserving structure. |
+| 3. High-D similarities | **pⱼ|ᵢ = exp(−‖xᵢ−xⱼ‖² / 2σᵢ²) / Σₖ exp(−‖xᵢ−xₖ‖² / 2σᵢ²)** — Gaussian. |
+| 4. Low-D similarities | **qⱼ|ᵢ = (1 + ‖yᵢ−yⱼ‖²)⁻¹ / Σₖ (1 + ‖yᵢ−yₖ‖²)⁻¹** — Student-t. |
+| 5. Perplexity | A smooth measure of the **effective number of neighbors** for each point. Typical range **5–50** (commonly 30). |
+
+</details>
+
+---
+
+## Exercise DR-5: t-SNE — Cost Function & Challenges
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is the cost function of t-SNE? | |
+| 2. Why use KL divergence? | |
+| 3. Why does t-SNE use Student-t distribution in low-D? | |
+| 4. What is the "crowding problem"? | |
+| 5. What is a key limitation of t-SNE? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Cost function | `C = Σᵢ KL(Pᵢ || Qᵢ) = Σᵢ Σⱼ pⱼ|ᵢ log(pⱼ|ᵢ / qⱼ|ᵢ)` |
+| 2. Why KL divergence | Measures the **faithfulness** with which qⱼ|ᵢ models pⱼ|ᵢ. Always positive. Asymmetric (focuses on preserving local structure). |
+| 3. Why Student-t in low-D | **Heavier tails** compensate for the "crowding problem" — gives more space in low-D to separate points. |
+| 4. Crowding problem | There is much more space in high dimensions than in low dimensions. Many points that are far apart in high-D can't be placed far enough apart in low-D. |
+| 5. Key limitation | **Stochastic** — different runs may give different results. Cannot be used for out-of-sample extension. |
+
+</details>
+
+---
+
+# SECTION 2: DENSITY ESTIMATION
+
+---
+
+## Exercise DE-1: KDE — Fundamentals
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is a kernel density estimate (KDE)? | |
+| 2. Write the KDE formula. | |
+| 3. What are the properties of a kernel function? | |
+| 4. What does the bandwidth h control? | |
+| 5. What happens when h is too small? Too large? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. What is KDE | A non-parametric way to estimate the probability density function of a random variable. Places a kernel function on every data point and averages them. |
+| 2. KDE formula | `f̂(x) = (1/(nh)) Σᵢ K((x − xᵢ)/h)` where K is the kernel function, h is the bandwidth. |
+| 3. Kernel properties | **Non-negative**: K(x) ≥ 0. **Symmetric**: K(x) = K(−x). **Decreasing**: K'(x) ≤ 0 for x > 0. |
+| 4. Bandwidth h controls | The **smoothness** of the density estimate. Larger h = smoother (more bias). Smaller h = more wiggly (more variance). |
+| 5. h too small vs too large | **Too small**: under-smoothing — many spikes, high variance, overfitting. **Too large**: over-smoothing — loses detail, high bias, underfitting. |
+
+</details>
+
+---
+
+## Exercise DE-2: Bandwidth Selection
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is Silverman's rule of thumb? | |
+| 2. What assumption does Silverman's rule make? | |
+| 3. What is the Improved Sheather Jones (ISJ) algorithm? | |
+| 4. Why is ISJ more robust than Silverman? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Silverman's rule | `h ≈ 1.06 × σ × n⁻¹/⁵` (for Gaussian kernel) — assumes data is normally distributed. |
+| 2. Assumption | Assumes data is **normally distributed** — good starting point but can fail for multimodal data. |
+| 3. ISJ algorithm | More robust bandwidth selection method. Works better for **multimodal** data. |
+| 4. Why ISJ is more robust | Handles **multimodality** better than Silverman. Doesn't assume normality. |
+
+</details>
+
+---
+
+# SECTION 3: CLUSTERING
+
+---
+
+## Exercise CL-1: Clustering Fundamentals
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is clustering? | |
+| 2. What type of learning is clustering? | |
+| 3. What are the three clustering algorithms we covered? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Clustering | Assigning observations to groups when we do not have class labels (Y). |
+| 2. Type of learning | **Unsupervised learning** — no clearly defined outcome of interest. |
+| 3. Three algorithms | **K-means clustering**, **Hierarchical clustering**, **Gaussian Mixture Models (GMMs)**. |
+
+</details>
+
+---
+
+## Exercise CL-2: K-Means Clustering
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. How many clusters must be specified in K-means? | |
+| 2. What is the objective of K-means? | |
+| 3. Describe the K-means algorithm steps. | |
+| 4. Does K-means always converge to the global minimum? | |
+| 5. Why is K-means random? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Number of clusters | **K must be specified a-priori**. |
+| 2. Objective | Minimize **within-cluster variation**: minimize Σⱼ Σᵢ∈Cⱼ ‖xᵢ − µⱼ‖². |
+| 3. Algorithm steps | **Step 1**: Assign each observation randomly to one of K clusters. **Step 2a**: Find the centroid of each cluster. **Step 2b**: Reassign each sample to the nearest centroid. Repeat until assignments stop changing. |
+| 4. Convergence | Always converges to a **local minimum** (not necessarily global). |
+| 5. Randomness | Each initialization can result in a different minimum. Run multiple times and select the lowest minimum. |
+
+</details>
+
+---
+
+## Exercise CL-3: Hierarchical Clustering
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What does hierarchical clustering produce? | |
+| 2. Does hierarchical clustering require specifying K a-priori? | |
+| 3. What type of hierarchical clustering is most common? | |
+| 4. How are clusters created? | |
+| 5. What is a dendrogram? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. What it produces | A **dendrogram** — a tree-like structure showing nested clusters. |
+| 2. Does it require K? | **No** — the number of clusters does not need to be specified a-priori. |
+| 3. Most common type | **Agglomerative** (bottom-up) — start with each point as its own cluster, iteratively fuse closest clusters. |
+| 4. How clusters are created | In each iteration, fuse the **2 clusters closest** to each other. Cut the dendrogram at a vertical point to get K clusters. |
+| 5. Dendrogram | Tree diagram showing the hierarchical relationship between clusters. Lower clusters are nested within higher clusters. |
+
+</details>
+
+---
+
+## Exercise CL-4: Linkage Methods
+
+| Question | Complete Linkage | Average Linkage | Single Linkage | Centroid Linkage |
+|----------|------------------|-----------------|----------------|------------------|
+| 1. How is distance defined? | | | | |
+| 2. Issue | | | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Complete Linkage | Average Linkage | Single Linkage | Centroid Linkage |
+|----------|------------------|-----------------|----------------|------------------|
+| 1. How is distance defined? | Maximum distance between pairs | Average of all pairwise distances | Minimum distance between pairs | Distance between centroids |
+| 2. Issue | - | - | **Chaining phenomenon** | **Inversions** |
+
+</details>
+
+---
+
+## Exercise CL-5: Correlation Distance
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What problem does correlation distance solve? | |
+| 2. What does correlation distance measure? | |
+| 3. When would you use correlation distance instead of Euclidean? | |
+| 4. Give an example of when correlation distance is more appropriate. | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Problem solved | Euclidean distance clusters customers who purchase similar **quantities**. Correlation distance clusters customers who purchase similar **patterns** across products. |
+| 2. What it measures | The **correlation** between two observations across features — captures similarity in **shape/pattern** rather than magnitude. |
+| 3. When to use | When we care about **purchase patterns** rather than total volume. When variables have different scales. |
+| 4. Example | Market segmentation: Euclidean would cluster all customers who purchase few things together. Correlation would cluster customers who purchase **similar types** of things together. |
+
+</details>
+
+---
+
+# SECTION 4: GAUSSIAN MIXTURE MODELS
+
+---
+
+## Exercise GMM-1: Generative View
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is a generative model for clustering? | |
+| 2. What is the generative process for a GMM? | |
+| 3. What are the parameters of a GMM? | |
+| 4. What is the marginal distribution p(x) in a GMM? | |
+| 5. What is a "responsibility" in GMM? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Generative model | Imagine data was produced by a model. Adjust model parameters using maximum likelihood to maximize probability of producing exactly the observed data. |
+| 2. Generative process | **Step 1**: Choose a cluster z ∈ {1, ..., K} with probability p(z=k) = πₖ. **Step 2**: Given z, sample x from a Gaussian: p(x\|z=k) = N(x\|µₖ, Σₖ). |
+| 3. Parameters | **πₖ** (mixing coefficients), **µₖ** (means), **Σₖ** (covariances). |
+| 4. Marginal distribution | **p(x) = Σᵢ πᵢ N(x\|µᵢ, Σᵢ)** — a Gaussian Mixture Model (GMM). |
+| 5. Responsibility | **rₙₖ = p(zₙ = k \| xₙ)** — the probability that cluster k generated data point n. |
+
+</details>
+
+---
+
+## Exercise GMM-2: EM Algorithm
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What does EM stand for? | |
+| 2. What are the two steps of EM? | |
+| 3. What happens in the E-step? | |
+| 4. What happens in the M-step? | |
+| 5. What are the M-step update formulas? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. EM stands for | **Expectation-Maximization** |
+| 2. Two steps | **E-step** and **M-step** — alternate until convergence. |
+| 3. E-step | Compute **responsibilities rₙₖ = p(zₙ=k\|xₙ)** given current model parameters (πₖ, µₖ, Σₖ). |
+| 4. M-step | Re-estimate parameters **given current responsibilities** rₙₖ. |
+| 5. M-step updates | `πₖ = (1/n)Σₙ rₙₖ`; `µₖ = (Σₙ rₙₖ xₙ) / (Σₙ rₙₖ)`; `Σₖ = (Σₙ rₙₖ (xₙ−µₖ)(xₙ−µₖ)ᵀ) / (Σₙ rₙₖ)` |
+
+</details>
+
+---
+
+## Exercise GMM-3: K-means vs GMMs
+
+| Question | K-means | GMMs |
+|----------|---------|------|
+| 1. Hard or soft assignment? | | |
+| 2. Requires K a-priori? | | |
+| 3. Assumes covariance? | | |
+| 4. Provides probabilities? | | |
+| 5. Type of clustering? | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | K-means | GMMs |
+|----------|---------|------|
+| 1. Hard or soft assignment? | **Hard** (each point belongs to exactly one cluster) | **Soft** (points have probabilities/responsibilities for each cluster) |
+| 2. Requires K a-priori? | Yes | Yes |
+| 3. Assumes covariance? | Spherical clusters (implicit) | Can have different covariance matrices (full covariance) |
+| 4. Provides probabilities? | No | Yes (responsibilities and density estimates) |
+| 5. Type of clustering? | Geometric | Probabilistic (generative) |
+
+</details>
+
+---
+
+## Exercise GMM-4: Complete Cheat Sheet
+
+### Fill in all blanks:
+
+**PCA Projection:**
+`z = ___________`, `x̂ = ___________`
+
+**PCA Solution:** Principal components = top K ___________ of ___________
+
+**t-SNE Purpose:** ___________ (2D/3D). Preserves ___________ structure.
+
+**t-SNE Cost Function:** `C = Σᵢ ___________`
+
+**KDE Formula:** `f̂(x) = ___________`
+
+**KDE Bandwidth:** Small h = ___________ (high variance); Large h = ___________ (high bias)
+
+**K-Means Objective:** Minimize `Σⱼ Σᵢ∈Cⱼ ___________`
+
+**Hierarchical Clustering:** Produces a ___________; agglomerative = ___________-up.
+
+**GMM Generative Process:** Choose cluster z with probability ___, then sample x ∼ ___
+
+**GMM Marginal:** `p(x) = ___________`
+
+**EM Algorithm:** E-step computes ___________; M-step updates ___________
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+**PCA Projection:**
+`z = **Uᵀ(x − µ)**`, `x̂ = **µ + Uz**`
+
+**PCA Solution:** Principal components = top K **eigenvectors** of **the covariance matrix**
+
+**t-SNE Purpose:** **Visualization** (2D/3D). Preserves **local** structure.
+
+**t-SNE Cost Function:** `C = Σᵢ **KL(Pᵢ || Qᵢ)**`
+
+**KDE Formula:** `f̂(x) = **(1/(nh)) Σᵢ K((x − xᵢ)/h)**`
+
+**KDE Bandwidth:** Small h = **under-smoothing** (high variance); Large h = **over-smoothing** (high bias)
+
+**K-Means Objective:** Minimize `Σⱼ Σᵢ∈Cⱼ **‖xᵢ − µⱼ‖²**`
+
+**Hierarchical Clustering:** Produces a **dendrogram**; agglomerative = **bottom**-up.
+
+**GMM Generative Process:** Choose cluster z with probability **πₖ**, then sample x ∼ **N(µₖ, Σₖ)**
+
+**GMM Marginal:** `p(x) = **Σᵢ πᵢ N(x|µᵢ, Σᵢ)**`
+
+**EM Algorithm:** E-step computes **responsibilities**; M-step updates **parameters (π, µ, Σ)**
+
+</details>
+
+---
+
+# 📊 COMPLETE COVERAGE SUMMARY
+
+| Category | Concepts | Status |
+|----------|----------|--------|
+| Dimensionality Reduction | Motivation, PCA, t-SNE | ✅ 100% |
+| PCA | Projection, criteria, eigenvectors | ✅ 100% |
+| t-SNE | Similarities, perplexity, crowding | ✅ 100% |
+| Density Estimation | KDE, kernels, bandwidth | ✅ 100% |
+| KDE Bandwidth | Silverman, ISJ, bias-variance | ✅ 100% |
+| Clustering | K-means, hierarchical | ✅ 100% |
+| Linkage Methods | Complete, average, single, centroid | ✅ 100% |
+| Correlation Distance | Patterns vs magnitudes | ✅ 100% |
+| GMMs | Generative view, parameters | ✅ 100% |
+| EM Algorithm | E-step, M-step, responsibilities | ✅ 100% |
+| K-means vs GMMs | Hard vs soft, spherical vs ellipsoidal | ✅ 100% |
+| **TOTAL** | **All Week 6 ML concepts** | ✅ **100%** |
+
+---
+
+## 📝 How to Use This Document
+
+1. **Read the question**, write your answer in the blank/box
+2. **Click the dropdown** to reveal the model answer
+3. **Compare** your answer to the model
+4. **Re-study** any sections where you got something wrong
+5. **Mark** your confidence level for each topic
+
+---
+
+**Good luck with your studies! 🎯**

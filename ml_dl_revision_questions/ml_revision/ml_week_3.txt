@@ -1,0 +1,1614 @@
+# Week 3 ML — Complete Revision Materials
+
+Based on your ML Week 3 slides covering **Data Preparation, Feature Engineering, and Data Visualization**, here are comprehensive revision materials following the established format.
+
+---
+
+## 1. CONFIDENCE TRACKER — WEEK 3 ML
+
+| Confidence Level | Meaning |
+|------------------|---------|
+| 🟢 **Green** | I knew this cold — could explain it to someone else |
+| 🟡 **Yellow** | I got it right, but I wasn't 100% sure / guessed |
+| 🔴 **Red** | I had no idea — got it wrong or completely guessed |
+
+---
+
+| Exercise | Topic | 🟢 | 🟡 | 🔴 | Re-study? |
+|----------|-------|----|----|----|-----------|
+| Ex 1 | Why Data Preparation Matters | | | | ☐ |
+| Ex 2 | The Data Preparation Pipeline | | | | ☐ |
+| Ex 3 | Common Data Quality Issues | | | | ☐ |
+| Ex 4 | Data Cleaning — Duplicates, Outliers, Formatting | | | | ☐ |
+| Ex 5 | Outlier Detection Methods (Z-score, IQR, Isolation Forest) | | | | ☐ |
+| Ex 6 | Missing Values — MCAR, MAR, MNAR | | | | ☐ |
+| Ex 7 | Missing Value Imputation Strategies | | | | ☐ |
+| Ex 8 | Encoding Categorical Variables | | | | ☐ |
+| Ex 9 | Advanced Encoding — Target Encoding, Frequency Encoding | | | | ☐ |
+| Ex 10 | Feature Scaling — Min-Max, Z-Score, Robust | | | | ☐ |
+| Ex 11 | Log & Power Transforms | | | | ☐ |
+| Ex 12 | Binning & Discretization | | | | ☐ |
+| Ex 13 | Polynomial & Ratio Features | | | | ☐ |
+| Ex 14 | Temporal Feature Engineering | | | | ☐ |
+| Ex 15 | Interaction Features | | | | ☐ |
+| Ex 16 | Text Feature Engineering — BoW, TF-IDF, Embeddings | | | | ☐ |
+| Ex 17 | Aggregation Features | | | | ☐ |
+| Ex 18 | Feature Selection — Filter, Wrapper, Embedded | | | | ☐ |
+| Ex 19 | Data Visualization — Anscombe's Quartet, Tufte | | | | ☐ |
+| Ex 20 | Gestalt Principles & Color Theory | | | | ☐ |
+| Ex 21 | Chart Types — When to Use What | | | | ☐ |
+| Ex 22 | Visualization Anti-Patterns | | | | ☐ |
+| Ex 23 | Storytelling & Dashboard Design | | | | ☐ |
+| Ex 24 | Complete Cheat Sheet | | | | ☐ |
+
+---
+
+## 2. 🎯 TEACH IT SUMMARY
+
+### The Big Picture — Week 3 ML
+
+Week 3 covers the **foundation of every ML project**: preparing data, engineering features, and visualizing insights. These are the steps that consume 60-80% of a data scientist's time and often determine model success more than algorithm choice.
+
+**Part 1: Data Preparation.** The core principle is **"Garbage in, garbage out"** — the quality of your output is strictly limited by the quality of your input. The data preparation pipeline is iterative: **Raw Data → Inspect → Clean → Impute → Encode → Visualize**. Common data quality issues include missing values, duplicates, outliers, inconsistent formatting, and wrong data types. **Missing values** come in three types: MCAR (missing completely at random — safe to delete), MAR (missing depends on observed variables — impute validly), and MNAR (missing depends on the missing value itself — highest bias risk). **Imputation** strategies range from simple (mean, median, mode) to advanced (KNN, MICE, forward/backward fill). **Encoding** categorical variables depends on type: nominal → One-Hot, ordinal → Label/Ordinal, high-cardinality → Target or Frequency Encoding. **The golden rule:** Never resample/transform/test on the test set — fit everything on train only.
+
+**Part 2: Feature Engineering.** "Applied ML is basically feature engineering" — Andrew Ng. Features should give the model "pre-digested" knowledge. **Numerical transformations** include scaling (Min-Max for NNs/KNN, Z-score for most models, Robust for outliers), log/power transforms for skewed data, binning, and polynomial/ratio features. **Temporal features** extract year/month/day/hour and use sin/cos for cyclical encoding (hours, months). **Text features** include Bag-of-Words, TF-IDF (downweights common words), and embeddings. **Aggregation features** compute group-level statistics per entity. **Feature selection** methods are Filter (statistical scores, fast), Wrapper (RFE, accurate but slow), and Embedded (Lasso/tree importance, fast and accurate). Always wrap transformations in a Pipeline to prevent leakage.
+
+**Part 3: Data Visualization.** **Anscombe's Quartet** demonstrates that identical summary statistics can produce completely different plots — visualization catches what numbers hide. **Tufte's Data-Ink Ratio** says "above all else show the data" — remove chartjunk, maximize data ink. **Gestalt principles** (proximity, continuity, similarity, closure, enclosure, figure/ground) explain how humans group visual elements. **Color** should be used intentionally: sequential for ordered data, diverging for meaningful midpoints, qualitative for categories. **Chart selection** matters: bar for comparisons, line for trends, scatter for relationships, box for distributions. **Storytelling with data** has four components: Context (who+why), Conflict (the question), Resolution (answer obvious in 5 seconds), Action (what to do next).
+
+**The Connecting Thread:** Data preparation, feature engineering, and visualization are not "pre-work" — they are the most important work. A simple model on clean, well-engineered data beats a complex model on dirty data every time.
+
+---
+
+## 3. ⚠️ COMMON PITFALLS IN PRACTICE
+
+| Pitfall | Why It Happens | How to Avoid |
+|---------|----------------|--------------|
+| **1. Scaling before splitting** | Test set statistics leak into training | Fit scaler on **TRAIN only**; transform all |
+| **2. Target encoding without K-fold** | Target information leaks from validation | Use **K-fold cross-fitting** |
+| **3. One-hot encoding high-cardinality features** | Creates hundreds of columns → sparse, overfitting | Use **Target/Frequency Encoding** |
+| **4. Deleting rows with missing values without checking MCAR** | Biases model if MAR/MNAR | Check missingness type first; impute if not MCAR |
+| **5. Removing outliers without domain knowledge** | Fraud/rare events ARE outliers | Understand WHY outlier exists before removing |
+| **6. Not using Pipelines** | Transformations differ between train and inference | Always use `sklearn.pipeline.Pipeline` |
+| **7. Forgetting cyclical encoding for time features** | Hour 23 and 0 appear far apart numerically | Use `sin`/`cos` encoding |
+| **8. Using accuracy for imbalanced data** | 99% negative → 99% accuracy trivial | Use **Precision, Recall, F1, PR-AUC** |
+| **9. Not visualizing data before modeling** | Missing patterns invisible in numbers | Always do EDA first |
+| **10. Using pie charts with >5 categories** | Human eye can't compare angles | Use **bar chart** or **donut** with "Other" |
+
+---
+
+## 4. ONE-SENTENCE SUMMARY — WEEK 3 ML
+
+**How to use:** For each concept, try to write your own one-sentence summary *before* clicking to reveal the model answer.
+
+---
+
+### Data Preparation
+
+<details>
+<summary><b>Data Preparation</b> — Try your own first</summary>
+
+**Model Answer:** The process of cleaning, transforming, and organizing raw data into a format suitable for analysis and modeling — consuming 60–80% of a data scientist's time.
+
+</details>
+
+---
+
+<details>
+<summary><b>Data Preparation Pipeline</b> — Try your own first</summary>
+
+**Model Answer:** Raw Data → Inspect → Clean → Impute → Encode → Visualize — an iterative process where you loop back as new issues are discovered.
+
+</details>
+
+---
+
+<details>
+<summary><b>Garbage In, Garbage Out</b> — Try your own first</summary>
+
+**Model Answer:** The quality of your output is strictly limited by the quality of your input — bad data leads to bad models regardless of algorithm choice.
+
+</details>
+
+---
+
+<details>
+<summary><b>Common Data Quality Issues</b> — Try your own first</summary>
+
+**Model Answer:** Missing values, duplicates, outliers, inconsistent formatting, wrong data types, and unencoded categories that silently break groupBy, joins, and model features.
+
+</details>
+
+---
+
+<details>
+<summary><b>MCAR, MAR, MNAR</b> — Try your own first</summary>
+
+**Model Answer:** MCAR (missing completely at random — safe to delete), MAR (missing depends on observed variables — impute valid), MNAR (missing depends on the missing value itself — highest bias risk).
+
+</details>
+
+---
+
+<details>
+<summary><b>Mean Imputation</b> — Try your own first</summary>
+
+**Model Answer:** Replaces missing values with the column mean — fast but distorts distributions and reduces variance; best for symmetric numeric data.
+
+</details>
+
+---
+
+<details>
+<summary><b>Median Imputation</b> — Try your own first</summary>
+
+**Model Answer:** Replaces missing values with the column median — robust to outliers; best for skewed numeric data.
+
+</details>
+
+---
+
+<details>
+<summary><b>One-Hot Encoding</b> — Try your own first</summary>
+
+**Model Answer:** Creates a binary column for each unique category — standard for nominal variables; use `drop_first=True` to avoid multicollinearity.
+
+</details>
+
+---
+
+<details>
+<summary><b>Target Encoding</b> — Try your own first</summary>
+
+**Model Answer:** Replaces each category with the mean of the target variable for that category — powerful but requires K-fold cross-fitting to prevent leakage.
+
+</details>
+
+---
+
+<details>
+<summary><b>Frequency Encoding</b> — Try your own first</summary>
+
+**Model Answer:** Replaces each category with its count or proportion in the dataset — no target leakage, but loses distinction between categories with same frequency.
+
+</details>
+
+---
+
+### Feature Engineering
+
+<details>
+<summary><b>Feature Engineering</b> — Try your own first</summary>
+
+**Model Answer:** Using domain knowledge to create, transform, or select input variables that make machine learning algorithms work better — "Applied ML is basically feature engineering" (Andrew Ng).
+
+</details>
+
+---
+
+<details>
+<summary><b>Min-Max Normalization</b> — Try your own first</summary>
+
+**Model Answer:** `x' = (x − min)/(max − min)` — scales to [0,1] range; best for neural networks/KNN/SVM but sensitive to outliers.
+
+</details>
+
+---
+
+<details>
+<summary><b>Z-Score Standardization</b> — Try your own first</summary>
+
+**Model Answer:** `x' = (x − μ)/σ` — transforms to mean=0, std=1; the most commonly used scaling method; robust to outliers.
+
+</details>
+
+---
+
+<details>
+<summary><b>Robust Scaling</b> — Try your own first</summary>
+
+**Model Answer:** `x' = (x − median)/IQR` — uses median and IQR; resistant to outliers; best for data with outliers you cannot remove.
+
+</details>
+
+---
+
+<details>
+<summary><b>Log Transform</b> — Try your own first</summary>
+
+**Model Answer:** Reduces right-skew (income, prices, counts), stabilizes variance, and improves linear model fit; use `log(x+1)` when data includes zeros.
+
+</details>
+
+---
+
+<details>
+<summary><b>Box-Cox Transform</b> — Try your own first</summary>
+
+**Model Answer:** `((x^λ − 1)/λ)` — finds optimal λ automatically; data must be positive; use `PowerTransformer(method='box-cox')`.
+
+</details>
+
+---
+
+<details>
+<summary><b>Cyclical Encoding</b> — Try your own first</summary>
+
+**Model Answer:** Uses `sin` and `cos` to preserve circular structure for hours, months, and days of week — hour 23 and hour 0 map to the same point.
+
+</details>
+
+---
+
+<details>
+<summary><b>TF-IDF</b> — Try your own first</summary>
+
+**Model Answer:** `tf-idf(term, doc) = tf × log(N / df)` — counts words but discounts very common corpus words like "the"; standard for document classification.
+
+</details>
+
+---
+
+### Feature Selection
+
+<details>
+<summary><b>Feature Selection Methods</b> — Try your own first</summary>
+
+**Model Answer:** Filter (statistical scoring — fast, model-agnostic), Wrapper (RFE — accurate but slow), or Embedded (Lasso/tree importance — fast and accurate but model-specific).
+
+</details>
+
+---
+
+### Data Visualization
+
+<details>
+<summary><b>Anscombe's Quartet</b> — Try your own first</summary>
+
+**Model Answer:** Four datasets with IDENTICAL summary statistics (mean, variance, correlation, regression line) but completely different when plotted — proving visualization catches what numbers hide.
+
+</details>
+
+---
+
+<details>
+<summary><b>Data-Ink Ratio (Tufte)</b> — Try your own first</summary>
+
+**Model Answer:** `Data-Ink Ratio = Ink used to display data / Total ink used` — "Above all else show the data" — remove chartjunk, maximize data ink.
+
+</details>
+
+---
+
+<details>
+<summary><b>Gestalt Principles</b> — Try your own first</summary>
+
+**Model Answer:** Proximity (close = related), Continuity (eyes follow lines), Similarity (same color = same category), Closure (brain completes shapes), Enclosure (box = group), Figure/Ground (main vs background).
+
+</details>
+
+---
+
+<details>
+<summary><b>Sequential Colormap</b> — Try your own first</summary>
+
+**Model Answer:** Ordered, numeric data (Blues) — use for low to high counts, income, density.
+
+</details>
+
+---
+
+<details>
+<summary><b>Diverging Colormap</b> — Try your own first</summary>
+
+**Model Answer:** Meaningful midpoint (RdYlBu) — use for correlation (-1 to 1), temperature anomaly, sentiment.
+
+</details>
+
+---
+
+<details>
+<summary><b>Qualitative Colormap</b> — Try your own first</summary>
+
+**Model Answer:** Nominal categories (tab10) — use for department, country, species (no order).
+
+</details>
+
+---
+
+<details>
+<summary><b>Colorblind Considerations</b> — Try your own first</summary>
+
+**Model Answer:** 8% of men and 0.5% of women are colorblind — avoid red+green, use colorblind-safe palettes like Viridis, Cividis, or ColorBrewer.
+
+</details>
+
+---
+
+<details>
+<summary><b>Storytelling with Data</b> — Try your own first</summary>
+
+**Model Answer:** Context (who+why) → Conflict (the question) → Resolution (answer obvious in 5 seconds) → Action (what the audience should do next).
+
+</details>
+
+---
+
+## 5. QUICK REFERENCE CHEAT SHEET — WEEK 3 ML
+
+### Data Preparation — Key Statistics
+
+<details>
+<summary><b>Key Statistics</b> — Try to recall first</summary>
+
+| Statistic | Value |
+|-----------|-------|
+| Time spent on data prep | **60–80%** of data scientist time |
+| Annual cost of bad data (US) | **~$3 trillion** |
+| #1 factor in failed ML projects | **Bad data quality** |
+
+</details>
+
+---
+
+### Data Quality Issues
+
+<details>
+<summary><b>5 Common Data Quality Issues</b> — Try to recall first</summary>
+
+1. **Missing Values** (NaN, NULL, sentinel values like -999)
+2. **Duplicates** (exact, key-field, near-duplicates)
+3. **Outliers** (extreme values from error or rare events)
+4. **Inconsistent Format** ('USA', 'U.S.A', 'us')
+5. **Wrong Dtype** (zip codes as floats, dates as strings)
+
+</details>
+
+---
+
+### Missing Value Mechanisms
+
+<details>
+<summary><b>MCAR, MAR, MNAR</b> — Try to recall first</summary>
+
+| Type | Meaning | Example | Action |
+|------|---------|---------|--------|
+| **MCAR** | Missing completely at random | Sensor randomly drops 5% of readings | Safe to delete |
+| **MAR** | Missing depends on observed variables | Men less likely to report weight | Impute validly |
+| **MNAR** | Missing depends on missing value itself | High earners skip salary field | Highest bias risk |
+
+</details>
+
+---
+
+### Missing Value Decision Thresholds
+
+<details>
+<summary><b>Thresholds</b> — Try to recall first</summary>
+
+| Missing Rate | Recommended Strategy |
+|--------------|---------------------|
+| **< 5%** | Almost any strategy works |
+| **5–20%** | Impute carefully |
+| **20–40%** | Consider adding missingness indicator |
+| **> 40%** | Consider dropping column |
+
+</details>
+
+---
+
+### Scaling Methods
+
+<details>
+<summary><b>Scaling Methods</b> — Try to recall first</summary>
+
+| Method | Formula | Best For | Outlier Sensitivity |
+|--------|---------|----------|---------------------|
+| **Min-Max** | `(x − min)/(max − min)` | NNs, KNN, SVM, images | High |
+| **Z-Score** | `(x − μ)/σ` | Linear/logistic regression, PCA, SVM | Low (most common) |
+| **Robust Scaling** | `(x − median)/IQR` | Data with outliers | Very low |
+
+</details>
+
+---
+
+### Transformations
+
+<details>
+<summary><b>Log & Power Transforms</b> — Try to recall first</summary>
+
+| Transform | Formula | Use When |
+|-----------|---------|----------|
+| **Log** | `log(x)` | Right-skewed data (income, prices) |
+| **Log1p** | `log(x+1)` | Data includes zeros |
+| **Box-Cox** | `((x^λ − 1)/λ)` | Positive data only, finds optimal λ |
+| **Yeo-Johnson** | Modified Box-Cox | Handles zero and negative values |
+
+</details>
+
+---
+
+### Encoding Methods
+
+<details>
+<summary><b>Encoding Methods</b> — Try to recall first</summary>
+
+| Method | When to Use | Risk |
+|--------|-------------|------|
+| **Label Encoding** | Tree-based models, ordinal data | Implies order |
+| **One-Hot Encoding** | Nominal, few categories (<15) | Column explosion |
+| **Target Encoding** | High-cardinality nominal | Leakage risk (use K-fold) |
+| **Frequency Encoding** | High-cardinality nominal | Loses category distinction |
+
+</details>
+
+---
+
+### Feature Scaling Summary
+
+<details>
+<summary><b>Scaling Summary</b> — Try to recall first</summary>
+
+| Method | When to Use |
+|--------|-------------|
+| **Min-Max** | Neural networks, KNN, SVM, image data |
+| **Z-Score** | Linear/logistic regression, PCA, SVM (most common) |
+| **Robust Scaling** | Data with outliers you cannot remove |
+
+</details>
+
+---
+
+### Feature Selection Methods
+
+<details>
+<summary><b>Filter, Wrapper, Embedded</b> — Try to recall first</summary>
+
+| Method | How It Works | Pros | Cons |
+|--------|--------------|------|------|
+| **Filter** | Statistical scores (correlation, chi²) | Fast, model-agnostic | Ignores interactions |
+| **Wrapper** | Try subsets, measure performance (RFE) | Accurate, considers interactions | Slow, overfitting risk |
+| **Embedded** | Built into training (Lasso, tree importance) | Fast and accurate | Model-specific |
+
+</details>
+
+---
+
+### Chart Selection Guide
+
+<details>
+<summary><b>When to Use Which Chart</b> — Try to recall first</summary>
+
+| Goal | Best Chart |
+|------|------------|
+| Compare values across categories | **Bar chart** |
+| Trend over time | **Line chart** |
+| Relationship between 2 numeric variables | **Scatter plot** |
+| Distribution of one numeric variable | **Histogram + KDE** |
+| Spread, median, outliers per group | **Box plot** |
+| Correlation between many features | **Heatmap** |
+| Part-to-whole proportions | **Stacked bar** (not pie) |
+| Data across geography | **Choropleth map** |
+
+</details>
+
+---
+
+### Bar Chart Best Practices
+
+<details>
+<summary><b>Do's and Don'ts</b> — Try to recall first</summary>
+
+| Rule | Why |
+|------|-----|
+| **Always start y-axis at zero** | Truncated axes exaggerate differences |
+| **Always sort bars by value** | Makes comparison easier |
+| **Avoid 3D bars** | Distorts perception |
+| **Max 12 categories** | More → switch to horizontal |
+
+</details>
+
+---
+
+### Color Palettes
+
+<details>
+<summary><b>Color Palettes</b> — Try to recall first</summary>
+
+| Palette Type | Use For | Example |
+|--------------|---------|---------|
+| **Sequential** | Ordered numeric data | Blues (low→high) |
+| **Diverging** | Meaningful midpoint | RdYlBu (correlation) |
+| **Qualitative** | Nominal categories | tab10 (departments) |
+
+**Colorblind-safe palettes:** Viridis, Cividis, ColorBrewer
+
+</details>
+
+---
+
+### Data-Ink Ratio (Tufte)
+
+<details>
+<summary><b>Data-Ink Ratio</b> — Try to recall first</summary>
+
+**Formula:** `Data-Ink Ratio = Ink used to display data / Total ink used`
+
+**Principle:** "Above all else show the data." — Remove chartjunk, maximize data ink.
+
+</details>
+
+---
+
+### Storytelling with Data
+
+<details>
+<summary><b>4 Components</b> — Try to recall first</summary>
+
+| Component | What It Means |
+|-----------|---------------|
+| **Context** | Who + Why (audience, decision) |
+| **Conflict** | The question (one insight) |
+| **Resolution** | Answer obvious in 5 seconds |
+| **Action** | What the audience should do next |
+
+</details>
+
+---
+
+## 6. CONNECTIONS MAP — WEEK 3 ML
+
+### 🌳 TEXT-BASED CONCEPT MAP
+
+```
+╔══════════════════════════════════════════════════════════════════════════╗
+║                                                                          ║
+║                    WEEK 3 ML: DATA PREP, FEATURES & VIZ                ║
+║                                                                          ║
+║                    ┌─────────────────────────────────────┐              ║
+║                    │   WHY DATA PREP MATTERS             │              ║
+║                    │   60-80% of data scientist time    │              ║
+║                    │   "Garbage in, garbage out"        │              ║
+║                    └──────────────┬──────────────────────┘              ║
+║                                   │                                      ║
+║                                   ▼                                      ║
+║                    ┌─────────────────────────────────────┐              ║
+║                    │   DATA PREPARATION PIPELINE         │              ║
+║                    │   Raw → Inspect → Clean → Impute   │              ║
+║                    │   → Encode → Visualize             │              ║
+║                    └──────────────┬──────────────────────┘              ║
+║                                   │                                      ║
+║    ┌──────────────────────────────┼──────────────────────────────┐      ║
+║    │                              │                              │      ║
+║    ▼                              ▼                              ▼      ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │ DATA         │          │ MISSING      │          │ CATEGORICAL  │  ║
+║ │ CLEANING     │          │ VALUES       │          │ ENCODING     │  ║
+║ └──────┬───────┘          └──────┬───────┘          └──────┬───────┘  ║
+║        │                         │                         │          ║
+║        ▼                         ▼                         ▼          ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │• Duplicates  │          │• MCAR/MAR    │          │• One-Hot     │  ║
+║ │• Outliers    │          │  /MNAR       │          │• Label       │  ║
+║ │• Formatting  │          │• Imputation  │          │• Target      │  ║
+║ │• Dtypes      │          │• Indicator   │          │• Frequency   │  ║
+║ └──────────────┘          └──────────────┘          └──────────────┘  ║
+║                                                                         ║
+║                    ┌─────────────────────────────────────┐             ║
+║                    │   FEATURE ENGINEERING               │             ║
+║                    │   "Applied ML is basically FE"     │             ║
+║                    └──────────────┬──────────────────────┘             ║
+║                                   │                                     ║
+║    ┌──────────────────────────────┼──────────────────────────────┐     ║
+║    │                              │                              │     ║
+║    ▼                              ▼                              ▼     ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │ NUMERICAL    │          │ TEMPORAL     │          │ TEXT &       │  ║
+║ │ TRANSFORMS   │          │ FEATURES     │          │ AGGREGATIONS │  ║
+║ └──────┬───────┘          └──────┬───────┘          └──────┬───────┘  ║
+║        │                         │                         │          ║
+║        ▼                         ▼                         ▼          ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │• Scaling     │          │• Year/Month  │          │• TF-IDF     │  ║
+║ │• Log/Sqrt    │          │• Hour/DOW    │          │• Embeddings │  ║
+║ │• Binning     │          │• Cyclical    │          │• Aggregates │  ║
+║ │• Polynomial  │          │• Lags/Rolls  │          │• Domain     │  ║
+║ │• Ratios      │          │• Sin/Cos     │          │  Features   │  ║
+║ └──────────────┘          └──────────────┘          └──────────────┘  ║
+║                                                                         ║
+║                    ┌─────────────────────────────────────┐             ║
+║                    │   FEATURE SELECTION                 │             ║
+║                    │   Filter · Wrapper · Embedded      │             ║
+║                    └──────────────┬──────────────────────┘             ║
+║                                   │                                     ║
+║                                   ▼                                     ║
+║                    ┌─────────────────────────────────────┐             ║
+║                    │   DATA VISUALIZATION                │             ║
+║                    │   Anscombe's Quartet · Design       │             ║
+║                    │   Principles · Chart Types          │             ║
+║                    └──────────────┬──────────────────────┘             ║
+║                                   │                                     ║
+║    ┌──────────────────────────────┼──────────────────────────────┐     ║
+║    │                              │                              │     ║
+║    ▼                              ▼                              ▼     ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │ DESIGN       │          │ CHART TYPES  │          │ STORYTELLING │  ║
+║ │ PRINCIPLES   │          │              │          │ & DASHBOARDS │  ║
+║ └──────┬───────┘          └──────┬───────┘          └──────┬───────┘  ║
+║        │                         │                         │          ║
+║        ▼                         ▼                         ▼          ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │• Data-Ink    │          │• Bar         │          │• Context     │  ║
+║ │• Color       │          │• Line        │          │• Conflict    │  ║
+║ │• Gestalt     │          │• Scatter     │          │• Resolution  │  ║
+║ │• Tufte       │          │• Box         │          │• Action      │  ║
+║ └──────────────┘          └──────────────┘          └──────────────┘  ║
+║                                                                         ║
+╚══════════════════════════════════════════════════════════════════════════╝
+```
+
+---
+
+### 🔗 KEY CONNECTION EXPLANATIONS
+
+<details>
+<summary><b>Connection 1: Why does data prep consume 60-80% of a data scientist's time?</b></summary>
+
+```
+DATA PREP IS THE FOUNDATION FOR EVERYTHING THAT FOLLOWS
+    │
+    ├── RAW DATA → INSPECT
+    │       │
+    │       ├── Profile: df.info(), df.describe()
+    │       └── Identify issues: missing, duplicates, outliers, format
+    │
+    ├── CLEAN
+    │       │
+    │       ├── Duplicates removed → prevents training/test leakage
+    │       ├── Outliers handled → prevents model distortion
+    │       └── Formatting standardized → enables groupBy/joins
+    │
+    ├── IMPUTE
+    │       │
+    │       ├── MCAR → safe to delete
+    │       ├── MAR → impute with predictors
+    │       └── MNAR → add missingness indicator
+    │
+    ├── ENCODE
+    │       │
+    │       ├── Nominal → One-Hot Encoding
+    │       ├── Ordinal → Ordinal/Label Encoding
+    │       └── High-cardinality → Target/Frequency Encoding
+    │
+    └── VISUALIZE
+            │
+            └── EDA catches issues before modeling
+
+        ⚠️ GARBAGE IN → GARBAGE OUT
+        No algorithm can fix bad data!
+```
+
+**Key insight:** Data prep is not "pre-work" — it's the most important work. A simple model on clean data beats a complex model on dirty data.
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 2: How do missingness types determine strategy?</b></summary>
+
+```
+MISSINGNESS TYPE
+    │
+    ├── MCAR (Missing Completely at Random)
+    │       │
+    │       ├── Example: Sensor randomly drops 5%
+    │       ├── Safe to delete rows
+    │       └── Test: Little's MCAR test (p > 0.05)
+    │
+    ├── MAR (Missing at Random)
+    │       │
+    │       ├── Example: Men less likely to report weight
+    │       ├── Impute using observed variables
+    │       ├── Most common in practice
+    │       └── KNN / MICE imputation
+    │
+    └── MNAR (Missing Not at Random)
+            │
+            ├── Example: High earners skip salary
+            ├── Highest bias risk
+            ├── Imputation unreliable
+            ├── Add missingness indicator
+            └── Requires domain knowledge
+
+        ⚠️ WRONG STRATEGY → BIASED MODEL
+        Deleting rows is only safe under MCAR!
+```
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 3: How do encoding methods connect to model types?</b></summary>
+
+```
+ENCODING METHOD            →        BEST FOR
+─────────────────────────────────────────────────────────
+Binary (0/1)               →        Yes/No features
+One-Hot Encoding           →        Nominal, <15 categories
+                             →        Linear models, SVM, NN
+                             →        ⚠️ Avoid for high-cardinality
+─────────────────────────────────────────────────────────
+Label/Ordinal Encoding     →        Ordinal data (S<M<L)
+                             →        Tree-based models (XGBoost)
+                             →        ⚠️ Implies order!
+─────────────────────────────────────────────────────────
+Target Encoding            →        High-cardinality nominal
+                             →        ⚠️ Leakage risk — use K-fold
+─────────────────────────────────────────────────────────
+Frequency Encoding         →        High-cardinality nominal
+                             →        ✅ No leakage risk
+                             →        ⚠️ Loses category distinction
+─────────────────────────────────────────────────────────
+Embeddings                 →        NLP / semantics
+                             →        Word2Vec, FastText, BERT
+```
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 4: How does data visualization connect to everything else?</b></summary>
+
+```
+VISUALIZATION PURPOSE                    CONNECTION
+─────────────────────────────────────────────────────────
+Understand Distributions        →   Guides scaling & transforms
+    └── Histograms, KDE              →   Log transform for skewed data
+
+Spot Outliers                   →   Guides outlier handling
+    └── Box plots, scatter         →   Remove? Impute? Winsorize?
+
+Find Relationships              →   Guides feature engineering
+    └── Scatter plots               →   Polynomial? Ratios? Interactions?
+
+Check Data Quality              →   Guides cleaning & imputation
+    └── Nullity heatmap           →   Missing patterns → MCAR/MAR/MNAR
+
+Communicate Insights            →   Guides business decisions
+    └── Bar charts, line charts    →   Stakeholders understand charts
+
+Guide Feature Engineering       →   Guides feature creation
+    └── What to log-transform?     →   Becomes obvious from plotting
+```
+
+**Key insight:** Anscombe's Quartet proves: numbers lie, plots tell the truth. ALWAYS visualize before modeling.
+
+</details>
+
+---
+
+### 📊 CONNECTION MATRIX
+
+| Concept A | Connects To | Why |
+|-----------|-------------|-----|
+| **Data Quality** | Model Performance | Garbage in = garbage out |
+| **MCAR/MAR/MNAR** | Imputation Strategy | Wrong strategy → bias |
+| **Outliers** | Handling Strategy | Fraud = signal, not noise |
+| **Encoding** | Model Type | OHE for linear, Label for trees |
+| **Target Encoding** | Leakage | Must use K-fold to prevent leakage |
+| **Scaling** | Algorithm | KNN/SVM need scaling; trees don't |
+| **Log Transform** | Skewed Data | Right-skew → log reduces skew |
+| **Cyclical Encoding** | Time Features | Sin/cos preserves circular structure |
+| **Lags/Rolls** | Time Series | Captures autocorrelation |
+| **TF-IDF** | Text Classification | Downweights common words |
+| **Aggregations** | Group-Level Context | Relative features are powerful |
+| **Feature Selection** | Overfitting | Fewer features = less overfitting |
+| **Data-Ink Ratio** | Chart Quality | Remove chartjunk |
+| **Color Palettes** | Accessibility | 8% of men are colorblind |
+| **Anscombe's Quartet** | Visualization | Stats alone aren't enough |
+
+---
+
+## 7. COMMON MISCONCEPTIONS — WEEK 3 ML
+
+**How to use:** Read each misconception first. Try to identify what's wrong. Then click to reveal the reality.
+
+---
+
+### Misconception 1: "Data preparation is just a one-time step before modeling."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Data prep is "pre-work" — you clean once and move on. | Data prep is **iterative** — you will loop back many times: |
+| | • New issues discovered during EDA → go back |
+| | • Feature engineering reveals new patterns → go back |
+| | • Model diagnostics reveal issues → go back |
+| | • Production data changes → update pipeline |
+
+**Rule:** Data prep is never "done." It's a continuous process throughout the project lifecycle.
+
+</details>
+
+---
+
+### Misconception 2: "Deleting rows with missing values is always the safest option."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| If in doubt, just delete rows with missing values. | **Deletion is only safe under MCAR:** |
+| | • **MCAR** → deletion is unbiased |
+| | • **MAR** → deletion biases the model |
+| | • **MNAR** → deletion biases the model |
+
+**Rule:** Understand WHY data is missing before deciding HOW to handle it. When in doubt, impute.
+
+</details>
+
+---
+
+### Misconception 3: "One-Hot Encoding is the best encoding method for all categorical variables."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| One-Hot Encoding is the standard — use it for everything. | **OHE fails with high cardinality:**
+| | • 800 cities → 799 columns (curse of dimensionality) |
+| | • Sparse data → wasted memory and compute |
+| | • Rare categories → overfitting |
+
+**Rule:** Match encoding to data type AND model type. OHE is not universal!
+
+</details>
+
+---
+
+### Misconception 4: "Outliers should always be removed — they corrupt the model."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Outliers are errors that must be removed. | **Outliers can be valuable signal:**
+| | • **Fraud detection** — fraud IS an outlier! |
+| | • **Rare disease detection** — the outlier IS the case |
+| | • **Anomaly detection** — outliers are what you're looking for |
+
+**Rule:** Understand WHY an outlier exists before removing it.
+
+</details>
+
+---
+
+### Misconception 5: "Feature engineering is optional — the model will learn everything it needs."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Deep learning learns features automatically — no need for feature engineering. | **Feature engineering is still essential:**
+| | • Andrew Ng: "Applied ML is basically feature engineering" |
+| | • A well-engineered feature > algorithm choice |
+| | • Models can't learn cycles from raw timestamps |
+| | • Models can't derive ratios (debt/income) |
+
+**Rule:** Give the model "pre-digested" knowledge.
+
+</details>
+
+---
+
+### Misconception 6: "Feature scaling is only needed for distance-based algorithms like KNN."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Only KNN and SVM need scaling — others are fine. | **Many algorithms need scaling:**
+| | • **Linear/Logistic Regression** — coefficients depend on scale |
+| | • **PCA** — variance dominated by larger scales |
+| | • **Neural Networks** — gradients affected by input scales |
+| | • **Only tree-based models** are scale-invariant |
+
+**Rule:** Scale for most models. Only trees are truly scale-invariant.
+
+</details>
+
+---
+
+### Misconception 7: "Target encoding is always dangerous — just avoid it."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Target encoding causes data leakage — never use it. | **Target encoding is powerful when done correctly:**
+| | • Use **K-fold cross-fitting** to prevent leakage |
+| | • Compute target means on training folds only |
+| | • Never compute on full dataset before validation |
+| | • Often one of the most powerful high-cardinality encodings |
+
+**Rule:** Target encoding is powerful but dangerous — use it carefully with K-fold.
+
+</details>
+
+---
+
+### Misconception 8: "Missing values only matter if there are a lot of them."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| If <5% missing, you can ignore it. | **Missingness pattern matters more than quantity:**
+| | • Even 1% missing can bias your model if MNAR |
+| | • A 1% missing indicator could be highly predictive |
+| | • The FACT of missingness can be the signal |
+
+**Rule:** Always check: does the FACT of being missing predict your target?
+
+</details>
+
+---
+
+### Misconception 9: "Visualization is just for presentation — not for analysis."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Charts are for communicating results, not for analysis. | **Visualization is a critical analysis tool:**
+| | • **Anscombe's Quartet** — identical stats, different plots |
+| | • Outliers jump out visually in seconds |
+| | • Relationships invisible in correlation coefficients become obvious |
+| | • EDA is impossible without visualization |
+
+**Rule:** ALWAYS visualize before modeling. It's not optional — it's essential.
+
+</details>
+
+---
+
+### Misconception 10: "More features always means a better model."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Adding more features always helps the model learn better. | **More features can make the model WORSE:**
+| | • **Overfitting** — model fits noise instead of signal |
+| | • **Curse of dimensionality** — distances meaningless |
+| | • **Multicollinearity** — unstable coefficients |
+| | • **Slower training** — 10× features = 10× slower |
+
+**Rule:** Feature selection is critical. More features ≠ better model.
+
+</details>
+
+---
+
+### Misconception 11: "Time features don't need special encoding — just use the raw timestamp."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| A timestamp is a number — the model can learn time patterns. | **Raw timestamps are useless for cyclic patterns:**
+| | • Model sees hour 23 and hour 0 as 23 apart |
+| | • In reality, they're only 1 hour apart (circular) |
+| | • **Solution**: Sin/Cos encoding for cycles |
+
+**Rule:** Cyclic features (hours, months, days) need sin/cos encoding.
+
+</details>
+
+---
+
+### Misconception 12: "A chart with more data is always more informative."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| More data, colors, and details make charts more informative. | **Chartjunk obscures the insight:**
+| | • Too many colors (15 in a pie) = impossible to distinguish |
+| | • 3D charts distort perception |
+| | • Truncated y-axes exaggerate differences |
+| | • Chartjunk adds noise without adding information |
+
+**Rule:** Every chart should answer one question for one audience. Remove everything else.
+
+</details>
+
+---
+
+## 📊 QUICK REFERENCE: MISCONCEPTIONS vs REALITY
+
+| Misconception | Reality |
+|---------------|---------|
+| Data prep is a one-time step | Data prep is iterative (you'll loop back) |
+| Deleting rows with missing is safest | Only safe under MCAR; impute otherwise |
+| OHE is always the best encoding | Fails with high-cardinality (800+ columns) |
+| Outliers should always be removed | Fraud/rare events ARE outliers — keep them |
+| Feature engineering is optional | It's essential — Andrew Ng says so |
+| Scaling only for KNN/SVM | Needed for regression, PCA, NNs too |
+| Target encoding is always dangerous | Powerful when done with K-fold cross-fitting |
+| <5% missing can be ignored | Missingness pattern matters more than quantity |
+| Visualization is just presentation | Critical analysis tool (Anscombe's Quartet) |
+| More features = better model | More features = overfitting risk |
+| Raw timestamp is fine for time features | Cyclic features need sin/cos encoding |
+| More data in charts = more informative | Chartjunk obscures insights |
+
+---
+
+# 📚 WEEK 3 ML — COMPLETE STUDY GUIDE
+## All Exercises with Answers in Spoiler Format
+
+---
+
+# SECTION 1: DATA PREPARATION
+
+---
+
+## Exercise DP-1: Why Data Preparation Matters
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What percentage of a data scientist's time is spent on data preparation? | |
+| 2. What is the estimated annual cost of bad data quality in the US? | |
+| 3. What is the #1 factor in failed ML projects? | |
+| 4. What is the "Garbage in, garbage out" principle? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Time spent on data prep | **60–80%** of a data scientist's time |
+| 2. Annual cost of bad data | **~$3 trillion** in the US |
+| 3. #1 factor in failed ML projects | **Bad data quality** |
+| 4. "Garbage in, garbage out" | The quality of your output is strictly limited by the quality of your input. |
+
+</details>
+
+---
+
+## Exercise DP-2: Common Data Quality Issues
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What are the 5 common data quality issues? | |
+| 2. Give an example of inconsistent formatting. | |
+| 3. Give an example of a wrong dtype issue. | |
+| 4. What is a sentinel value? Give examples. | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Five common issues | **Missing Values**, **Duplicates**, **Outliers**, **Inconsistent Format**, **Wrong Dtype**. |
+| 2. Inconsistent formatting | 'USA', 'U.S.A', 'us', 'United States' — same value, different representations. |
+| 3. Wrong dtype example | Zip codes stored as floats (10001.0 instead of '10001'), dates as strings. |
+| 4. Sentinel value | A value that looks valid but means "no data" (e.g., -999, -1, 'N/A', 'unknown'). |
+
+</details>
+
+---
+
+## Exercise DP-3: Missing Values — MCAR, MAR, MNAR
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What are the three types of missing values? | |
+| 2. What is MCAR? Give an example. | |
+| 3. What is MAR? Give an example. | |
+| 4. What is MNAR? Give an example. | |
+| 5. Why does the type of missingness matter? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Three types of missingness | **MCAR**, **MAR**, **MNAR**. |
+| 2. MCAR with example | Missingness is **unrelated to any variable**. Example: sensor randomly drops 5% of readings. **Low bias, safe to delete rows**. |
+| 3. MAR with example | Missingness depends on **other observed variables**. Example: men less likely to report weight. **Imputation valid if you include predictors**. Most common in practice. |
+| 4. MNAR with example | Missingness depends on the **missing value itself**. Example: high earners skip the salary field. **Highest bias risk**. |
+| 5. Why it matters | Using the **wrong strategy introduces bias**. Deleting rows is only safe under MCAR. When in doubt, impute. |
+
+</details>
+
+---
+
+## Exercise DP-4: Missing Value Imputation Strategies
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What are the simple imputation methods? | |
+| 2. What are the advanced imputation methods? | |
+| 3. What is the missingness indicator technique? | |
+| 4. When would you add a missingness indicator? | |
+| 5. What are the deletion strategies? When are they appropriate? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Simple imputation | **Mean** (symmetric), **Median** (skewed), **Mode** (categorical), **Constant** ('Unknown' or 0). |
+| 2. Advanced imputation | **KNN Imputation**, **Iterative Imputation (MICE)**, **Forward/Backward Fill** (time series). |
+| 3. Missingness indicator | Add a binary column recording whether the value was missing. |
+| 4. When to add | When the **FACT of being missing predicts your target** (MNAR). |
+| 5. Deletion strategies | **Listwise Deletion** (drop all rows with any missing) — unbiased if MCAR. **Column Deletion** if missing > 40%. Don't delete if dataset is small, missing rate > 5%, or MNAR suspected. |
+
+</details>
+
+---
+
+## Exercise DP-5: Encoding Categorical Variables
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. Why must we encode categorical variables? | |
+| 2. What are the four types of categorical variables? | |
+| 3. What is Label Encoding? When is it appropriate? | |
+| 4. What is One-Hot Encoding? When is it appropriate? | |
+| 5. What is the "dummy variable trap"? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Why encode | Machine learning algorithms operate on numbers. Categorical text values must be converted before training. |
+| 2. Four types | **Nominal** (no order), **Ordinal** (meaningful order), **Binary** (only 2 values), **High-Cardinality** (many unique values). |
+| 3. Label Encoding | Assigns an integer to each unique category. **Implies ordering** — use only for tree-based models or truly ordinal data. |
+| 4. One-Hot Encoding | Creates a binary column for each unique category. Standard for nominal variables. Use `drop_first=True` to avoid multicollinearity. |
+| 5. Dummy variable trap | When you have K categories and create K dummy columns, they are perfectly collinear (sum to 1). **Fix**: drop one column (`drop_first=True`). |
+
+</details>
+
+---
+
+# SECTION 2: FEATURE ENGINEERING
+
+---
+
+## Exercise FE-1: Feature Scaling
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is Min-Max Normalization? Formula? Best for? | |
+| 2. What is Standardization (Z-score)? Formula? Best for? | |
+| 3. What is Robust Scaling? Formula? Best for? | |
+| 4. Which scaling method is most commonly used? | |
+| 5. Which scaling method is sensitive to outliers? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Min-Max | `x' = (x − min)/(max − min)` — scales to [0, 1]. Best for: neural networks, KNN, SVM. **Sensitive to outliers**. |
+| 2. Z-Score | `x' = (x − μ)/σ` — mean = 0, std = 1. **Most commonly used**. Robust to outliers. Best for: linear/logistic regression, PCA, SVM. |
+| 3. Robust Scaling | `x' = (x − median)/IQR` — resistant to outliers. Best for: data with outliers you cannot remove. |
+| 4. Most commonly used | **Z-Score Standardization** |
+| 5. Sensitive to outliers | **Min-Max Normalization** |
+
+</details>
+
+---
+
+## Exercise FE-2: Log & Power Transforms
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What types of data benefit from log transforms? | |
+| 2. What is Log1p and when would you use it? | |
+| 3. What is Box-Cox transform? | |
+| 4. What is Yeo-Johnson transform? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Data benefiting from log transforms | **Right-skewed** features (income, prices, counts). Reduces skew, stabilizes variance, improves linear model fit. |
+| 2. Log1p | `log(x + 1)` — **use when data includes zero values**. |
+| 3. Box-Cox | `((x^λ − 1)/λ)` — finds **optimal λ automatically**. Data must be positive. |
+| 4. Yeo-Johnson | Modified Box-Cox — **handles zero and negative values** too. |
+
+</details>
+
+---
+
+## Exercise FE-3: Temporal Feature Engineering
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What temporal features can you extract from a timestamp? | |
+| 2. Why is cyclical encoding needed for time features? | |
+| 3. How do you cyclically encode hours? | |
+| 4. How do you cyclically encode months? | |
+| 5. What are lag features? | |
+| 6. What are rolling window statistics? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Temporal features | **year, month, day_of_week, is_weekend, hour_of_day, quarter, is_month_start, is_holiday**. |
+| 2. Why cyclical encoding | Hours, days, months are **cyclic** — hour 23 is close to hour 0, but numerically they're far apart. Sin/cos encoding preserves circular structure. |
+| 3. Cyclical encoding for hours | `sin_hour = sin(2π × hour / 24)`, `cos_hour = cos(2π × hour / 24)`. |
+| 4. Cyclical encoding for months | `sin_month = sin(2π × month / 12)`, `cos_month = cos(2π × month / 12)`. |
+| 5. Lag features | Look backward in time: **sales_lag1** = yesterday, **sales_lag7** = same day last week. |
+| 6. Rolling window statistics | Rolling aggregations over a window: **rolling_mean_7d**, **rolling_std_7d**, **rolling_max_30d**. |
+
+</details>
+
+---
+
+## Exercise FE-4: Text Feature Engineering
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What are the three text feature approaches? | |
+| 2. How does Bag-of-Words work? Pros and cons? | |
+| 3. How does TF-IDF work? | |
+| 4. What are embeddings? | |
+| 5. Which approach is best for document classification? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Three text approaches | **Bag-of-Words/Count**, **TF-IDF**, **Embeddings**. |
+| 2. Bag-of-Words | Count occurrences of each word. **Pros**: simple, fast, interpretable. **Cons**: no word order, ignores meaning. |
+| 3. TF-IDF | **Term Frequency × Inverse Document Frequency**. Downweights common words (the, a, is) and rewards rare but informative ones. |
+| 4. Embeddings | Dense vector of meaning. Semantically similar words have similar vectors. Examples: Word2Vec, GloVe, FastText, BERT. |
+| 5. Best for document classification | **TF-IDF** is the standard baseline for document classification. |
+
+</details>
+
+---
+
+## Exercise FE-5: Feature Selection Methods
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. Why does feature selection matter? | |
+| 2. What are Filter methods? Pros/cons? | |
+| 3. What are Wrapper methods? Pros/cons? | |
+| 4. What are Embedded methods? Pros/cons? | |
+| 5. Which method is Lasso (L1) regularization? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Why feature selection matters | Irrelevant and redundant features add noise, increase overfitting risk, slow training, cause multicollinearity. |
+| 2. Filter methods | Score each feature independently using statistics (correlation, chi², mutual info). **Pros**: fast, model-agnostic. **Cons**: blind to feature interactions. |
+| 3. Wrapper methods | Try subsets of features and measure model performance (RFE). **Pros**: accurate — considers interactions. **Cons**: slow, risk of overfitting. |
+| 4. Embedded methods | Feature selection built into model training (Lasso, tree importance). **Pros**: fast and accurate. **Cons**: model-specific. |
+| 5. Lasso | **Embedded method** — L1 regularization performs feature selection during training. |
+
+</details>
+
+---
+
+# SECTION 3: DATA VISUALIZATION
+
+---
+
+## Exercise DV-1: Why Visualize Data?
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What does Anscombe's Quartet demonstrate? | |
+| 2. What is the 60,000× faster statistic? | |
+| 3. List the 6 reasons to visualize before modeling. | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Anscombe's Quartet | Four datasets with **IDENTICAL summary statistics** — yet they look completely different when plotted. **Visualization catches what numbers hide.** |
+| 2. 60,000× faster | Humans process visual information **60,000× faster** than plain text. |
+| 3. Six reasons | **1. Understand Distributions**. **2. Spot Outliers**. **3. Find Relationships**. **4. Check Data Quality**. **5. Communicate Insights**. **6. Guide Feature Engineering**. |
+
+</details>
+
+---
+
+## Exercise DV-2: Tufte's Data-Ink Ratio
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is the Data-Ink Ratio? | |
+| 2. Who introduced the Data-Ink Ratio? | |
+| 3. List 6 things to keep (maximize data ink). | |
+| 4. List 6 types of chartjunk to remove. | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Data-Ink Ratio | `Data-Ink Ratio = Ink used to display data / Total ink used`. "Above all else show the data." |
+| 2. Who introduced it | **Edward Tufte** in "The Visual Display of Quantitative Information" (1983). |
+| 3. What to keep | ✓ Only necessary gridlines (horizontal only, light grey). ✓ Direct labels. ✓ Remove top/right axis spines. ✓ Thin axis lines. ✓ White plot background. ✓ Color only to encode information. |
+| 4. Chartjunk to remove | ✗ Heavy border around plot. ✗ Background fill or gradient. ✗ 3D effects on 2D data. ✗ Unnecessary legend. ✗ Decorative icons. ✗ Shadows on bars. |
+
+</details>
+
+---
+
+## Exercise DV-3: Gestalt Principles
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is Proximity? | |
+| 2. What is Continuity? | |
+| 3. What is Similarity? | |
+| 4. What is Closure? | |
+| 5. What is Enclosure? | |
+| 6. What is Figure/Ground? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Proximity | Elements placed **close together appear related**. |
+| 2. Continuity | Eyes follow **smooth lines and curves**. |
+| 3. Similarity | Elements with the **same color, shape, or size** look like they belong together. |
+| 4. Closure | The brain **completes incomplete shapes**. |
+| 5. Enclosure | Elements surrounded by a **border or box appear grouped**. |
+| 6. Figure/Ground | The **main element stands out from its background**. |
+
+</details>
+
+---
+
+## Exercise DV-4: Color in Data Visualization
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is Sequential colormap? When to use? | |
+| 2. What is Diverging colormap? When to use? | |
+| 3. What is Qualitative colormap? When to use? | |
+| 4. What percentage of men and women are colorblind? | |
+| 5. What color pairs should be avoided? | |
+| 6. Name colorblind-safe palettes. | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Sequential | Ordered, numeric data (Blues palette). **Use for**: low to high counts, income, density. |
+| 2. Diverging | Meaningful midpoint (RdYlBu palette). **Use for**: correlation (-1 to 1), temperature anomaly, sentiment. |
+| 3. Qualitative | Nominal categories (tab10). **Use for**: department, country, species (no order). |
+| 4. Colorblind prevalence | **8% of men**, **0.5% of women** are colorblind. |
+| 5. Avoid these pairs | ✗ Red + Green. ✗ Green + Brown. ✗ Blue + Purple. |
+| 6. Colorblind-safe palettes | ✓ Viridis, ✓ Cividis, ✓ ColorBrewer palettes. |
+
+</details>
+
+---
+
+## Exercise DV-5: Chart Types — When to Use
+
+| Question | Best Chart | Alternative |
+|----------|------------|-------------|
+| Compare values across categories | | |
+| Trend over time | | |
+| Relationship between 2 numeric variables | | |
+| Distribution of one numeric variable | | |
+| Spread, median, outliers per group | | |
+| Correlation between many features | | |
+| Part-to-whole proportions | | |
+| Data across geography | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Best Chart | Alternative |
+|----------|------------|-------------|
+| Compare values across categories | **Bar chart** | Dot plot |
+| Trend over time | **Line chart** | Area chart |
+| Relationship between 2 numeric variables | **Scatter plot** | Bubble chart |
+| Distribution of one numeric variable | **Histogram + KDE** | Box plot, violin plot |
+| Spread, median, outliers per group | **Box plot** | Violin plot |
+| Correlation between many features | **Heatmap** | Pair plot |
+| Part-to-whole proportions | **Stacked bar** | Pie/donut (5 or fewer slices) |
+| Data across geography | **Choropleth map** | Bubble map |
+
+</details>
+
+---
+
+## Exercise DV-6: Visualization Anti-Patterns
+
+| Question | Problem | Fix |
+|----------|---------|-----|
+| Truncated Y-axis | | |
+| 3D Charts | | |
+| Chartjunk | | |
+| Too many colors | | |
+| Wrong chart type | | |
+| Missing context | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Problem | Fix |
+|----------|---------|-----|
+| Truncated Y-axis | Starting at non-zero exaggerates differences | Start at zero for bar charts |
+| 3D Charts | 3D perspective distorts values | Use 2D always |
+| Chartjunk | Adds visual noise without information | Remove everything not data or necessary context |
+| Too many colors | 15 colors impossible to distinguish | Max 5–7 categorical colors |
+| Wrong chart type | Pie with 12 slices, line for unordered categories | Match chart to data type |
+| Missing context | No title, axis labels, units, source | Every chart must have title, labels, units, source |
+
+</details>
+
+---
+
+## Exercise DV-7: Storytelling & Dashboard Design
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What are the 4 components of storytelling with data? | |
+| 2. What is the layout hierarchy for dashboards? | |
+| 3. What should KPI cards include? | |
+| 4. What context information should dashboards display? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Four components | **1. Context**: Who + Why. **2. Conflict**: The question. **3. Resolution**: Answer obvious in 5 seconds. **4. Action**: What the audience should do next. |
+| 2. Layout hierarchy | **Top-left**: most important KPI. **Flow**: left to right, top to bottom. **Group**: related charts with whitespace. **1–2 key numbers** per section maximum. |
+| 3. KPI cards | Large, bold numbers for key metrics — instantly scannable. Include trend direction and delta from previous period. |
+| 4. Context information | ✓ Always show date range. ✓ Include last-updated timestamp. ✓ Display data source. ✓ State when filters are active. |
+
+</details>
+
+---
+
+## Exercise DV-8: Complete Cheat Sheet
+
+### Fill in all blanks:
+
+**Data Preparation Pipeline:**
+`Raw Data → ________ → ________ → ________ → ________ → ________`
+
+**Garbage In, Garbage Out:** The quality of your output is strictly limited by the quality of your ________.
+
+**Missing Value Types:**
+- MCAR: ________
+- MAR: ________
+- MNAR: ________
+
+**Scaling Methods:**
+- Min-Max: `x' = ________`
+- Z-Score: `x' = ________`
+- Robust Scaling: `x' = ________`
+
+**Encoding Methods:**
+- Nominal, few categories → ________
+- Ordinal → ________
+- High-cardinality → ________
+
+**Feature Selection Methods:**
+- ________ (statistical scores, fast)
+- ________ (RFE, accurate but slow)
+- ________ (Lasso/tree importance)
+
+**Data-Ink Ratio (Tufte):**
+`Data-Ink Ratio = ________ / ________`
+
+**Gestalt Principles:**
+- ________ (close = related)
+- ________ (eyes follow lines)
+- ________ (same color = same category)
+- ________ (brain completes shapes)
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+**Data Preparation Pipeline:**
+`Raw Data → **Inspect** → **Clean** → **Impute** → **Encode** → **Visualize**`
+
+**Garbage In, Garbage Out:** The quality of your output is strictly limited by the quality of your **input**.
+
+**Missing Value Types:**
+- MCAR: **Missing Completely at Random** (safe to delete)
+- MAR: **Missing at Random** (impute validly)
+- MNAR: **Missing Not at Random** (highest bias risk)
+
+**Scaling Methods:**
+- Min-Max: `x' = **(x − min)/(max − min)**`
+- Z-Score: `x' = **(x − μ)/σ**`
+- Robust Scaling: `x' = **(x − median)/IQR**`
+
+**Encoding Methods:**
+- Nominal, few categories → **One-Hot Encoding**
+- Ordinal → **Ordinal/Label Encoding**
+- High-cardinality → **Target/Frequency Encoding**
+
+**Feature Selection Methods:**
+- **Filter** (statistical scores, fast)
+- **Wrapper** (RFE, accurate but slow)
+- **Embedded** (Lasso/tree importance)
+
+**Data-Ink Ratio (Tufte):**
+`Data-Ink Ratio = **Ink used to display data** / **Total ink used**`
+
+**Gestalt Principles:**
+- **Proximity** (close = related)
+- **Continuity** (eyes follow lines)
+- **Similarity** (same color = same category)
+- **Closure** (brain completes shapes)
+
+</details>
+
+---
+
+# 📊 COMPLETE COVERAGE SUMMARY
+
+| Category | Concepts | Status |
+|----------|----------|--------|
+| Data Preparation | Pipeline, quality issues, duplicates, outliers | ✅ 100% |
+| Missing Values | MCAR, MAR, MNAR, imputation, thresholds | ✅ 100% |
+| Categorical Encoding | One-Hot, Label, Target, Frequency | ✅ 100% |
+| Feature Engineering | Definition, mental model, Ng quote | ✅ 100% |
+| Numerical Transforms | Scaling, log/power, binning, ratios | ✅ 100% |
+| Temporal Features | Extraction, cyclical encoding, lags, rolls | ✅ 100% |
+| Text Features | BoW, TF-IDF, embeddings, aggregations | ✅ 100% |
+| Feature Selection | Filter, Wrapper, Embedded | ✅ 100% |
+| Data Visualization | Anscombe's Quartet, Tufte, Data-Ink | ✅ 100% |
+| Gestalt Principles | Proximity, continuity, similarity, closure | ✅ 100% |
+| Color Theory | Sequential, diverging, qualitative, accessibility | ✅ 100% |
+| Chart Types | Bar, line, scatter, box, heatmap | ✅ 100% |
+| Storytelling | Context, conflict, resolution, action | ✅ 100% |
+| **TOTAL** | **All Week 3 ML concepts** | ✅ **100%** |
+
+---
+
+## 📝 How to Use This Document
+
+1. **Read the question**, write your answer in the blank/box
+2. **Click the dropdown** to reveal the model answer
+3. **Compare** your answer to the model
+4. **Re-study** any sections where you got something wrong
+5. **Mark** your confidence level for each topic
+
+---
+
+**Good luck with your studies! 🎯**
