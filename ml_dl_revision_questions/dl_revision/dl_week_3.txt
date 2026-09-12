@@ -1,0 +1,2012 @@
+# Week 3 DL — Complete Revision Materials
+
+Based on your Week 3 slides covering **CNN Fundamentals, Computer Vision Tasks, and Keypoint Detection & Pose Estimation**, here are comprehensive revision materials following the established format.
+
+---
+
+## 1. CONFIDENCE TRACKER — WEEK 3 DL
+
+| Confidence Level | Meaning |
+|------------------|---------|
+| 🟢 **Green** | I knew this cold — could explain it to someone else |
+| 🟡 **Yellow** | I got it right, but I wasn't 100% sure / guessed |
+| 🔴 **Red** | I had no idea — got it wrong or completely guessed |
+
+---
+
+| Exercise | Topic | 🟢 | 🟡 | 🔴 | Re-study? |
+|----------|-------|----|----|----|-----------|
+| Ex 1 | CNN vs FC Comparison | | | | ☐ |
+| Ex 2 | Computer Vision Task Matching | | | | ☐ |
+| Ex 3 | CNN Building Blocks Matching | | | | ☐ |
+| Ex 4 | Convolution Output Size Calculation | | | | ☐ |
+| Ex 5 | Padding Types | | | | ☐ |
+| Ex 6 | Pooling Types | | | | ☐ |
+| Ex 7 | Weight Sharing & Parameter Efficiency | | | | ☐ |
+| Ex 8 | Receptive Field Calculation | | | | ☐ |
+| Ex 9 | Dilation (Atrous Convolution) | | | | ☐ |
+| Ex 10 | Upsampling Methods | | | | ☐ |
+| Ex 11 | Batch Normalization in CNNs | | | | ☐ |
+| Ex 12 | IoU (Intersection over Union) | | | | ☐ |
+| Ex 13 | Detection Metrics (Precision, Recall, mAP, OKS) | | | | ☐ |
+| Ex 14 | Faster R-CNN vs YOLO | | | | ☐ |
+| Ex 15 | ROI Pooling vs ROI Align | | | | ☐ |
+| Ex 16 | U-Net Architecture | | | | ☐ |
+| Ex 17 | Mask R-CNN Architecture | | | | ☐ |
+| Ex 18 | Multi-Task Learning | | | | ☐ |
+| Ex 19 | Handling Class Imbalance in Segmentation | | | | ☐ |
+| Ex 20 | Heatmap vs Regression for Keypoints | | | | ☐ |
+| Ex 21 | OpenPose — Bottom-Up Approach | | | | ☐ |
+| Ex 22 | HRNet — Top-Down Approach | | | | ☐ |
+| Ex 23 | Challenges in Pose Estimation | | | | ☐ |
+| Ex 24 | Action Recognition from Keypoints | | | | ☐ |
+| Ex 25 | 3D Pose Estimation | | | | ☐ |
+| Ex 26 | Complete Cheat Sheet | | | | ☐ |
+
+---
+
+## 2. 🎯 TEACH IT SUMMARY
+
+### The Big Picture — Week 3 DL
+
+Week 3 covers **Convolutional Neural Networks (CNNs)** and their applications in computer vision — from the fundamental building blocks to state-of-the-art architectures for detection, segmentation, and pose estimation.
+
+**Part 1: CNN Fundamentals.** CNNs exploit spatial structure using **local receptive fields** and **weight sharing**. Instead of flattening images into vectors (like MLPs), CNNs preserve spatial relationships. A convolution applies a small filter (kernel) across the entire image, computing dot products at each position. **Weight sharing** drastically reduces parameters — a CNN layer might have ~1,700 parameters where a fully connected layer would have billions. **Padding** preserves spatial dimensions; **stride** controls downsampling; **pooling** (max/average) provides translation invariance. **Dilation** expands receptive fields without adding parameters. Stacked small filters (e.g., 3×3) build hierarchical features: edges → textures → patterns → parts → objects.
+
+**Part 2: Computer Vision Tasks.** Vision tasks range from classification (what is in the image) to detection (what and where) to segmentation (every pixel labeled). **IoU** measures box overlap; **mAP** is the standard detection metric. **Faster R-CNN** is a two-stage detector (Region Proposal Network + classification) prioritizing accuracy. **YOLO** is a single-stage detector (grid-based regression) prioritizing speed. **U-Net** uses encoder-decoder with skip connections for semantic segmentation. **Mask R-CNN** extends Faster R-CNN with a mask branch for instance segmentation. **Multi-task learning** shares a backbone across tasks, improving robustness.
+
+**Part 3: Keypoint Detection & Pose Estimation.** Keypoints are structural points (joints, facial landmarks). **Heatmap-based** approaches represent keypoints as 2D Gaussian distributions (robust, handles uncertainty); **regression-based** approaches predict coordinates directly (faster). **OpenPose** uses a bottom-up approach (detect all parts first, then associate using Part Affinity Fields), scaling well to crowds. **HRNet** uses a top-down approach (person detector first, then keypoints), maintaining high resolution throughout via parallel multi-resolution streams. Applications include action recognition (RNNs/GCNs on skeleton sequences), 3D pose estimation (2D-to-3D lifting), and AR/VR.
+
+**The Connecting Thread:** CNNs replaced manual feature engineering with learned hierarchical representations. The choice of architecture depends on the task: detection needs localization, segmentation needs pixel-level precision, pose estimation needs fine-grained spatial accuracy. All modern vision systems build on these foundations.
+
+---
+
+## 3. ⚠️ COMMON PITFALLS IN PRACTICE
+
+| Pitfall | Why It Happens | How to Avoid |
+|---------|----------------|--------------|
+| **1. Using FC layers on images** | FC layers flatten spatial structure → lose locality | Use **convolutional layers** to preserve spatial relationships |
+| **2. Forgetting padding in deep networks** | Spatial dimensions shrink → early layers lose edges | Use **same padding** (padding=(kernel-1)/2) to preserve size |
+| **3. Using stride >1 too aggressively** | Loses too much spatial detail early | Start with stride=1, use pooling or stride=2 later |
+| **4. Misunderstanding receptive field** | Thinking one 7×7 kernel is better than three 3×3 | Three 3×3 = 7×7 RF with **45% fewer parameters** |
+| **5. Using dilation without context** | Dilation skips information → may miss fine details | Use moderate dilation; test with visualization |
+| **6. Confusing ROI Pooling and ROI Align** | ROI Pooling rounds coordinates → misalignment | Use **ROI Align** for segmentation/mask tasks |
+| **7. Using accuracy for imbalanced detection** | 99% background → 99% accuracy is meaningless | Use **mAP**, **Precision/Recall**, **F1** |
+| **8. Not handling class imbalance in segmentation** | Background pixels dominate → model ignores foreground | Use **Weighted CE**, **Dice Loss**, or **Focal Loss** |
+| **9. Confusing semantic and instance segmentation** | Labeling pixels ≠ distinguishing instances | Semantic = class per pixel; Instance = mask per object |
+| **10. Using regression for keypoints when heatmaps are better** | Regression is sensitive to outliers | Use **heatmaps** for robustness and uncertainty |
+| **11. Misunderstanding bottom-up vs top-down** | Top-down is not always more accurate | Bottom-up scales better to crowds; top-down has higher precision |
+| **12. Forgetting to recompute BN stats in HRNet** | Training and inference statistics differ | Use running averages; recompute after averaging |
+
+---
+
+## 4. ONE-SENTENCE SUMMARY — WEEK 3 DL
+
+**How to use:** For each concept, try to write your own one-sentence summary *before* clicking to reveal the model answer.
+
+---
+
+### CNN Fundamentals
+
+<details>
+<summary><b>Convolutional Neural Network (CNN)</b> — Try your own first</summary>
+
+**Model Answer:** A neural network architecture that uses local receptive fields and shared weights to exploit spatial structure, drastically reducing parameters and enabling translation invariance.
+
+</details>
+
+---
+
+<details>
+<summary><b>Local Receptive Field</b> — Try your own first</summary>
+
+**Model Answer:** Each neuron is connected only to a local patch of the input, capturing nearby spatial patterns (edges, textures) rather than the whole image.
+
+</details>
+
+---
+
+<details>
+<summary><b>Weight Sharing</b> — Try your own first</summary>
+
+**Model Answer:** The same filter (kernel) is applied across the entire input, dramatically reducing the number of parameters and enabling translation invariance.
+
+</details>
+
+---
+
+<details>
+<summary><b>Translation Invariance</b> — Try your own first</summary>
+
+**Model Answer:** A feature can be detected regardless of its position in the image because the same filter slides across all spatial locations.
+
+</details>
+
+---
+
+<details>
+<summary><b>Padding</b> — Try your own first</summary>
+
+**Model Answer:** Adding zeros around the input to preserve spatial dimensions and prevent edge information from being lost during convolution.
+
+</details>
+
+---
+
+<details>
+<summary><b>Stride</b> — Try your own first</summary>
+
+**Model Answer:** The step size of the kernel as it slides; stride > 1 downsamples the feature map, reducing resolution and computation.
+
+</details>
+
+---
+
+<details>
+<summary><b>Max Pooling</b> — Try your own first</summary>
+
+**Model Answer:** Selects the maximum value in each pooling window, retaining the strongest feature response and providing spatial invariance.
+
+</details>
+
+---
+
+<details>
+<summary><b>Average Pooling</b> — Try your own first</summary>
+
+**Model Answer:** Computes the average value in each pooling window, smoothing the feature map and aggregating global context.
+
+</details>
+
+---
+
+<details>
+<summary><b>Receptive Field</b> — Try your own first</summary>
+
+**Model Answer:** The region of the input that a CNN feature "sees"; shallow layers see local details, deep layers see global context through accumulated convolutions.
+
+</details>
+
+---
+
+<details>
+<summary><b>Dilation (Atrous Convolution)</b> — Try your own first</summary>
+
+**Model Answer:** Inserts holes between kernel weights to expand the receptive field without adding parameters or reducing resolution, essential for segmentation.
+
+</details>
+
+---
+
+<details>
+<summary><b>Transposed Convolution (Deconvolution)</b> — Try your own first</summary>
+
+**Model Answer:** A learnable upsampling operation that projects low-resolution features to higher resolution by spreading activations with a learned kernel.
+
+</details>
+
+---
+
+<details>
+<summary><b>Bilinear Interpolation</b> — Try your own first</summary>
+
+**Model Answer:** A non-learnable upsampling method that computes smooth pixel values using weighted averages of the 2×2 neighborhood, avoiding checkerboard artifacts.
+
+</details>
+
+---
+
+<details>
+<summary><b>Batch Normalization in CNNs</b> — Try your own first</summary>
+
+**Model Answer:** Normalizes layer activations across the batch to stabilize training, enabling higher learning rates and acting as a mild regularizer.
+
+</details>
+
+---
+
+### Computer Vision Tasks
+
+<details>
+<summary><b>Object Detection</b> — Try your own first</summary>
+
+**Model Answer:** Locating objects with bounding boxes and assigning class labels, answering "what" and "where" in an image.
+
+</details>
+
+---
+
+<details>
+<summary><b>Semantic Segmentation</b> — Try your own first</summary>
+
+**Model Answer:** Labeling every pixel with a category (e.g., road, car, person), but not distinguishing between individual objects of the same class.
+
+</details>
+
+---
+
+<details>
+<summary><b>Instance Segmentation</b> — Try your own first</summary>
+
+**Model Answer:** Labeling every pixel and distinguishing between individual objects of the same class (e.g., each separate pedestrian), combining detection and segmentation.
+
+</details>
+
+---
+
+<details>
+<summary><b>IoU (Intersection over Union)</b> — Try your own first</summary>
+
+**Model Answer:** The ratio of overlap to union between predicted and ground truth boxes; IoU ≥ 0.5 typically counts as a True Positive detection.
+
+</details>
+
+---
+
+<details>
+<summary><b>Precision (Detection)</b> — Try your own first</summary>
+
+**Model Answer:** Of all detections made, how many are correct — `TP / (TP + FP)`; high precision means few false positives.
+
+</details>
+
+---
+
+<details>
+<summary><b>Recall (Detection)</b> — Try your own first</summary>
+
+**Model Answer:** Of all ground truth objects, how many were detected — `TP / (TP + FN)`; high recall means few false negatives.
+
+</details>
+
+---
+
+<details>
+<summary><b>mAP (Mean Average Precision)</b> — Try your own first</summary>
+
+**Model Answer:** The primary object detection metric; the average of AP values across all classes, balancing precision and recall across confidence thresholds.
+
+</details>
+
+---
+
+<details>
+<summary><b>OKS (Object Keypoint Similarity)</b> — Try your own first</summary>
+
+**Model Answer:** The keypoint detection metric analogous to IoU, measuring the distance between predicted and ground truth keypoints with object-scale normalization.
+
+</details>
+
+---
+
+<details>
+<summary><b>Faster R-CNN</b> — Try your own first</summary>
+
+**Model Answer:** A two-stage detector that first proposes regions of interest (RPN) and then classifies + refines each proposal, prioritizing high accuracy.
+
+</details>
+
+---
+
+<details>
+<summary><b>Region Proposal Network (RPN)</b> — Try your own first</summary>
+
+**Model Answer:** A convolutional layer in Faster R-CNN that scans the feature map to generate candidate object proposals using anchor boxes.
+
+</details>
+
+---
+
+<details>
+<summary><b>Anchor Boxes</b> — Try your own first</summary>
+
+**Model Answer:** Multi-scale, multi-aspect-ratio reference boxes used by RPN to handle variation in object size and shape.
+
+</details>
+
+---
+
+<details>
+<summary><b>ROI Pooling</b> — Try your own first</summary>
+
+**Model Answer:** Hard quantization of ROI coordinates to a fixed-size grid, causing misalignment that hurts pixel-level precision.
+
+</details>
+
+---
+
+<details>
+<summary><b>ROI Align</b> — Try your own first</summary>
+
+**Model Answer:** Uses bilinear interpolation instead of rounding to preserve precise spatial information, essential for Mask R-CNN's pixel-perfect masks.
+
+</details>
+
+---
+
+<details>
+<summary><b>YOLO (You Only Look Once)</b> — Try your own first</summary>
+
+**Model Answer:** A single-stage detector that frames detection as a regression problem, predicting boxes and classes directly from a grid, prioritizing real-time speed.
+
+</details>
+
+---
+
+<details>
+<summary><b>U-Net</b> — Try your own first</summary>
+
+**Model Answer:** A symmetric encoder-decoder architecture for segmentation with skip connections that preserve high-resolution spatial details lost during downsampling.
+
+</details>
+
+---
+
+<details>
+<summary><b>Skip Connections (U-Net)</b> — Try your own first</summary>
+
+**Model Answer:** Direct links between encoder and decoder layers that recover spatial resolution, preventing the "vanishing" of structural information in deep networks.
+
+</details>
+
+---
+
+<details>
+<summary><b>Mask R-CNN</b> — Try your own first</summary>
+
+**Model Answer:** Extends Faster R-CNN with a third branch for pixel-level masks, performing classification, bounding box regression, and mask prediction simultaneously.
+
+</details>
+
+---
+
+<details>
+<summary><b>Multi-Task Learning</b> — Try your own first</summary>
+
+**Model Answer:** Learning multiple related tasks (classification, detection, segmentation) with a shared backbone, forcing the network to learn robust unified representations.
+
+</details>
+
+---
+
+<details>
+<summary><b>Weighted Cross-Entropy</b> — Try your own first</summary>
+
+**Model Answer:** A segmentation loss that assigns higher weights to minority classes (e.g., tumors) to prevent the model from ignoring rare objects.
+
+</details>
+
+---
+
+<details>
+<summary><b>Dice Loss</b> — Try your own first</summary>
+
+**Model Answer:** A segmentation loss based on the Dice coefficient (`2|A∩B|/(|A|+|B|)`) that is robust to class imbalance and widely used in medical imaging.
+
+</details>
+
+---
+
+<details>
+<summary><b>Focal Loss</b> — Try your own first</summary>
+
+**Model Answer:** A loss that down-weights easy, well-classified background examples, forcing the model to focus on "hard" pixels in highly imbalanced datasets.
+
+</details>
+
+---
+
+### Keypoint Detection & Pose Estimation
+
+<details>
+<summary><b>Keypoint Detection</b> — Try your own first</summary>
+
+**Model Answer:** Detecting distinctive structural points (joints, facial landmarks) to represent complex geometry as a sparse, compact skeleton.
+
+</details>
+
+---
+
+<details>
+<summary><b>Heatmap-Based Keypoint Detection</b> — Try your own first</summary>
+
+**Model Answer:** Represents each keypoint as a 2D Gaussian distribution (heatmap), using MSE loss to compare predicted vs ground truth distributions for robust localization.
+
+</details>
+
+---
+
+<details>
+<summary><b>Regression-Based Keypoint Detection</b> — Try your own first</summary>
+
+**Model Answer:** Directly predicts `(x, y)` coordinates; faster but more sensitive to outliers than heatmap-based approaches.
+
+</details>
+
+---
+
+<details>
+<summary><b>OpenPose</b> — Try your own first</summary>
+
+**Model Answer:** A bottom-up pose estimation method that detects all joints first, then uses Part Affinity Fields (PAFs) to associate them into individual skeletons.
+
+</details>
+
+---
+
+<details>
+<summary><b>Part Affinity Fields (PAFs)</b> — Try your own first</summary>
+
+**Model Answer:** Vector fields learned by OpenPose that encode limb orientation, solving the association problem by grouping correct joints to the correct person in multi-person scenes.
+
+</details>
+
+---
+
+<details>
+<summary><b>Bottom-Up Pose Estimation</b> — Try your own first</summary>
+
+**Model Answer:** Detects all body parts first, then associates them into individuals; scales well with crowd density (OpenPose).
+
+</details>
+
+---
+
+<details>
+<summary><b>Top-Down Pose Estimation</b> — Try your own first</summary>
+
+**Model Answer:** Detects a person first (person detector), then estimates keypoints within the cropped region; higher precision but slower for multiple people (HRNet).
+
+</details>
+
+---
+
+<details>
+<summary><b>HRNet</b> — Try your own first</summary>
+
+**Model Answer:** Maintains high-resolution representations throughout the network using parallel multi-resolution streams, achieving state-of-the-art keypoint precision.
+
+</details>
+
+---
+
+<details>
+<summary><b>Action Recognition</b> — Try your own first</summary>
+
+**Model Answer:** Analyzing keypoint movement across frames to classify actions (walking, waving), using RNNs/LSTMs or Graph Convolutional Networks (GCNs) to model temporal dynamics.
+
+</details>
+
+---
+
+<details>
+<summary><b>Graph Convolutional Network (GCN) for Pose</b> — Try your own first</summary>
+
+**Model Answer:** Treats the skeleton as a graph (joints = nodes, limbs = edges) and learns spatial-temporal features by traversing the human graph structure over time.
+
+</details>
+
+---
+
+<details>
+<summary><b>3D Pose Estimation</b> — Try your own first</summary>
+
+**Model Answer:** Mapping 2D keypoints to 3D coordinates using 2D-to-3D lifting networks or direct regression, often constrained by anatomical priors (bone length consistency).
+
+</details>
+
+---
+
+<details>
+<summary><b>2D-to-3D Lifting</b> — Try your own first</summary>
+
+**Model Answer:** A two-stage approach: first detect 2D keypoints (HRNet), then use a separate network to "lift" them into 3D space.
+
+</details>
+
+---
+
+## 5. QUICK REFERENCE CHEAT SHEET — WEEK 3 DL
+
+### CNN Output Size Formula
+
+<details>
+<summary><b>Convolution Output Size</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Formula** | `O = (I - K + 2P) / S + 1` |
+| **Where** | I = input size, K = kernel size, P = padding, S = stride |
+| **Example** | 32×32 input, 3×3 kernel, padding=1, stride=1 → 32×32 |
+
+</details>
+
+---
+
+<details>
+<summary><b>Pooling Output Size</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Formula** | `O = (I - K) / S + 1` |
+| **Note** | Pooling has no learnable parameters |
+
+</details>
+
+---
+
+<details>
+<summary><b>Transposed Convolution Output Size</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Formula** | `O = (I - 1)S + K - 2P` |
+
+</details>
+
+---
+
+<details>
+<summary><b>Effective Receptive Field with Dilation</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Formula** | `K_eff = K + (K-1)(d-1)` |
+| **Example** | 3×3 kernel, dilation=2 → effective 5×5 (still 9 parameters) |
+
+</details>
+
+---
+
+### IoU Calculation
+
+<details>
+<summary><b>IoU Formula</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Formula** | `IoU = Area(Prediction ∩ GroundTruth) / Area(Prediction ∪ GroundTruth)` |
+| **True Positive Threshold** | Usually IoU ≥ 0.5 |
+| **IoU = 1** | Perfect overlap |
+| **IoU = 0** | No overlap |
+
+</details>
+
+---
+
+### Detection Metrics
+
+<details>
+<summary><b>Precision, Recall, F1</b> — Try to recall first</summary>
+
+| Metric | Formula | What It Measures |
+|--------|---------|------------------|
+| **Precision** | `TP / (TP + FP)` | How many detections are correct |
+| **Recall** | `TP / (TP + FN)` | How many objects were found |
+| **F1 Score** | `2·P·R / (P + R)` | Harmonic mean; balanced measure |
+
+</details>
+
+---
+
+<details>
+<summary><b>mAP</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Full Name** | Mean Average Precision |
+| **What It Is** | Mean of AP values across all object classes |
+| **AP** | Area under Precision-Recall curve |
+| **Why It's Used** | Standard object detection benchmark |
+
+</details>
+
+---
+
+<details>
+<summary><b>OKS (Object Keypoint Similarity)</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **What It Is** | Keypoint detection metric analogous to IoU |
+| **Measures** | Distance between predicted and GT keypoints |
+| **Normalization** | Scaled by object size |
+
+</details>
+
+---
+
+### Vision Task Architecture Quick Reference
+
+<details>
+<summary><b>Architecture Reference Table</b> — Try to recall first</summary>
+
+| Task | Architecture | Key Mechanism | Speed |
+|------|-------------|---------------|-------|
+| **Classification** | ResNet, ViT | Depth + Non-linearity | Fast |
+| **Object Detection** | Faster R-CNN | Two-stage (RPN + head) | Slower |
+| **Object Detection** | YOLO | Single-stage (grid regression) | **Very Fast** |
+| **Semantic Segmentation** | U-Net | Encoder-decoder + skip connections | Moderate |
+| **Instance Segmentation** | Mask R-CNN | Two-stage + mask branch | Slower |
+| **Keypoint Detection** | HRNet | Parallel multi-resolution streams | Moderate |
+| **Pose Estimation** | OpenPose | Bottom-up (parts → associations) | Fast |
+
+</details>
+
+---
+
+### Pooling Methods Quick Reference
+
+<details>
+<summary><b>Pooling Types</b> — Try to recall first</summary>
+
+| Method | Operation | Best For |
+|--------|-----------|----------|
+| **Max Pooling** | Selects maximum value | Edge detection, strong features |
+| **Average Pooling** | Computes average value | Smoothing, global context |
+
+</details>
+
+---
+
+### Upsampling Methods Quick Reference
+
+<details>
+<summary><b>Upsampling Types</b> — Try to recall first</summary>
+
+| Method | Learnable? | Quality | Artifact Risk | Use Case |
+|--------|------------|---------|---------------|----------|
+| **Nearest Neighbor** | ❌ | Blocky | Low | Fast, simple tasks |
+| **Bilinear Interpolation** | ❌ | Smooth | None | Semantic segmentation |
+| **Transposed Convolution** | ✅ | Learned | Checkerboard (if large stride) | Learned upsampling |
+
+</details>
+
+---
+
+### Key Numbers to Remember
+
+<details>
+<summary><b>Key Vision Numbers</b> — Try to recall first</summary>
+
+| Concept | Number |
+|---------|--------|
+| IoU threshold for True Positive | 0.5 |
+| Default kernel size | 3×3 |
+| Default stride | 1 |
+| Default pooling window | 2×2 |
+| Typical batch size for images | 32 – 256 |
+
+</details>
+
+---
+
+### Segmentation Loss Functions
+
+<details>
+<summary><b>Segmentation Losses</b> — Try to recall first</summary>
+
+| Loss | Formula/Mechanism | Best For |
+|------|-------------------|----------|
+| **Cross-Entropy** | Pixel-wise classification | Balanced classes |
+| **Weighted Cross-Entropy** | Higher weights for minority classes | Class imbalance |
+| **Dice Loss** | `1 - 2|A∩B|/(|A|+|B|)` | Severe imbalance (tumors) |
+| **Focal Loss** | Down-weights easy examples | Many easy background pixels |
+
+</details>
+
+---
+
+### Keypoint Detection Methods
+
+<details>
+<summary><b>Heatmap vs Regression</b> — Try to recall first</summary>
+
+| Aspect | Heatmap-Based | Regression-Based |
+|--------|--------------|------------------|
+| **Output** | 2D probability distribution | Direct (x,y) coordinates |
+| **Loss** | MSE between heatmaps | MSE/L1 on coordinates |
+| **Robustness** | ✅ Robust to outliers | ❌ Sensitive |
+| **Computational Cost** | Higher (dense) | Lower (sparse) |
+| **Handles Uncertainty** | ✅ Yes | ❌ No |
+
+</details>
+
+---
+
+### Pose Estimation Approaches
+
+<details>
+<summary><b>Bottom-Up vs Top-Down</b> — Try to recall first</summary>
+
+| Aspect | Bottom-Up (OpenPose) | Top-Down (HRNet) |
+|--------|---------------------|------------------|
+| **Approach** | Parts → Associations | Person → Keypoints |
+| **Speed** | Faster for multiple people | Slower for multiple people |
+| **Precision** | Lower | Higher |
+| **Multi-Person** | ✅ Excellent | Depends on person detector |
+| **Occlusion Handling** | Good (via PAFs) | Better (crops) |
+| **Best For** | Crowded scenes | High-precision applications |
+
+</details>
+
+---
+
+### Receptive Field with Stacked Kernels
+
+<details>
+<summary><b>Stacked 3×3 Kernels</b> — Try to recall first</summary>
+
+| Layers | Receptive Field | Parameters (vs 1 large kernel) |
+|--------|-----------------|-------------------------------|
+| 1 × 3×3 | 3×3 | 9C |
+| 2 × 3×3 | 5×5 | 18C (vs 25C for 5×5) |
+| 3 × 3×3 | **7×7** | **27C (vs 49C for 7×7)** |
+| **Key Insight** | Stacked small kernels = **45% fewer parameters** + more non-linearity | |
+
+</details>
+
+---
+
+### Dilation (Atrous Convolution)
+
+<details>
+<summary><b>Dilation Quick Reference</b> — Try to recall first</summary>
+
+| Dilation Rate | Effective Kernel Size (3×3 base) | Parameters |
+|---------------|----------------------------------|------------|
+| d = 1 | 3×3 | 9 |
+| d = 2 | **5×5** | 9 |
+| d = 3 | **7×7** | 9 |
+| d = 4 | **9×9** | 9 |
+
+**Key Insight:** Receptive field expands **without adding parameters**.
+
+</details>
+
+---
+
+### CNN vs FC Comparison
+
+<details>
+<summary><b>CNN vs Fully Connected</b> — Try to recall first</summary>
+
+| Aspect | Fully Connected (FC) | Convolutional |
+|--------|---------------------|---------------|
+| Input treatment | Flattens to 1D vector | Preserves spatial structure (H×W×C) |
+| Parameter count | **O(N²)** — huge | **O(k²·C)** — small |
+| Translation invariance | ❌ None | ✅ Built-in (shared weights) |
+| Spatial structure | ❌ Lost | ✅ Preserved |
+| Weight sharing | ❌ No | ✅ Yes |
+
+</details>
+
+---
+
+## 6. CONNECTIONS MAP — WEEK 3 DL
+
+### 🌳 TEXT-BASED CONCEPT MAP
+
+```
+╔══════════════════════════════════════════════════════════════════════════╗
+║                                                                          ║
+║                    WEEK 3 DL: CNN & COMPUTER VISION                    ║
+║                                                                          ║
+║                    ┌─────────────────────────────────────┐              ║
+║                    │   CNN FUNDAMENTALS                  │              ║
+║                    │   Local RF + Weight Sharing        │              ║
+║                    └──────────────┬──────────────────────┘              ║
+║                                   │                                      ║
+║    ┌──────────────────────────────┼──────────────────────────────┐      ║
+║    │                              │                              │      ║
+║    ▼                              ▼                              ▼      ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │ CONVOLUTION  │          │   POOLING    │          │  DILATION    │  ║
+║ │  (1D/2D)     │          │  (Max/Avg)   │          │  (Atrous)    │  ║
+║ └──────┬───────┘          └──────┬───────┘          └──────┬───────┘  ║
+║        │                         │                         │          ║
+║        └─────────────────────────┼─────────────────────────┘          ║
+║                                  │                                     ║
+║                                  ▼                                     ║
+║                    ┌─────────────────────────────────────┐             ║
+║                    │   RECEPTIVE FIELD                   │             ║
+║                    │   Local → Global Hierarchically    │             ║
+║                    └──────────────┬──────────────────────┘             ║
+║                                   │                                     ║
+║    ┌──────────────────────────────┼──────────────────────────────┐     ║
+║    │                              │                              │     ║
+║    ▼                              ▼                              ▼     ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │  DOWNSAMPLING│          │  UPSAMPLING  │          │  BATCH NORM  │  ║
+║ │  (Stride/Pool)│          │ (Transposed) │          │  (BN in CNN) │  ║
+║ └──────┬───────┘          └──────┬───────┘          └──────────────┘  ║
+║        │                         │                                      ║
+║        └─────────────────────────┼──────────────────────────────────┐   ║
+║                                  │                                  │   ║
+║                                  ▼                                  │   ║
+║                    ┌─────────────────────────────────────┐          │   ║
+║                    │   COMPUTER VISION TASKS             │          │   ║
+║                    └──────────────┬──────────────────────┘          │   ║
+║                                   │                                 │   ║
+║    ┌──────────────┬───────────────┼───────────────┬──────────────┐  │   ║
+║    │              │               │               │              │  │   ║
+║    ▼              ▼               ▼               ▼              ▼  │   ║
+║ ┌──────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────┐ │   ║
+║ │CLASS-│    │ DETECT-  │    │ SEMANTIC │    │ INSTANCE │    │KEYPOINT│ │   ║
+║ │IFICA-│    │ ION      │    │ SEG      │    │ SEG      │    │DETECT- │ │   ║
+║ │TION  │    └────┬─────┘    └──────────┘    └──────────┘    │ION    │ │   ║
+║ └──────┘         │                                        └────┬───┘ │   ║
+║                  │                                             │     │   ║
+║    ┌─────────────┼─────────────────────────────────────────────┘     │   ║
+║    │             │                                                   │   ║
+║    ▼             ▼                                                   │   ║
+║ ┌──────────┐ ┌──────────────┐                                       │   ║
+║ │ FASTER   │ │   YOLO       │                                       │   ║
+║ │ R-CNN    │ │ (Single-     │                                       │   ║
+║ │ (Two-    │ │  Stage)      │                                       │   ║
+║ │  Stage)  │ └──────────────┘                                       │   ║
+║ └────┬─────┘                                                        │   ║
+║      │                                                              │   ║
+║      ▼                                                              │   ║
+║ ┌──────────────┐              ┌──────────────┐                     │   ║
+║ │   ROI Align  │              │    U-Net     │                     │   ║
+║ │   (Mask R-   │              │   (Skip      │                     │   ║
+║ │    CNN)      │              │ Connections) │                     │   ║
+║ └──────────────┘              └──────────────┘                     │   ║
+║                                                                     │   ║
+║                    ┌─────────────────────────────────────┐          │   ║
+║                    │   POSE ESTIMATION                    │          │   ║
+║                    └──────────────┬──────────────────────┘          │   ║
+║                                   │                                 │   ║
+║    ┌──────────────────────────────┼──────────────────────────────┐  │   ║
+║    │                              │                              │  │   ║
+║    ▼                              ▼                              ▼  │   ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐│   ║
+║ │  HEATMAP     │          │  BOTTOM-UP   │          │  TOP-DOWN    ││   ║
+║ │  (Robust)    │          │  (OpenPose)  │          │  (HRNet)     ││   ║
+║ └──────────────┘          └──────────────┘          └──────────────┘│   ║
+║        │                         │                         │        │   ║
+║        └─────────────────────────┼─────────────────────────┘        │   ║
+║                                  │                                   │   ║
+║                                  ▼                                   │   ║
+║                    ┌─────────────────────────────────────┐           │   ║
+║                    │   APPLICATIONS                      │           │   ║
+║                    │   Action Recognition · 3D Pose     │           │   ║
+║                    │   AR/VR · Fitness Tracking         │           │   ║
+║                    └─────────────────────────────────────┘           │   ║
+║                                                                         ║
+╚══════════════════════════════════════════════════════════════════════════╝
+```
+
+---
+
+### 🔗 KEY CONNECTION EXPLANATIONS
+
+<details>
+<summary><b>Connection 1: How does weight sharing connect to parameter efficiency and translation invariance?</b></summary>
+
+```
+Weight Sharing (same kernel across entire image)
+    │
+    ├── PARAMETER EFFICIENCY
+    │       │
+    │       ├── FC: O(N²) parameters
+    │       ├── CNN: O(k²·C) parameters
+    │       └── Example: 224×224×3 → 64 filters, 3×3
+    │            FC: ~4.8×10¹¹ parameters
+    │            CNN: 1,792 parameters
+    │            → 268 million × reduction!
+    │
+    └── TRANSLATION INVARIANCE
+            │
+            ├── Same feature detector applies everywhere
+            ├── Feature useful at position (x,y)
+            │   → Also useful at position (x+δ, y+δ)
+            └── No need to re-learn features per location
+```
+
+**Key insight:** Weight sharing is the "inductive bias" that makes CNNs work — a feature useful in one part of an image is likely useful elsewhere.
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 2: How does receptive field grow with depth?</b></summary>
+
+```
+Layer 1 (3×3 Conv)          Layer 2 (3×3 Conv)          Layer 3 (3×3 Conv)
+    │                           │                           │
+    ▼                           ▼                           ▼
+┌───────────┐              ┌───────────┐              ┌───────────┐
+│ Receptive │              │ Receptive │              │ Receptive │
+│ Field:    │              │ Field:    │              │ Field:    │
+│  3×3      │              │  5×5      │              │  7×7      │
+└───────────┘              └───────────┘              └───────────┘
+    │                           │                           │
+    └───────────────────────────┼───────────────────────────┘
+                                │
+                                ▼
+                    ┌─────────────────────────┐
+                    │   WHY DEPTH MATTERS     │
+                    │   3 × 3×3 layers =      │
+                    │   One 7×7 receptive     │
+                    │   field                 │
+                    │   • 45% fewer params    │
+                    │   • More non-linearity  │
+                    │   • Hierarchical        │
+                    │     feature learning    │
+                    └─────────────────────────┘
+```
+
+**Key insight:** Depth = larger receptive field + more non-linearity + better feature hierarchy.
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 3: How do vision tasks relate to each other?</b></summary>
+
+```
+CLASSIFICATION
+    "What is in this image?"
+    (One label per image)
+    │
+    └─────────────┐
+                  ▼
+OBJECT DETECTION
+    "What and where?"
+    (Bounding boxes + class labels)
+    │
+    └─────────────┐
+                  ▼
+SEMANTIC SEGMENTATION
+    "What is every pixel?"
+    (Class label per pixel)
+    │
+    └─────────────┐
+                  ▼
+INSTANCE SEGMENTATION
+    "What is every pixel AND which object?"
+    (Mask per object instance)
+    │
+    └─────────────┐
+                  ▼
+KEYPOINT DETECTION
+    "Where are the structural points?"
+    (Sparse coordinates per object)
+
+Each task adds more spatial detail and complexity!
+```
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 4: Architecture → Task mapping</b></summary>
+
+```
+ARCHITECTURE                        BEST TASK
+─────────────────────────────────────────────────────────────────
+ResNet / ViT         →    Image Classification
+    │
+    ├── Faster R-CNN      →    Object Detection (High Accuracy)
+    │       │
+    │       ├── ROI Align   →    Instance Segmentation (Mask R-CNN)
+    │       │
+    │       └── + Mask Branch →  Mask R-CNN
+    │
+    ├── YOLO               →    Object Detection (Real-Time)
+    │
+    ├── U-Net              →    Semantic Segmentation
+    │       │
+    │       └── Skip Connections → Preserve spatial details
+    │
+    ├── HRNet              →    Keypoint Detection (Top-Down)
+    │       │
+    │       └── Parallel Multi-Res → High precision
+    │
+    └── OpenPose           →    Pose Estimation (Bottom-Up)
+            │
+            └── PAFs          →    Multi-person association
+```
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 5: How do heatmaps and regression compare for keypoints?</b></summary>
+
+```
+KEYPOINT DETECTION METHODS
+    │
+    ├── HEATMAP-BASED
+    │       │
+    │       ├── Each keypoint = 2D Gaussian distribution
+    │       ├── Loss: MSE between predicted and GT heatmaps
+    │       ├── Robust to outliers
+    │       ├── Handles uncertainty
+    │       └── Higher computational cost
+    │
+    └── REGRESSION-BASED
+            │
+            ├── Direct (x, y) coordinate prediction
+            ├── Loss: MSE/L1 on coordinates
+            ├── Sensitive to outliers
+            ├── No uncertainty handling
+            └── Lower computational cost
+
+    Rule: Heatmaps for accuracy and robustness; regression for speed.
+```
+
+</details>
+
+---
+
+### 📊 CONNECTION MATRIX
+
+| Concept A | Connects To | Why |
+|-----------|-------------|-----|
+| **Weight Sharing** | Parameter Efficiency | O(k²·C) vs O(N²) parameters |
+| **Weight Sharing** | Translation Invariance | Same filter everywhere → feature location independent |
+| **Depth** | Receptive Field | Deeper = larger RF (3×3×3 = 7×7) |
+| **Dilation** | Receptive Field | Expands RF without adding parameters |
+| **Convolution** | Feature Extraction | Learns hierarchical features |
+| **IoU** | Detection Metrics | Measures box overlap |
+| **mAP** | Object Detection | Standard benchmark metric |
+| **RPN** | Faster R-CNN | Generates region proposals |
+| **ROI Align** | Mask R-CNN | Preserves pixel-level precision |
+| **Skip Connections** | U-Net | Preserves spatial resolution |
+| **Heatmap** | Keypoint Detection | Robust, handles uncertainty |
+| **PAFs** | OpenPose | Solves association problem |
+| **HRNet** | Top-Down Pose | Maintains high resolution |
+
+---
+
+## 7. COMMON MISCONCEPTIONS — WEEK 3 DL
+
+**How to use:** Read each misconception first. Try to identify what's wrong. Then click to reveal the reality.
+
+---
+
+### Misconception 1: "CNNs don't need feature engineering — they learn everything from scratch."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| CNNs learn all features automatically with no prior assumptions. | CNNs have a strong **inductive bias**: |
+| | • **Local receptive fields** → assumes nearby pixels are correlated |
+| | • **Weight sharing** → assumes features are translation-invariant |
+| | • **Hierarchical processing** → assumes features build from simple to complex |
+
+**Key insight:** CNNs are NOT a blank slate. They are specifically designed for visual data with built-in assumptions about spatial structure.
+
+</details>
+
+---
+
+### Misconception 2: "Transposed convolution is the mathematical inverse of convolution."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Transposed convolution is the inverse operation of convolution. | **It is NOT an inverse.** It's a different operation: |
+| | • Also called "fractionally-strided convolution" |
+| | • It's a **learned upsampling** operation |
+| | • It doesn't "undo" the forward convolution |
+| | • You can't recover the original input from its convolution output |
+
+**Example:**
+```
+Convolution: 5×5 → 3×3 (loss of information)
+Transposed Conv: 3×3 → 5×5 (learned expansion, not inverse)
+The 5×5 output is NOT the same as the original input!
+```
+
+</details>
+
+---
+
+### Misconception 3: "Pooling is essential for translation invariance."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Pooling is what makes CNNs translation-invariant. | **Pooling helps, but it's not the only source:** |
+| | • **Weight sharing** (same kernel everywhere) provides most of the invariance |
+| | • Pooling provides **translation equivariance**, not invariance |
+| | • Invariance comes from **aggregating** over spatial locations (max pooling, average pooling, global pooling) |
+| | • Modern architectures (e.g., ViT) achieve invariance without pooling |
+
+**Key distinction:**
+- **Equivariance:** Feature map shifts with input (CNN)
+- **Invariance:** Final prediction doesn't change with input position (Pooling + FC layers)
+
+</details>
+
+---
+
+### Misconception 4: "Larger kernels are always better for larger receptive fields."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| If you need a large receptive field, use a large kernel. | **Stacked small kernels are better:**
+| | • 3 × 3×3 layers = 7×7 receptive field |
+| | • **45% fewer parameters** (27C vs 49C) |
+| | • **More non-linearity** (3 activation functions vs 1) |
+| | • **Deeper** representation → hierarchical feature learning |
+
+**Example:**
+```
+One 7×7 kernel: 49 parameters, 1 ReLU
+Three 3×3 kernels: 27 parameters, 3 ReLUs
+→ 45% fewer parameters + more expressive power!
+```
+
+</details>
+
+---
+
+### Misconception 5: "Dilation expands the receptive field by adding parameters."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Dilation adds parameters to the kernel to see more of the input. | **Dilation adds ZERO parameters!**
+| | • 3×3 kernel with dilation=2 still has **9 parameters** |
+| | • Effective receptive field becomes **5×5** |
+| | • Holes between kernel weights don't add parameters |
+| | • Dilation = same weights, larger spacing |
+
+**Example:**
+```
+d=1: 3×3 kernel, 9 params, RF=3×3
+d=2: 3×3 kernel, 9 params, RF=5×5
+d=3: 3×3 kernel, 9 params, RF=7×7
+```
+**Net effect:** Receptive field expands without adding parameters or reducing resolution!
+
+</details>
+
+---
+
+### Misconception 6: "ROI Pooling and ROI Align are interchangeable."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| ROI Pooling and ROI Align are just two ways to do the same thing. | **They are NOT interchangeable!** |
+| | | **ROI Pooling** | **ROI Align** |
+| | | Hard quantization (rounding) | Bilinear interpolation |
+| | | Lossy precision | Preserves spatial precision |
+| | | Used in Faster R-CNN | Used in **Mask R-CNN** |
+| | | Pixel misalignment | Precise alignment |
+
+**The problem:** ROI Pooling rounds coordinates → misalignment → blurry masks. ROI Align uses interpolation → pixel-perfect masks → **essential for instance segmentation.**
+
+</details>
+
+---
+
+### Misconception 7: "YOLO is always better than Faster R-CNN because it's faster."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| YOLO is superior to Faster R-CNN in every way. | **It's a trade-off, not a replacement:**
+
+| Aspect | Faster R-CNN | YOLO |
+|--------|-------------|------|
+| Speed | Slower | **Very fast** |
+| Accuracy | **Higher** | Lower |
+| Small objects | **Better** | Worse |
+| Two-stage | Yes | No (single-stage) |
+
+**When to use which:**
+- ✅ **Faster R-CNN:** High-accuracy applications (medical imaging, satellite imagery)
+- ✅ **YOLO:** Real-time applications (autonomous driving, robotics, mobile)
+
+</details>
+
+---
+
+### Misconception 8: "Semantic segmentation and instance segmentation are the same thing."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Semantic segmentation and instance segmentation both label pixels — same thing. | **Different outputs:** |
+| | | **Semantic Segmentation** | **Instance Segmentation** |
+| | | Pixel labels (class per pixel) | Pixel masks PER OBJECT |
+| | | Same class = same color | Each object separate |
+| | | Can't tell cars apart | Can count individual cars |
+
+**Example:**
+```
+Semantic Segmentation: All "car" pixels = blue
+Instance Segmentation: Car #1 = blue, Car #2 = green, Car #3 = red
+→ You can count and track individual objects!
+```
+
+</details>
+
+---
+
+### Misconception 9: "Heatmap-based keypoint detection is just a trick — regression is the real solution."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Heatmaps are just a hack; direct regression is cleaner and more efficient. | **Heatmaps are the standard for a reason:** |
+
+| Aspect | Heatmap | Regression |
+|--------|---------|------------|
+| Robustness | ✅ High | ❌ Low |
+| Uncertainty | ✅ Captures it | ❌ No |
+| Outlier handling | ✅ Robust | ❌ Sensitive |
+| Compute | Higher | Lower |
+
+**Why heatmaps dominate:**
+- A 2D Gaussian distribution captures **spatial uncertainty**
+- Small localization errors don't cause huge loss spikes
+- The model learns a **probability distribution**, not a point estimate
+
+**Rule:** If accuracy matters → Heatmaps. If speed is critical → Regression.
+
+</details>
+
+---
+
+### Misconception 10: "Bottom-up pose estimation is always slower than top-down."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Bottom-up (OpenPose) is slower because it processes the whole image. | **For multiple people, bottom-up is faster!** |
+
+| Aspect | Bottom-Up (OpenPose) | Top-Down (HRNet) |
+|--------|---------------------|------------------|
+| **1 person** | Slower | Faster |
+| **10 people** | **Faster** | Slower (runs detector 10×) |
+| **Crowded scenes** | **Best** | Poor (occlusion) |
+| **Precision** | Lower | **Higher** |
+
+**Why:** Top-down runs a person detector for each person → O(N) where N = number of people. Bottom-up processes the image once → O(1) regardless of crowd size.
+
+</details>
+
+---
+
+### Misconception 11: "Action recognition requires understanding the semantics of the scene."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| To recognize actions, the model must understand objects, context, and semantics. | **Keypoints alone are often sufficient!**
+| | • Actions are defined by **movement trajectories** of joints |
+| | • Keypoints discard visual noise (clothing, background, lighting) |
+| | • The kinematic signature (how joints move) defines the action |
+| | • Walking: repeated leg movement; Waving: arm trajectory |
+
+**Analogy:** You can recognize a person walking from their skeletal movement alone, even if you can't see their clothes or surroundings. Keypoints capture this pure movement signal.
+
+</details>
+
+---
+
+### Misconception 12: "3D pose estimation from 2D is just a matter of adding a depth channel."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| 3D pose estimation is easy — just predict Z coordinate too. | **It's an ill-posed problem!**
+| | • Multiple 3D configurations project to the same 2D image |
+| | • Depth ambiguity: Which person is closer? |
+| | • Self-occlusion: Hidden joints in 3D |
+
+**Example:**
+```
+2D image: Arm at 45° angle
+3D possibilities:
+  → Arm in front of body (Z close)
+  → Arm behind body (Z far)
+  → Arm to the side (Z medium)
+All project to the SAME 2D image!
+```
+
+**Solutions:**
+- Geometric constraints (bone length consistency)
+- Multi-view triangulation
+- Temporal consistency (video)
+
+</details>
+
+---
+
+## 📊 QUICK REFERENCE: MISCONCEPTIONS vs REALITY
+
+| Misconception | Reality |
+|---------------|---------|
+| CNNs learn everything from scratch | CNNs have strong inductive bias (spatial locality) |
+| Transposed conv = inverse of conv | It's learned upsampling, not inverse |
+| Pooling = translation invariance | Weight sharing provides most invariance |
+| Large kernels are better | Stacked small kernels = more efficient |
+| Dilation adds parameters | Dilation expands RF with ZERO params |
+| ROI Pooling = ROI Align | ROI Align is essential for masks |
+| YOLO always > Faster R-CNN | Trade-off: speed vs accuracy |
+| Semantic = Instance seg | Instance seg per-object masks |
+| Heatmaps are just a hack | Heatmaps = robust + uncertainty |
+| Bottom-up is slower | Bottom-up is faster for crowds |
+| Action rec needs semantics | Keypoints alone = kinematic signature |
+| 3D pose is just +Z channel | It's an ill-posed problem |
+
+---
+
+# 📚 WEEK 3 DL — COMPLETE STUDY GUIDE
+## All Exercises with Answers in Spoiler Format
+
+---
+
+# SECTION 1: CNN FUNDAMENTALS
+
+---
+
+## Exercise CNN-1: CNN vs FC Comparison
+
+| Aspect | Fully Connected (FC) | Convolutional |
+|--------|---------------------|---------------|
+| Input treatment | | |
+| Parameter count | | |
+| Translation invariance | | |
+| Spatial structure preservation | | |
+| Weight sharing | | |
+| Best for | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Aspect | Fully Connected (FC) | Convolutional |
+|--------|---------------------|---------------|
+| Input treatment | Flattens to 1D vector | Preserves spatial structure (H×W×C) |
+| Parameter count | **O(N²)** — huge | **O(k²·C)** — small (kernel size only) |
+| Translation invariance | ❌ None (must relearn at each position) | ✅ Built-in (shared weights) |
+| Spatial structure preservation | ❌ Lost | ✅ Preserved |
+| Weight sharing | ❌ No | ✅ Yes (same kernel across image) |
+| Best for | Tabular data, small feature vectors | Images, spatial data |
+
+</details>
+
+---
+
+## Exercise CNN-2: Convolution Output Size Calculation
+
+| Input Size | Kernel Size | Padding | Stride | Output Size |
+|------------|-------------|---------|--------|-------------|
+| 32×32 | 3×3 | 0 | 1 | |
+| 32×32 | 3×3 | 1 | 1 | |
+| 32×32 | 5×5 | 0 | 1 | |
+| 32×32 | 3×3 | 1 | 2 | |
+| 224×224 | 7×7 | 0 | 2 | |
+| 64×64 | 5×5 | 2 | 1 | |
+
+**Formula:** `O = (I - K + 2P) / S + 1`
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Input Size | Kernel Size | Padding | Stride | Output Size | Calculation |
+|------------|-------------|---------|--------|-------------|-------------|
+| 32×32 | 3×3 | 0 | 1 | **30×30** | (32-3+0)/1+1 = 30 |
+| 32×32 | 3×3 | 1 | 1 | **32×32** | (32-3+2)/1+1 = 32 |
+| 32×32 | 5×5 | 0 | 1 | **28×28** | (32-5+0)/1+1 = 28 |
+| 32×32 | 3×3 | 1 | 2 | **16×16** | (32-3+2)/2+1 = 16 |
+| 224×224 | 7×7 | 0 | 2 | **109×109** | (224-7+0)/2+1 = 109 |
+| 64×64 | 5×5 | 2 | 1 | **64×64** | (64-5+4)/1+1 = 64 |
+
+</details>
+
+---
+
+## Exercise CNN-3: Weight Sharing & Parameter Efficiency
+
+**Scenario:** An image is 224×224×3 (RGB). You apply 64 filters of size 3×3 with stride 1 and padding 1.
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. How many parameters does this convolutional layer have (including biases)? | |
+| 2. How many parameters would a Fully Connected layer have connecting the same input to the same output size? | |
+| 3. What is the parameter reduction factor? | |
+| 4. What is the "inductive bias" that weight sharing introduces? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Convolution parameters | **(3×3×3 + 1) × 64 = (27 + 1) × 64 = 1,792** parameters |
+| 2. FC parameters | Input size = 224×224×3 = **150,528**. Output size = 64 × 224 × 224 = **3,211,264** (same spatial size with 64 channels). FC parameters = 150,528 × 3,211,264 ≈ **4.8 × 10¹¹** (impossible to store). |
+| 3. Parameter reduction factor | ~**268 million × reduction** (4.8e11 / 1,792 ≈ 268,000,000) |
+| 4. Inductive bias | Weight sharing assumes that a feature useful in one part of the image is likely useful elsewhere. This significantly reduces the search space for the optimizer. |
+
+</details>
+
+---
+
+## Exercise CNN-4: Receptive Field Calculation
+
+**Scenario:** You stack three 3×3 convolutional layers (stride=1, padding=0). Each layer has no pooling.
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is the receptive field of the **first** layer? | |
+| 2. What is the receptive field of the **second** layer? | |
+| 3. What is the receptive field of the **third** layer? | |
+| 4. How many parameters does one 3×3 layer have (compared to a 7×7 layer)? | |
+| 5. Why is stacking small kernels preferred over using one large kernel? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Receptive field of first layer | **3×3** (local patch) |
+| 2. Receptive field of second layer | **5×5** (combines features from the first layer's receptive field) |
+| 3. Receptive field of third layer | **7×7** (three 3×3 layers = one 7×7 receptive field) |
+| 4. Parameters comparison | Three 3×3 layers = 3 × (9 × C) = **27C**. One 7×7 layer = 49C. **3×3 layers use ~45% fewer parameters** (27 vs 49). |
+| 5. Why stack small kernels? | More **parameter efficient**, more **non-linearity** (more activation functions), and **deeper representations** (hierarchical feature learning). |
+
+</details>
+
+---
+
+## Exercise CNN-5: Dilation (Atrous Convolution)
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What does dilation do? | |
+| 2. For a 3×3 kernel with dilation rate = 2, what is the effective receptive field size? | |
+| 3. Why use dilation instead of increasing kernel size? | |
+| 4. When is dilation particularly useful? | |
+| 5. What's the trade-off with dilation? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. What does dilation do? | Inserts "holes" (zeros) between kernel weights, expanding the receptive field without increasing parameters. |
+| 2. Effective receptive field for dilation=2 | `K_eff = K + (K-1)(d-1) = 3 + (2)(1) = **5×5**` |
+| 3. Why use dilation instead of larger kernel? | Dilation increases receptive field **without adding parameters** (3×3 dilated to 5×5 still has 9 parameters, vs 25 for a real 5×5 kernel). |
+| 4. When is dilation particularly useful? | **Semantic Segmentation** — need global context while preserving spatial resolution (no downsampling). |
+| 5. Trade-off with dilation | Can miss fine-grained details if dilation is too aggressive (large holes skip important local patterns). |
+
+</details>
+
+---
+
+## Exercise CNN-6: Upsampling Methods
+
+| Method | Learnable? | Output Quality | Common Use |
+|--------|------------|----------------|------------|
+| Nearest Neighbor Interpolation | | | |
+| Bilinear Interpolation | | | |
+| Transposed Convolution | | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Method | Learnable? | Output Quality | Common Use |
+|--------|------------|----------------|------------|
+| **Nearest Neighbor** | ❌ No | Blocky artifacts | Fast upsampling, simple tasks |
+| **Bilinear Interpolation** | ❌ No | Smooth, continuous | Semantic segmentation (U-Net) |
+| **Transposed Convolution** | ✅ Yes | Learns optimal patterns | Feature reconstruction, autoencoders |
+
+</details>
+
+---
+
+## Exercise CNN-7: Batch Normalization in CNNs
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What problem does Batch Normalization solve? | |
+| 2. What are the learnable parameters in BN? | |
+| 3. What are the benefits of BN for CNNs? | |
+| 4. Why does BN act as a regularizer? | |
+| 5. How does BN differ during training vs inference? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. What problem does BN solve? | **Internal Covariate Shift** — distributions of layer inputs change as previous layers update, forcing lower learning rates and complicating initialization. |
+| 2. Learnable parameters in BN | **Scale (γ)** and **Shift (β)** — allow the network to learn the optimal mean/variance for each layer. |
+| 3. Benefits of BN for CNNs | Enables **higher learning rates**, acts as a **regularizer**, reduces sensitivity to **weight initialization**. |
+| 4. Why does BN act as a regularizer? | Mini-batch statistics introduce **stochastic noise** into activations, similar to dropout. |
+| 5. Training vs Inference | **Training**: uses current mini-batch statistics. **Inference**: uses running averages accumulated during training (deterministic). |
+
+</details>
+
+---
+
+# SECTION 2: COMPUTER VISION TASKS
+
+---
+
+## Exercise CV-1: Vision Task Matching
+
+| Task | Output | Example Use Case |
+|------|--------|------------------|
+| Image Classification | | |
+| Object Detection | | |
+| Semantic Segmentation | | |
+| Instance Segmentation | | |
+| Keypoint Detection | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Task | Output | Example Use Case |
+|------|--------|------------------|
+| **Image Classification** | Single class label per image | "Is this a cat or dog?" |
+| **Object Detection** | Bounding boxes + class labels | Self-driving car pedestrian detection |
+| **Semantic Segmentation** | Class label per pixel | Road scene understanding (road, sky, car) |
+| **Instance Segmentation** | Pixel mask per object instance | Identifying each person in a crowd |
+| **Keypoint Detection** | Sparse (x,y) coordinates | Human pose estimation, face landmarks |
+
+</details>
+
+---
+
+## Exercise CV-2: IoU Calculation
+
+**Scenario:** Predicted box = [x1=10, y1=10, x2=30, y2=30]; Ground Truth = [x1=15, y1=15, x2=35, y2=35].
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. Calculate the area of the **intersection**. | |
+| 2. Calculate the area of the **union**. | |
+| 3. Calculate the **IoU**. | |
+| 4. Is this considered a True Positive (IoU ≥ 0.5)? | |
+| 5. What does an IoU of 0 mean? | |
+| 6. What does an IoU of 1 mean? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Area of intersection | Intersection: x1=max(10,15)=15, y1=max(10,15)=15, x2=min(30,35)=30, y2=min(30,35)=30. Width=15, Height=15. **Area = 15 × 15 = 225** |
+| 2. Area of union | Predicted area = 20×20 = 400. GT area = 20×20 = 400. Union = 400 + 400 - 225 = **575** |
+| 3. IoU | **225 / 575 = 0.391** (≈39.1%) |
+| 4. True Positive? | **NO** — IoU = 0.391 < 0.5 threshold |
+| 5. IoU = 0 | **No overlap** — completely missed the object |
+| 6. IoU = 1 | **Perfect overlap** — exact match with ground truth |
+
+</details>
+
+---
+
+## Exercise CV-3: Detection Metrics
+
+| Metric | Formula | What it Measures | When to Prioritize |
+|--------|---------|------------------|-------------------|
+| Precision | | | |
+| Recall | | | |
+| F1 Score | | | |
+| mAP (Mean Average Precision) | | | |
+| OKS (Object Keypoint Similarity) | | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Metric | Formula | What it Measures | When to Prioritize |
+|--------|---------|------------------|-------------------|
+| **Precision** | TP / (TP + FP) | How many detected objects are actually correct | When false positives are costly (e.g., spam detection) |
+| **Recall** | TP / (TP + FN) | How many ground truth objects were found | When false negatives are costly (e.g., cancer detection) |
+| **F1 Score** | 2×(P×R)/(P+R) | Harmonic mean of precision & recall | When you need a balanced measure |
+| **mAP** | Mean of AP across all classes | Overall detection performance across thresholds | Standard benchmark for object detection |
+| **OKS** | Distance-based score for keypoints | Keypoint localization accuracy | Pose estimation (analogous to IoU for keypoints) |
+
+</details>
+
+---
+
+## Exercise CV-4: Faster R-CNN vs YOLO
+
+| Aspect | Faster R-CNN | YOLO |
+|--------|-------------|------|
+| Number of stages | | |
+| Speed | | |
+| Accuracy | | |
+| Key mechanism | | |
+| Best for | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Aspect | Faster R-CNN | YOLO |
+|--------|-------------|------|
+| Number of stages | **Two-stage** (RPN + Classification) | **Single-stage** (Regression) |
+| Speed | Slower (sequential) | **Very fast** (real-time, >30 FPS) |
+| Accuracy | **Higher** (more precise) | Slightly lower, especially for small objects |
+| Key mechanism | Region Proposal Network → ROI Pooling | Grid-based regression (S×S cells, B boxes per cell) |
+| Best for | High-accuracy applications | Real-time applications (autonomous driving, robotics) |
+
+</details>
+
+---
+
+## Exercise CV-5: ROI Pooling vs ROI Align
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is the problem with ROI Pooling? | |
+| 2. How does ROI Align solve it? | |
+| 3. Which method is used in Mask R-CNN? | |
+| 4. Why is ROI Align essential for instance segmentation? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Problem with ROI Pooling | Performs **hard quantization** (rounding) of coordinates to map to fixed-size grids. This causes **misalignment** between the ROI and the feature map, hurting pixel-level precision. |
+| 2. How ROI Align solves it | Uses **bilinear interpolation** instead of rounding. Samples four points per grid cell to preserve precise spatial information. |
+| 3. Which method is used in Mask R-CNN? | **ROI Align** — crucial for accurate mask prediction. |
+| 4. Why is ROI Align essential for segmentation? | Segmentation requires **pixel-perfect precision**. Any misalignment from rounding leads to blurry masks and poor boundary accuracy. |
+
+</details>
+
+---
+
+## Exercise CV-6: U-Net Architecture
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is the U-Net architecture used for? | |
+| 2. Describe the encoder (contracting path). | |
+| 3. Describe the decoder (expanding path). | |
+| 4. What are "skip connections" and why are they important? | |
+| 5. Why is U-Net data-efficient? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. What is U-Net used for? | **Semantic Segmentation** — dense pixel-wise classification. |
+| 2. Encoder (contracting path) | Extracts **context** via convolutions + pooling. Captures high-level semantic information. |
+| 3. Decoder (expanding path) | Restores **spatial resolution** via upsampling/transposed convolutions. Recovers fine-grained location details. |
+| 4. What are skip connections? | Direct links between corresponding encoder and decoder layers. **Recover high-resolution spatial details** lost during downsampling. Prevent "vanishing" of spatial structure. |
+| 5. Why is U-Net data-efficient? | Works well with **smaller datasets** due to skip connections preserving spatial information, reducing the need for massive data. |
+
+</details>
+
+---
+
+## Exercise CV-7: Mask R-CNN Architecture
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What tasks does Mask R-CNN perform simultaneously? | |
+| 2. What are the three output branches? | |
+| 3. What is the key architectural improvement over Faster R-CNN? | |
+| 4. Why is mask prediction decoupled from class prediction? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Tasks performed simultaneously | **Classification + Bounding Box Regression + Mask Prediction** (Multi-task learning) |
+| 2. Three output branches | 1. **Classification** (class label), 2. **Bounding Box** (coordinates), 3. **Mask** (pixel-wise binary mask) |
+| 3. Key improvement over Faster R-CNN | Adds a **third branch** for mask prediction and uses **ROI Align** (instead of ROI Pooling). |
+| 4. Why is mask decoupled from class prediction? | Allows the network to learn **shape independently of category** — a dog's shape and a cat's shape can be learned separately, improving robustness. |
+
+</details>
+
+---
+
+## Exercise CV-8: Handling Class Imbalance in Segmentation
+
+| Loss Function | Mechanism | Best For |
+|---------------|-----------|----------|
+| Weighted Cross-Entropy | | |
+| Dice Loss | | |
+| Focal Loss | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Loss Function | Mechanism | Best For |
+|---------------|-----------|----------|
+| **Weighted Cross-Entropy** | Assigns higher weights to minority classes (rare objects) | When you know class importance weights |
+| **Dice Loss** | `1 - (2|A∩B|)/(|A|+|B|)` — overlap-based metric | Highly imbalanced segmentation (tumor detection) |
+| **Focal Loss** | Down-weights easy examples, focuses on "hard" pixels | When there are many easy background pixels |
+
+</details>
+
+---
+
+# SECTION 3: KEYPOINT DETECTION & POSE ESTIMATION
+
+---
+
+## Exercise KP-1: Heatmap vs Regression for Keypoints
+
+| Aspect | Heatmap-Based | Regression-Based |
+|--------|--------------|------------------|
+| Output representation | | |
+| Loss function | | |
+| Handles uncertainty? | | |
+| Robustness to outliers | | |
+| Computational cost | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Aspect | Heatmap-Based | Regression-Based |
+|--------|--------------|------------------|
+| Output representation | 2D probability distribution (Gaussian) | Direct (x,y) coordinates |
+| Loss function | MSE between predicted and GT heatmaps | MSE/L1 on coordinates |
+| Handles uncertainty? | ✅ Yes (soft distribution) | ❌ No (point estimate) |
+| Robustness to outliers | ✅ Robust | ❌ Sensitive |
+| Computational cost | Higher (dense output) | Lower (sparse output) |
+
+</details>
+
+---
+
+## Exercise KP-2: OpenPose — Bottom-Up Approach
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What does "bottom-up" mean in OpenPose? | |
+| 2. What are Part Confidence Maps? | |
+| 3. What are Part Affinity Fields (PAFs)? | |
+| 4. What problem do PAFs solve? | |
+| 5. Why is bottom-up approach good for multi-person scenes? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. What does "bottom-up" mean? | Detects all **body parts (joints)** first, then **associates** them to form individuals. |
+| 2. What are Part Confidence Maps? | Predicts the location of each joint (e.g., elbow, knee) as a heatmap. |
+| 3. What are Part Affinity Fields (PAFs)? | Vector fields encoding the **orientation and direction** between connected joints (e.g., shoulder → elbow). |
+| 4. What problem do PAFs solve? | The **association problem** — grouping correct limbs to the correct person in multi-person scenes. |
+| 5. Why is bottom-up good for multi-person? | No need for an initial person detector. Scales well with crowd density. |
+
+</details>
+
+---
+
+## Exercise KP-3: HRNet — Top-Down Approach
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What does "top-down" mean in pose estimation? | |
+| 2. What makes HRNet unique architecturally? | |
+| 3. How does HRNet maintain high resolution? | |
+| 4. Why is high resolution important for keypoint detection? | |
+| 5. How does HRNet differ from U-Net-style encoder-decoder? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. What does "top-down" mean? | **Person detector first**; keypoint estimator runs on the cropped image of each person. |
+| 2. What makes HRNet unique? | Maintains **high-resolution representations** throughout the entire network (no bottleneck). |
+| 3. How does HRNet maintain high resolution? | **Parallel multi-resolution streams** with repeated **multi-scale fusion** across resolutions. |
+| 4. Why is high resolution important? | Keypoints require **fine-grained spatial precision** — high resolution preserves small details (wrists, ankles). |
+| 5. How does HRNet differ from U-Net? | U-Net downsamples (bottleneck) then upsamples. HRNet **never downsamples to a single low-resolution stream** — keeps high-res parallel throughout. |
+
+</details>
+
+---
+
+## Exercise KP-4: Challenges in Pose Estimation
+
+| Challenge | Description | Mitigation Strategy |
+|-----------|-------------|---------------------|
+| Occlusion | | |
+| Scale Variation | | |
+| Viewpoint Variation | | |
+| Complex Articulation | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Challenge | Description | Mitigation Strategy |
+|-----------|-------------|---------------------|
+| **Occlusion** | Body parts hidden by objects or self | Learn to "infer" hidden keypoints from context; use large datasets (COCO) |
+| **Scale Variation** | People at different distances from camera | Multi-scale feature pyramids, HRNet with parallel resolutions |
+| **Viewpoint Variation** | Different camera angles | Augmentation (rotation, scaling), multi-view datasets |
+| **Complex Articulation** | Non-standard poses (acrobatics, dancing) | Large, diverse datasets; graph-based modeling |
+
+</details>
+
+---
+
+## Exercise KP-5: 3D Pose Estimation
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is the main challenge in 3D pose estimation from 2D images? | |
+| 2. What is "2D-to-3D lifting"? | |
+| 3. How do geometric constraints help? | |
+| 4. Why is multi-view triangulation more accurate? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Main challenge in 3D pose from 2D | **Ill-posed problem** — multiple 3D configurations can project to the same 2D image (depth ambiguity). |
+| 2. What is "2D-to-3D lifting"? | First detect 2D keypoints (e.g., HRNet), then use a separate network to "lift" them to 3D coordinates. |
+| 3. How do geometric constraints help? | Use **anatomical priors** (bone length consistency, joint angles) to regularize predictions. |
+| 4. Why is multi-view triangulation more accurate? | Combines **multiple camera views** to triangulate 3D joint positions with high accuracy — resolves depth ambiguity. |
+
+</details>
+
+---
+
+## Exercise KP-6: Action Recognition from Keypoints
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. How do keypoints enable action recognition? | |
+| 2. What is a Graph Convolutional Network (GCN) for pose? | |
+| 3. What is the advantage of using keypoints over raw video for action recognition? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. How do keypoints enable action recognition? | Keypoints across frames form a **trajectory** of human motion — the sequence of (x,y,t) positions defines the action (walking, waving, jumping). |
+| 2. What is GCN for pose? | Treats skeleton as a graph (joints = nodes, limbs = edges). Learns spatial-temporal features by traversing the human graph structure. |
+| 3. Advantage of keypoints over raw video? | **Discards visual noise** (clothing, background, lighting) and focuses purely on the kinematic signature of the action. |
+
+</details>
+
+---
+
+## Exercise KP-7: The Complete Cheat Sheet
+
+### Fill in all blanks:
+
+**CNN Core Principles:**
+
+| Principle | Description |
+|-----------|-------------|
+| Local Receptive Fields | |
+| Weight Sharing | |
+| Translation Invariance | |
+
+**CNN Building Blocks Formula:**
+
+| Operation | Output Size Formula |
+|-----------|---------------------|
+| Convolution (with padding P, stride S) | |
+| Pooling | |
+| Transposed Convolution | |
+
+**Computer Vision Tasks:**
+
+| Task | Output | Architecture Example |
+|------|--------|---------------------|
+| Classification | | |
+| Object Detection | | |
+| Semantic Segmentation | | |
+| Instance Segmentation | | |
+| Keypoint Detection | | |
+
+**Pose Estimation Approaches:**
+
+| Approach | How it Works | Example |
+|----------|--------------|---------|
+| Bottom-Up | | |
+| Top-Down | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+**CNN Core Principles:**
+
+| Principle | Description |
+|-----------|-------------|
+| **Local Receptive Fields** | Neurons connect to local patches of input, capturing spatial patterns |
+| **Weight Sharing** | Same filter (kernel) applied across entire input → reduces parameters |
+| **Translation Invariance** | Features detected regardless of location in the image |
+
+**CNN Building Blocks Formula:**
+
+| Operation | Output Size Formula |
+|-----------|---------------------|
+| Convolution (with padding P, stride S) | `O = (I - K + 2P)/S + 1` |
+| Pooling | `O = (I - K)/S + 1` |
+| Transposed Convolution | `O = (I - 1)S + K - 2P` |
+
+**Computer Vision Tasks:**
+
+| Task | Output | Architecture Example |
+|------|--------|---------------------|
+| **Classification** | Single class label | ResNet, ViT |
+| **Object Detection** | Bounding boxes + labels | Faster R-CNN, YOLO |
+| **Semantic Segmentation** | Pixel-wise class labels | U-Net |
+| **Instance Segmentation** | Mask per object | Mask R-CNN |
+| **Keypoint Detection** | Sparse (x,y) coordinates | HRNet, OpenPose |
+
+**Pose Estimation Approaches:**
+
+| Approach | How it Works | Example |
+|----------|--------------|---------|
+| **Bottom-Up** | Detect all parts first → associate | OpenPose |
+| **Top-Down** | Detect person first → estimate keypoints | HRNet |
+
+</details>
+
+---
+
+# 📊 COMPLETE COVERAGE SUMMARY
+
+| Category | Concepts | Status |
+|----------|----------|--------|
+| CNN Fundamentals | Local RF, weight sharing, translation invariance | ✅ 100% |
+| CNN Building Blocks | Convolution, padding, stride, pooling, dilation | ✅ 100% |
+| Upsampling | Nearest neighbor, bilinear, transposed conv | ✅ 100% |
+| Vision Tasks | Classification, detection, segmentation | ✅ 100% |
+| Detection Metrics | IoU, Precision, Recall, mAP, OKS | ✅ 100% |
+| Detection Architectures | Faster R-CNN, YOLO, ROI Align | ✅ 100% |
+| Segmentation Architectures | U-Net, Mask R-CNN | ✅ 100% |
+| Keypoint Detection | Heatmap vs Regression | ✅ 100% |
+| Pose Estimation | OpenPose (bottom-up), HRNet (top-down) | ✅ 100% |
+| Applications | Action recognition, 3D pose, AR/VR | ✅ 100% |
+| **TOTAL** | **All Week 3 DL concepts** | ✅ **100%** |
+
+---
+
+## 📝 How to Use This Document
+
+1. **Read the question**, write your answer in the blank/box
+2. **Click the dropdown** to reveal the model answer
+3. **Compare** your answer to the model
+4. **Re-study** any sections where you got something wrong
+5. **Mark** your confidence level for each topic
+
+---
+
+**Good luck with your studies! 🎯**

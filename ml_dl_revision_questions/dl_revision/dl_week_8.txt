@@ -1,0 +1,1699 @@
+# Week 8 DL — Complete Revision Materials
+
+Based on your Week 8 slides covering **MLOps (Experiment Tracking, Reproducibility, Serving & Monitoring)** and **Large-Scale Distributed Training**, here are comprehensive revision materials following the established format.
+
+---
+
+## 1. CONFIDENCE TRACKER — WEEK 8 DL
+
+| Confidence Level | Meaning |
+|------------------|---------|
+| 🟢 **Green** | I knew this cold — could explain it to someone else |
+| 🟡 **Yellow** | I got it right, but I wasn't 100% sure / guessed |
+| 🔴 **Red** | I had no idea — got it wrong or completely guessed |
+
+---
+
+| Exercise | Topic | 🟢 | 🟡 | 🔴 | Re-study? |
+|----------|-------|----|----|----|-----------|
+| Ex 1 | ML Research vs ML Production | | | | ☐ |
+| Ex 2 | ML Systems vs Traditional Software | | | | ☐ |
+| Ex 3 | ML Failures — Ops vs ML Metrics | | | | ☐ |
+| Ex 4 | ML-Specific Failures | | | | ☐ |
+| Ex 5 | Degenerate Feedback Loops | | | | ☐ |
+| Ex 6 | Data Distribution Shifts | | | | ☐ |
+| Ex 7 | Detecting Distribution Shifts | | | | ☐ |
+| Ex 8 | Monitoring & Observability | | | | ☐ |
+| Ex 9 | Monitoring Metrics — Operational vs ML | | | | ☐ |
+| Ex 10 | ML Reproducibility | | | | ☐ |
+| Ex 11 | Experiment Tracking (W&B) | | | | ☐ |
+| Ex 12 | Model Serving — TorchServe | | | | ☐ |
+| Ex 13 | Model Optimization — Quantization | | | | ☐ |
+| Ex 14 | Model Optimization — Distillation | | | | ☐ |
+| Ex 15 | TorchScript — Tracing vs Scripting | | | | ☐ |
+| Ex 16 | GPU Hardware & Speedup | | | | ☐ |
+| Ex 17 | Communication Collectives | | | | ☐ |
+| Ex 18 | Data Parallelism (DP) | | | | ☐ |
+| Ex 19 | Fully Sharded Data Parallelism (FSDP) | | | | ☐ |
+| Ex 20 | Hybrid Sharded Data Parallel (HSDP) | | | | ☐ |
+| Ex 21 | Activation Checkpointing | | | | ☐ |
+| Ex 22 | Context Parallelism (CP) | | | | ☐ |
+| Ex 23 | Pipeline Parallelism (PP) | | | | ☐ |
+| Ex 24 | Tensor Parallelism (TP) | | | | ☐ |
+| Ex 25 | Expert Parallelism (EP) | | | | ☐ |
+| Ex 26 | Model FLOPs Utilization (MFU) | | | | ☐ |
+| Ex 27 | Scaling Recipe | | | | ☐ |
+| Ex 28 | Complete Cheat Sheet | | | | ☐ |
+
+---
+
+## 2. 🎯 TEACH IT SUMMARY
+
+### The Big Picture — Week 8 DL
+
+Week 8 covers **the engineering side of deep learning**: how to take models from research to production (MLOps) and how to train them at massive scale (distributed training). This is where deep learning meets systems engineering.
+
+**Part 1: MLOps (L1).** Machine learning in production is fundamentally different from research. Research prioritizes model performance on static benchmarks; production must satisfy **multiple stakeholders** (ML team, product, sales, management) with competing objectives — accuracy, latency, cost, interpretability. Production data is messy, constantly shifting, and full of privacy concerns. ML systems are **part code, part data** — you need to version and test both. Failures come in two flavors: **ops failures** (software crashes, network issues) and **ML failures** (distribution shifts, edge cases, degenerate feedback loops). Monitoring and observability are critical: track operational metrics (latency, throughput) and ML-specific metrics (accuracy, predictions, features). Reproducibility is hard — same model + same hyperparameters ≠ same results, due to randomness in data ordering, hardware, library versions, and initialization. Tools like **Weights & Biases (W&B)** help track experiments, version data, and visualize results. For deployment: **quantization** reduces precision (FP32 → INT8) for faster inference, **distillation** trains a small "student" model to mimic a large "teacher," and **TorchScript** optimizes models for production serving.
+
+**Part 2: Distributed Training (L2).** Modern LLMs like Llama3-405B are too large for a single GPU. Distributed training splits the work across many GPUs using **communication collectives** (All-Reduce, Reduce-Scatter, All-Gather, All-To-All). There are **five parallelism strategies**, each splitting a different dimension of the activation tensor (Layer, Batch, Sequence, Channel): **Data Parallelism (DP)** splits the batch; **Context Parallelism (CP)** splits the sequence; **Pipeline Parallelism (PP)** splits the layers; **Tensor Parallelism (TP)** splits the channels; **Expert Parallelism (EP)** splits MoE experts. **FSDP (Fully Sharded Data Parallelism)** shards model weights across GPUs, and **HSDP (Hybrid Sharded Data Parallelism)** combines FSDP within groups with DP across groups. **Activation checkpointing** trades compute for memory: instead of storing all activations, recompute them during the backward pass. The goal is to maximize **MFU (Model FLOPs Utilization)** — the fraction of theoretical peak FLOPs actually used for useful computation. The scaling recipe: use DP up to ~128 GPUs, FSDP for >1B params, HSDP for >256 GPUs, and advanced strategies (CP, PP, TP) for >1K GPUs.
+
+**The Connecting Thread:** Week 8 shows that deep learning is not just about models — it's about systems. The same model that achieves state-of-the-art accuracy in a paper may fail in production due to distribution shift, or may be impossible to train without distributed infrastructure. Understanding these engineering challenges is what separates research from real-world impact.
+
+---
+
+## 3. ⚠️ COMMON PITFALLS IN PRACTICE
+
+**How to use:** These are practical mistakes that happen in code and experiments. Read each pitfall and the fix before your next project.
+
+| Pitfall | Why It Happens | How to Avoid |
+|---------|----------------|--------------|
+| **1. Treating ML production like research** | Research optimizes model performance; production has multiple stakeholders | Define a **comprehensive utility function**: accuracy, latency, cost, interpretability, robustness |
+| **2. Ignoring data versioning** | Code is versioned with Git; data is not | Use **data versioning tools** (DVC, W&B Artifacts); line-by-line diffs don't work for datasets |
+| **3. Confusing ops failures with ML failures** | Both cause system failure but have different causes | **Ops failures**: crashes, network issues. **ML failures**: distribution shift, edge cases, feedback loops |
+| **4. Not monitoring predictions** | Predictions are low-dim and easy to monitor | Track **prediction distributions**; changes often indicate input distribution shifts |
+| **5. Assuming more data always helps** | Production data is messy, biased, and shifting | **Monitor data quality**; retrain when distribution shifts; use two-sample tests |
+| **6. Ignoring degenerate feedback loops** | Model predictions influence future training data | Use **randomization** and **positional features**; be aware of recommender systems and resume screening |
+| **7. Not reproducing experiments** | Same model + hyperparameters ≠ same results | Track **random seeds, library versions, hardware, data order**; use W&B |
+| **8. Deploying unoptimized models** | Large models are slow and expensive | Use **quantization** (FP32 → INT8), **distillation**, **TorchScript** |
+| **9. Using eager mode in production** | Eager mode is flexible but slow | Use **TorchScript** (tracing or scripting) for optimized inference |
+| **10. Training large models on one GPU** | Model doesn't fit in memory | Use **FSDP** to shard weights; **activation checkpointing** to reduce memory |
+| **11. Ignoring communication overhead** | Distributed training is communication-bound | Use **HSDP** to keep communication local; overlap computation and communication |
+| **12. Not measuring MFU** | You don't know if you're using GPUs efficiently | Compute **MFU**: theoretical FLOPs / actual time; >30% is good, >40% is excellent |
+| **13. Using the wrong parallelism strategy** | Different strategies suit different model sizes | Follow the **scaling recipe**: DP → FSDP → HSDP → CP/PP/TP |
+| **14. Forgetting activation checkpointing** | Activations fill up GPU memory | Use **activation checkpointing**: recompute activations during backward pass |
+| **15. Not using communication collectives efficiently** | Naive communication is slow | Use **All-Reduce** (DP), **Reduce-Scatter** (FSDP backward), **All-Gather** (FSDP forward), **All-To-All** (CP) |
+
+---
+
+## 4. ONE-SENTENCE SUMMARY — WEEK 8 DL
+
+**How to use:** For each concept, try to write your own one-sentence summary *before* clicking to reveal the model answer.
+
+---
+
+### MLOps
+
+<details>
+<summary><b>ML Research vs ML Production</b> — Try your own first</summary>
+
+**Model Answer:** Research optimizes model performance on static benchmarks; production must satisfy multiple stakeholders with competing objectives (accuracy, latency, cost, interpretability) on constantly shifting, messy data.
+
+</details>
+
+---
+
+<details>
+<summary><b>ML Systems vs Traditional Software</b> — Try your own first</summary>
+
+**Model Answer:** ML systems are part code, part data — you need to version and test both, and failures can be either ops failures (crashes) or ML failures (distribution shifts, edge cases).
+
+</details>
+
+---
+
+<details>
+<summary><b>ML Failure</b> — Try your own first</summary>
+
+**Model Answer:** A failure happens when one or more expectations of the system is violated — operational metrics (latency, throughput) or ML metrics (accuracy, F1).
+
+</details>
+
+---
+
+<details>
+<summary><b>Degenerate Feedback Loops</b> — Try your own first</summary>
+
+**Model Answer:** When predictions influence the feedback used to extract labels for the next iteration, causing the model to become increasingly confident in its own biases (e.g., recommender systems, resume screening).
+
+</details>
+
+---
+
+<details>
+<summary><b>Data Distribution Shift</b> — Try your own first</summary>
+
+**Model Answer:** When the target distribution (production data) differs from the source distribution (training data) — types include covariate shift (P(X) changes), label shift (P(Y) changes), and concept drift (P(Y|X) changes).
+
+</details>
+
+---
+
+<details>
+<summary><b>Covariate Shift</b> — Try your own first</summary>
+
+**Model Answer:** P(X) changes but P(Y|X) remains the same — the input distribution changes but the relationship between input and output stays constant.
+
+</details>
+
+---
+
+<details>
+<summary><b>Label Shift</b> — Try your own first</summary>
+
+**Model Answer:** P(Y) changes but P(X|Y) remains the same — the output distribution changes but for a given output, the input distribution stays the same.
+
+</details>
+
+---
+
+<details>
+<summary><b>Concept Drift</b> — Try your own first</summary>
+
+**Model Answer:** P(X) remains the same but P(Y|X) changes — same input, expecting different output (e.g., housing prices drop during COVID).
+
+</details>
+
+---
+
+<details>
+<summary><b>Monitoring vs Observability</b> — Try your own first</summary>
+
+**Model Answer:** Monitoring is tracking metrics to determine when something goes wrong; observability is setting up the system to give visibility into *why* something went wrong.
+
+</details>
+
+---
+
+<details>
+<summary><b>Operational Metrics</b> — Try your own first</summary>
+
+**Model Answer:** Latency, throughput, requests/minute, % 2XX responses, CPU/GPU utilization, memory utilization, availability (e.g., SLA: median latency <200ms, 99.99% uptime).
+
+</details>
+
+---
+
+<details>
+<summary><b>ML-Specific Metrics</b> — Try your own first</summary>
+
+**Model Answer:** Accuracy-related metrics (click-through rate, duration watched), prediction distributions, feature statistics (min, max, median, regex, categorical sets).
+
+</details>
+
+---
+
+<details>
+<summary><b>ML Reproducibility</b> — Try your own first</summary>
+
+**Model Answer:** Same model + same hyperparameters ≠ same results due to randomness in data ordering, hardware, library versions, weight initialization, and dropout — critical for high-stakes applications.
+
+</details>
+
+---
+
+<details>
+<summary><b>Experiment Tracking (W&B)</b> — Try your own first</summary>
+
+**Model Answer:** Tools like Weights & Biases track experiments, version data, visualize results, and enable collaboration — essential for reproducibility and debugging.
+
+</details>
+
+---
+
+<details>
+<summary><b>Quantization</b> — Try your own first</summary>
+
+**Model Answer:** Reducing the precision of model weights (FP32 → INT8) for faster inference and lower memory — dynamic, static, or quantization-aware training.
+
+</details>
+
+---
+
+<details>
+<summary><b>Knowledge Distillation</b> — Try your own first</summary>
+
+**Model Answer:** Training a small "student" model to mimic a large "teacher" model — student learns from teacher's soft labels (predictions) plus hard labels (true labels).
+
+</details>
+
+---
+
+<details>
+<summary><b>TorchScript</b> — Try your own first</summary>
+
+**Model Answer:** An optimized intermediate representation of a PyTorch model for production — tracing (requires sample input, no control flow) or scripting (supports control flow, only requires model).
+
+</details>
+
+---
+
+<details>
+<summary><b>TorchServe</b> — Try your own first</summary>
+
+**Model Answer:** A model server optimized for PyTorch — supports multi-model serving, model versioning for A/B testing, server-side batching, and pre/post processing.
+
+</details>
+
+---
+
+### Distributed Training
+
+<details>
+<summary><b>GPU Speedup</b> — Try your own first</summary>
+
+**Model Answer:** GPUs have gotten ~1000× faster since 2013 (K40: 5 TFLOP/sec → B200: 5000 TFLOP/sec), making large-scale training feasible.
+
+</details>
+
+---
+
+<details>
+<summary><b>Communication Collectives</b> — Try your own first</summary>
+
+**Model Answer:** Primitives for GPUs to exchange data — All-Reduce (sum), Reduce-Scatter (sum + scatter), All-Gather (concat), All-To-All (transpose).
+
+</details>
+
+---
+
+<details>
+<summary><b>All-Reduce</b> — Try your own first</summary>
+
+**Model Answer:** Each GPU has a different tensor; each GPU ends up with the sum of all input tensors — used in DDP backward.
+
+</details>
+
+---
+
+<details>
+<summary><b>Reduce-Scatter</b> — Try your own first</summary>
+
+**Model Answer:** Each GPU has a different tensor; each GPU ends up with a piece of the sum — used in FSDP backward.
+
+</details>
+
+---
+
+<details>
+<summary><b>All-Gather</b> — Try your own first</summary>
+
+**Model Answer:** Each GPU has a piece of a tensor; collect them so each GPU has the whole tensor — used in FSDP forward.
+
+</details>
+
+---
+
+<details>
+<summary><b>All-To-All</b> — Try your own first</summary>
+
+**Model Answer:** Break each input tensor into chunks and "transpose" them across GPUs — used to reshard a tensor along a different axis (Ulysses CP).
+
+</details>
+
+---
+
+<details>
+<summary><b>Data Parallelism (DP)</b> — Try your own first</summary>
+
+**Model Answer:** Split the batch dimension across GPUs; each GPU has its own copy of the model, computes gradients on its batch, then averages gradients via All-Reduce.
+
+</details>
+
+---
+
+<details>
+<summary><b>Fully Sharded Data Parallelism (FSDP)</b> — Try your own first</summary>
+
+**Model Answer:** Split model weights across GPUs; each weight is owned by one GPU (with its grads and optimizer states); broadcast weights before forward/backward, reduce gradients after.
+
+</details>
+
+---
+
+<details>
+<summary><b>Hybrid Sharded Data Parallelism (HSDP)</b> — Try your own first</summary>
+
+**Model Answer:** Split N = M*K GPUs into M groups of K; each group does FSDP (splits weights across K GPUs), and DP is done across the M groups.
+
+</details>
+
+---
+
+<details>
+<summary><b>Activation Checkpointing</b> — Try your own first</summary>
+
+**Model Answer:** Trade compute for memory — instead of storing all activations, save checkpoints every C layers and recompute activations during the backward pass.
+
+</details>
+
+---
+
+<details>
+<summary><b>Context Parallelism (CP)</b> — Try your own first</summary>
+
+**Model Answer:** Split the sequence dimension across GPUs — used for long-sequence finetuning (e.g., Llama3-405B: S=131,072, 16-way CP).
+
+</details>
+
+---
+
+<details>
+<summary><b>Pipeline Parallelism (PP)</b> — Try your own first</summary>
+
+**Model Answer:** Split the layers across GPUs; copy activations between layers at GPU boundaries; use microbatches to reduce idle time (bubbles).
+
+</details>
+
+---
+
+<details>
+<summary><b>Tensor Parallelism (TP)</b> — Try your own first</summary>
+
+**Model Answer:** Split the weights of each linear layer across GPUs; use block matrix multiply; with 2 consecutive TP layers, shard first over row and second over column to avoid communication.
+
+</details>
+
+---
+
+<details>
+<summary><b>Expert Parallelism (EP)</b> — Try your own first</summary>
+
+**Model Answer:** For MoE models, split experts across GPUs — each GPU processes a subset of experts.
+
+</details>
+
+---
+
+<details>
+<summary><b>Model FLOPs Utilization (MFU)</b> — Try your own first</summary>
+
+**Model Answer:** The fraction of the GPU's theoretical peak FLOPs used for "useful" model computation — >30% is good, >40% is excellent.
+
+</details>
+
+---
+
+<details>
+<summary><b>Scaling Recipe</b> — Try your own first</summary>
+
+**Model Answer:** 1) DP up to ~128 GPUs (models ~1B), 2) FSDP for >1B params, 3) Activation checkpointing for larger batches, 4) HSDP for >256 GPUs, 5) CP/PP/TP for >1K GPUs or >50B params.
+
+</details>
+
+---
+
+## 5. QUICK REFERENCE CHEAT SHEET — WEEK 8 DL
+
+### Key Formulas
+
+<details>
+<summary><b>Data Parallelism Gradient</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Loss** | `L = (1/MN) Σ_i Σ_j ℓ(x_{i,j}, W)` |
+| **Gradient** | `∂L/∂W = (1/M) Σ_i (1/N) Σ_j ∂ℓ/∂W` |
+| **Key insight** | Gradients are linear — each GPU computes its own gradient, then average via All-Reduce |
+
+</details>
+
+---
+
+<details>
+<summary><b>FSDP Memory</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Problem** | Each weight needs 4 numbers (weight, grad, Adam β1, β2), 2 bytes each |
+| **1B params** | 8GB |
+| **10B params** | 80GB (fills up H100) |
+| **100B params** | 800GB; split over 80 GPUs = 10GB per GPU |
+
+</details>
+
+---
+
+<details>
+<summary><b>Activation Checkpointing</b> — Try to recall first</summary>
+
+| Strategy | Compute | Memory |
+|----------|---------|--------|
+| **Forward+backward** | O(N) | O(N) |
+| **Full recomputation** | O(N²) | O(1) |
+| **C checkpoints** | O(N²/C) | O(C) |
+| **√N checkpoints** | O(N^1.5) | O(√N) |
+
+</details>
+
+---
+
+<details>
+<summary><b>MFU Calculation</b> — Try to recall first</summary>
+
+| Step | Detail |
+|------|--------|
+| 1 | `FLOP_theoretical = forward + backward` (backward = 2× forward) |
+| 2 | `FLOP/sec_theoretical = 989.4 TFLOP/sec (H100)` |
+| 3 | `t_theoretical = FLOP_theoretical / FLOP/sec_theoretical` |
+| 4 | `t_actual = measured time for full iteration` |
+| 5 | `MFU = t_theoretical / t_actual` |
+
+</details>
+
+---
+
+### Parallelism Strategies
+
+<details>
+<summary><b>Parallelism Comparison</b> — Try to recall first</summary>
+
+| Strategy | Split Dimension | Used For | Communication |
+|----------|-----------------|----------|---------------|
+| **DP** | Batch | Models <1B | All-Reduce (gradients) |
+| **FSDP** | Weights | Models >1B | All-Gather (forward), Reduce-Scatter (backward) |
+| **HSDP** | Weights + Batch | Models >256 GPUs | Local + global |
+| **CP** | Sequence | Long sequences | All-To-All |
+| **PP** | Layers | Deep models | Point-to-point |
+| **TP** | Channels | Wide layers | All-Reduce |
+
+</details>
+
+---
+
+<details>
+<summary><b>Communication Collectives</b> — Try to recall first</summary>
+
+| Collective | What it does | Used in |
+|------------|--------------|---------|
+| **All-Reduce** | Sum all tensors; all GPUs get result | DP backward |
+| **Reduce-Scatter** | Sum then scatter pieces | FSDP backward |
+| **All-Gather** | Collect pieces into full tensor | FSDP forward |
+| **All-To-All** | Transpose chunks across GPUs | Ulysses CP |
+
+</details>
+
+---
+
+### MLOps Comparison
+
+<details>
+<summary><b>Research vs Production</b> — Try to recall first</summary>
+
+| Aspect | Research | Production |
+|--------|----------|------------|
+| **Objectives** | Model performance | Multiple stakeholders |
+| **Computational priority** | Fast training | Fast inference |
+| **Data** | Static, clean | Constantly shifting, messy |
+| **Fairness** | Good to have | Important |
+| **Interpretability** | Good to have | Important |
+
+</details>
+
+---
+
+<details>
+<summary><b>Distribution Shifts</b> — Try to recall first</summary>
+
+| Type | P(X) | P(Y) | P(Y|X) | Decomposition |
+|------|------|------|--------|---------------|
+| **Covariate** | Changes | Same | Same | P(X,Y) = P(Y|X)P(X) |
+| **Label** | Same | Changes | Same | P(X,Y) = P(X|Y)P(Y) |
+| **Concept** | Same | Same | Changes | P(X,Y) = P(Y|X)P(X) |
+
+</details>
+
+---
+
+<details>
+<summary><b>Model Optimization</b> — Try to recall first</summary>
+
+| Technique | What it does | Speedup |
+|-----------|--------------|---------|
+| **Quantization** | FP32 → INT8 | 1.8× - 5.7× |
+| **Distillation** | Small student mimics large teacher | Model size reduction |
+| **TorchScript** | Optimized IR | 21% - 42% |
+
+</details>
+
+---
+
+### Key Defaults
+
+<details>
+<summary><b>Key Defaults</b> — Try to recall first</summary>
+
+| Concept | Default |
+|---------|---------|
+| DP max GPUs | ~128 |
+| FSDP threshold | >1B params |
+| HSDP threshold | >256 GPUs |
+| CP/PP/TP threshold | >1K GPUs or >50B params |
+| MFU good | >30% |
+| MFU excellent | >40% |
+| Quantization | INT8 |
+| TorchScript | Tracing or Scripting |
+
+</details>
+
+---
+
+## 6. CONNECTIONS MAP — WEEK 8 DL
+
+### 🌳 TEXT-BASED CONCEPT MAP
+
+```
+╔══════════════════════════════════════════════════════════════════════════╗
+║                                                                          ║
+║                    WEEK 8 DL: MLOPS & DISTRIBUTED TRAINING              ║
+║                                                                          ║
+║                    ┌─────────────────────────────────────┐              ║
+║                    │   FROM RESEARCH TO PRODUCTION        │              ║
+║                    └──────────────┬──────────────────────┘              ║
+║                                   │                                      ║
+║    ┌──────────────────────────────┼──────────────────────────────┐      ║
+║    │                              │                              │      ║
+║    ▼                              ▼                              ▼      ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │  MLOps       │          │  MONITORING  │          │  DISTRIBUTED │  ║
+║ │  Experiment  │          │  &           │          │  TRAINING    │  ║
+║ │  Tracking    │          │  OBSERVABILITY│         │  Parallelism │  ║
+║ └──────┬───────┘          └──────┬───────┘          └──────┬───────┘  ║
+║        │                         │                         │          ║
+║        │                         │                         │          ║
+║        ▼                         ▼                         ▼          ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │  W&B         │          │  Operational │          │  DP, FSDP,   │  ║
+║ │  Artifacts   │          │  Metrics     │          │  HSDP        │  ║
+║ │  Sweeps      │          │  ML Metrics  │          │  CP, PP, TP  │  ║
+║ └──────┬───────┘          └──────┬───────┘          └──────┬───────┘  ║
+║        │                         │                         │          ║
+║        │                         │                         │          ║
+║        ▼                         ▼                         ▼          ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │  Reproduc-   │          │  Data        │          │  Communication│  ║
+║ │  ibility     │          │  Distribution│          │  Collectives  │  ║
+║ │  Seeds       │          │  Shifts      │          │  All-Reduce   │  ║
+║ │  Versions    │          │  Feedback    │          │  All-Gather   │  ║
+║ └──────┬───────┘          │  Loops       │          │  Reduce-Scatter│ ║
+║        │                  └──────┬───────┘          └──────┬───────┘  ║
+║        │                         │                         │          ║
+║        │                         │                         │          ║
+║        ▼                         ▼                         ▼          ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │  Serving     │          │  Model       │          │  Activation   │  ║
+║ │  TorchServe  │          │  Retraining  │          │  Checkpointing│  ║
+║ │  Quantization│          │  Continual   │          │  MFU          │  ║
+║ │  Distillation│          │  Learning    │          │  Scaling      │  ║
+║ └──────────────┘          └──────────────┘          └──────────────┘  ║
+║                                                                         ║
+╚══════════════════════════════════════════════════════════════════════════╝
+```
+
+---
+
+### 🔗 KEY CONNECTION EXPLANATIONS
+
+<details>
+<summary><b>Connection 1: How does MLOps connect to distributed training?</b></summary>
+
+```
+MLOps (L1)                              Distributed Training (L2)
+─────────────────────────────────────────────────────────────────────
+Experiment Tracking (W&B)          →    Track distributed training runs
+    ↓                                        ↓
+Reproducibility                    →    Same parallelism strategy + same config
+    ↓                                        ↓
+Model Serving (TorchServe)         →    Serve large models trained on many GPUs
+    ↓                                        ↓
+Quantization / Distillation        →    Compress large models for deployment
+    ↓                                        ↓
+Monitoring                         →    Monitor distributed training metrics (MFU, loss)
+
+The connection: MLOps is about managing the lifecycle; distributed training is about scaling the training phase. Both are essential for production ML.
+```
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 2: How do communication collectives connect to parallelism strategies?</b></summary>
+
+```
+Communication Collectives                Parallelism Strategies
+─────────────────────────────────────────────────────────────────────
+All-Reduce                          →    Data Parallelism (DP) backward
+    ↓                                        ↓
+Reduce-Scatter                      →    FSDP backward
+    ↓                                        ↓
+All-Gather                          →    FSDP forward
+    ↓                                        ↓
+All-To-All                          →    Context Parallelism (CP)
+    ↓                                        ↓
+Point-to-Point                      →    Pipeline Parallelism (PP)
+
+Each parallelism strategy uses specific communication collectives optimized for its pattern.
+```
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 3: How does FSDP relate to DP?</b></summary>
+
+```
+Data Parallelism (DP)                   FSDP
+─────────────────────────────────────────────────────────────────────
+Each GPU has full model copy        →    Weights sharded across GPUs
+    ↓                                        ↓
+Model size limited by GPU memory    →    Can train models larger than one GPU
+    ↓                                        ↓
+All-Reduce gradients                →    All-Gather weights, Reduce-Scatter grads
+    ↓                                        ↓
+Simple, efficient for small models  →    More complex, but scales to huge models
+
+FSDP is DP with sharded weights — it solves the memory problem of DP.
+```
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 4: How does activation checkpointing connect to FSDP?</b></summary>
+
+```
+FSDP                                    Activation Checkpointing
+─────────────────────────────────────────────────────────────────────
+Solves: model weights too big           Solves: activations too big
+    ↓                                        ↓
+Shards weights across GPUs              Recomputes activations during backward
+    ↓                                        ↓
+Frees up memory for weights             Frees up memory for activations
+    ↓                                        ↓
+Together: Can train massive models      Together: FSDP + AC = scale to 100B+ params
+
+The two techniques are complementary — FSDP handles weights, AC handles activations.
+```
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 5: The Production ML Lifecycle</b></summary>
+
+```
+Research Model
+    ↓
+Experiment Tracking (W&B)
+    ↓
+Reproducibility (seeds, versions)
+    ↓
+Distributed Training (DP/FSDP/HSDP)
+    ↓
+Model Optimization (Quantization, Distillation)
+    ↓
+Model Serving (TorchServe)
+    ↓
+Monitoring (Operational + ML Metrics)
+    ↓
+Data Distribution Shift Detection
+    ↓
+Model Retraining / Continual Learning
+    ↓
+Back to Experiment Tracking
+
+The lifecycle is a loop — production models must be continuously monitored and retrained.
+```
+
+</details>
+
+---
+
+### 📊 CONNECTION MATRIX
+
+| Concept A | Connects To | Why |
+|-----------|-------------|-----|
+| **Experiment Tracking** | Reproducibility | Track seeds, configs, versions |
+| **Reproducibility** | Distributed Training | Same parallelism config |
+| **Monitoring** | Distribution Shifts | Detect when data changes |
+| **Distribution Shifts** | Retraining | When to retrain and what data |
+| **DP** | All-Reduce | Gradient averaging |
+| **FSDP** | All-Gather / Reduce-Scatter | Weight sharding |
+| **HSDP** | DP + FSDP | Hierarchical parallelism |
+| **CP** | All-To-All | Sequence splitting |
+| **PP** | Point-to-Point | Layer splitting |
+| **TP** | All-Reduce | Channel splitting |
+| **Activation Checkpointing** | Memory | Trade compute for memory |
+| **MFU** | Efficiency | Measure GPU utilization |
+
+---
+
+## 7. COMMON MISCONCEPTIONS — WEEK 8 DL
+
+**How to use:** Read each misconception first. Try to identify what's wrong. Then click to reveal the reality.
+
+---
+
+### Misconception 1: "ML production is just ML research with more data."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Production ML is research + more data. | **Production ML is fundamentally different:** |
+| | • **Multiple stakeholders** — ML team wants accuracy, product wants latency, sales wants revenue, management wants profit |
+| | • **Computational priority** — Research: fast training; Production: fast inference |
+| | • **Data** — Research: static, clean; Production: constantly shifting, messy, biased |
+| | • **Fairness & Interpretability** — "Good to have" in research; "Important" in production |
+| | • **Failures** — Ops failures (crashes) and ML failures (distribution shifts) |
+
+**Key insight:** Production ML is 10% machine learning and 90% engineering.
+
+</details>
+
+---
+
+### Misconception 2: "If training loss is low, the model is good."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Low training loss = good model. | **Overfitting alert!** A model can memorize training data (0 loss) but fail on new data. |
+| | **What actually matters:** Performance on **validation/test sets** (generalization) and **production metrics**. |
+| | **In production:** A model may have high accuracy on the test set but fail due to **distribution shift** — production data differs from training data. |
+
+**Key insight:** Always monitor production performance, not just training loss.
+
+</details>
+
+---
+
+### Misconception 3: "Data distribution shifts are rare."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Distribution shifts are edge cases. | **Distribution shifts are the norm in production:** |
+| | • **Covariate shift** — input distribution changes (new users, new devices) |
+| | • **Label shift** — output distribution changes (seasonal demand) |
+| | • **Concept drift** — relationship between input and output changes (COVID housing prices) |
+| | • **Feature change** — features added/removed/updated |
+| | • **Label schema change** — new classes added |
+
+**Key insight:** Production data is constantly shifting — you must monitor and retrain.
+
+</details>
+
+---
+
+### Misconception 4: "Monitoring is enough — you don't need observability."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Monitoring and observability are the same. | **They are different:** |
+| | • **Monitoring** — tracking metrics to determine *when* something goes wrong |
+| | • **Observability** — setting up the system to give visibility into *why* something went wrong |
+| | • Observability is part of monitoring |
+| | • **Instrumentation** — adding timers, counting NaNs, logging unusual events |
+
+**Key insight:** You need both — monitoring tells you something is wrong; observability tells you why.
+
+</details>
+
+---
+
+### Misconception 5: "More data always improves production models."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| More data = better model. | **Not necessarily in production:** |
+| | • **Quality matters** — messy, biased data hurts |
+| | • **Distribution shift** — more data from the wrong distribution makes it worse |
+| | • **Label noise** — more wrong labels = worse model |
+| | • **Diminishing returns** — at some point, more data barely helps |
+
+**Key insight:** In production, data quality and relevance matter more than quantity.
+
+</details>
+
+---
+
+### Misconception 6: "FSDP and DP are the same thing."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| FSDP is just DP with a different name. | **FSDP extends DP by sharding weights:** |
+| | • **DP** — each GPU has a full copy of the model; limited by GPU memory |
+| | • **FSDP** — weights are sharded across GPUs; can train models larger than one GPU |
+| | • **DP** — All-Reduce gradients |
+| | • **FSDP** — All-Gather weights (forward), Reduce-Scatter gradients (backward) |
+| | • **FSDP** — more complex, but scales to huge models |
+
+**Key insight:** FSDP solves DP's memory problem by sharding weights.
+
+</details>
+
+---
+
+### Misconception 7: "Activation checkpointing is free."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Activation checkpointing reduces memory with no cost. | **Activation checkpointing trades compute for memory:** |
+| | • **Forward+backward** — O(N) compute, O(N) memory |
+| | • **Full recomputation** — O(N²) compute, O(1) memory |
+| | • **C checkpoints** — O(N²/C) compute, O(C) memory |
+| | • **√N checkpoints** — O(N^1.5) compute, O(√N) memory |
+| | • **The cost:** More compute (recomputation) in exchange for less memory |
+
+**Key insight:** Activation checkpointing is a trade-off — you pay in compute to save memory.
+
+</details>
+
+---
+
+### Misconception 8: "Pipeline parallelism is efficient."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Pipeline parallelism keeps all GPUs busy. | **Pipeline parallelism has bubbles (idle time):** |
+| | • **Problem:** Sequential dependencies — GPUs are mostly sitting idle |
+| | • **Max MFU with N-way PP is 1/N** |
+| | • **Solution:** Run multiple **microbatches** at the same time, pipeline them through the GPUs |
+| | • **Trade-off:** Microbatches reduce bubbles but add complexity |
+
+**Key insight:** PP requires microbatches to be efficient; without them, most GPUs are idle.
+
+</details>
+
+---
+
+### Misconception 9: "Tensor parallelism is always beneficial."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Tensor parallelism speeds up all models. | **TP has communication overhead:** |
+| | • **Problem:** Need to gather parts of Y after forward, can't overlap with communication |
+| | • **Trick:** With 2 consecutive TP layers, shard first over row and second over column to avoid communication |
+| | • **TP is best for wide layers** (large channel dimension) |
+| | • **TP is less useful for narrow layers** |
+
+**Key insight:** TP is beneficial for wide layers but has communication overhead — use strategically.
+
+</details>
+
+---
+
+### Misconception 10: "MFU >50% is easy to achieve."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| You can easily achieve 50%+ MFU. | **MFU >30% is good, >40% is excellent:** |
+| | • **GPT-3** — 21.3% MFU |
+| | • **Gopher** — 32.5% MFU |
+| | • **Megatron-Turing NLG** — 30.2% MFU |
+| | • **PaLM** — 46.2% MFU |
+| | • **Llama3** — 38-43% MFU |
+| | **Why it's hard:** Communication overhead, memory bandwidth, kernel launch overhead, non-matmul operations |
+
+**Key insight:** MFU >40% is world-class; most models achieve 20-30%.
+
+</details>
+
+---
+
+### Misconception 11: "Quantization always reduces accuracy significantly."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Quantization (FP32 → INT8) destroys accuracy. | **Modern quantization preserves accuracy:** |
+| | • **BERT** — 0.902 → 0.895 (dynamic) |
+| | • **ResNet-50** — 76.9 → 75.9 (static) |
+| | • **MobileNet-v2** — 71.9 → 71.6 (quantization-aware training) |
+| | • **Quantization-aware training** — quantization error is part of training error; leads to greatest accuracy |
+
+**Key insight:** Quantization can achieve 2-5× speedup with minimal accuracy loss.
+
+</details>
+
+---
+
+### Misconception 12: "TorchScript is always better than eager mode."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| TorchScript is always faster and better. | **TorchScript vs Eager:** |
+| | • **Eager** — good for training/prototyping/debugging; flexible; slow for production |
+| | • **TorchScript** — optimized for production; faster; but doesn't support everything |
+| | • **Tracing** — doesn't support control flow; requires sample input |
+| | • **Scripting** — supports control flow; only requires model |
+| | • **TorchScript** — 21-42% faster inference |
+
+**Key insight:** Use eager for development, TorchScript for production.
+
+</details>
+
+---
+
+## 📊 QUICK REFERENCE: MISCONCEPTIONS vs REALITY
+
+| Misconception | Reality |
+|---------------|---------|
+| ML production = research + more data | Fundamentally different: stakeholders, data, priorities |
+| Low training loss = good model | Validation/production performance matters |
+| Distribution shifts are rare | They're the norm in production |
+| Monitoring = observability | Monitoring tells you *when*; observability tells you *why* |
+| More data always helps | Quality and relevance matter more than quantity |
+| FSDP = DP | FSDP shards weights; DP has full copies |
+| Activation checkpointing is free | Trades compute for memory |
+| Pipeline parallelism is efficient | Has bubbles; needs microbatches |
+| Tensor parallelism always helps | Communication overhead; best for wide layers |
+| MFU >50% is easy | >30% is good, >40% is excellent |
+| Quantization destroys accuracy | Modern methods preserve accuracy |
+| TorchScript always better | Use eager for dev, TorchScript for production |
+
+---
+
+# 📚 WEEK 8 DL — COMPLETE STUDY GUIDE
+## All Exercises with Answers in Spoiler Format
+
+---
+
+# SECTION 1: MLOPS — RESEARCH VS PRODUCTION
+
+---
+
+## Exercise W8-1: ML Research vs ML Production
+
+| Aspect | Research | Production |
+|--------|----------|------------|
+| Objectives | | |
+| Computational priority | | |
+| Data | | |
+| Fairness | | |
+| Interpretability | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Aspect | Research | Production |
+|--------|----------|------------|
+| **Objectives** | Model performance | Different stakeholders have different objectives |
+| **Computational priority** | Fast training, high throughput | Fast inference, low latency |
+| **Data** | Static, clean | Constantly shifting, messy, biased |
+| **Fairness** | Good to have | Important |
+| **Interpretability** | Good to have | Important |
+
+</details>
+
+---
+
+## Exercise W8-2: ML Systems vs Traditional Software
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is the key difference between ML systems and traditional software? | |
+| 2. Why is versioning data hard? | |
+| 3. What are two engineering challenges with large ML models? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Key difference | ML systems are **part code, part data** — you need to version and test both |
+| 2. Why versioning data is hard | Line-by-line diffs like Git don't work with datasets; can't naively create multiple copies of large datasets; merging changes is complex |
+| 3. Engineering challenges | Too big to fit on-device; consume too much energy; too slow to be useful; CI tests take hours |
+
+</details>
+
+---
+
+## Exercise W8-3: ML Failures
+
+| Type | Definition | Example |
+|------|------------|---------|
+| Ops failure | | |
+| ML failure | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Type | Definition | Example |
+|------|------------|---------|
+| **Ops failure** | Violation of operational metrics (latency, throughput, uptime) | Translation service returns no output |
+| **ML failure** | Violation of ML metrics (accuracy, F1, BLEU) | Translations are consistently incorrect |
+
+</details>
+
+---
+
+## Exercise W8-4: Degenerate Feedback Loops
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is a degenerate feedback loop? | |
+| 2. Give an example from recommender systems. | |
+| 3. Give an example from resume screening. | |
+| 4. How can you mitigate it? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Definition | When predictions influence the feedback used to extract labels for the next iteration of the model |
+| 2. Recommender systems | Model recommends item A → user clicks on A → model confirms A is good → recommendations become more homogenous |
+| 3. Resume screening | Model thinks X is a good feature → only picks resumes with X → hiring managers only see X → model confirms X is good |
+| 4. Mitigation | **Randomization** (show random items to collect unbiased feedback) and **positional features** (account for position bias) |
+
+</details>
+
+---
+
+# SECTION 2: DATA DISTRIBUTION SHIFTS
+
+---
+
+## Exercise W8-5: Types of Distribution Shifts
+
+| Type | P(X) | P(Y) | P(Y|X) | Example |
+|------|------|------|--------|---------|
+| Covariate shift | | | | |
+| Label shift | | | | |
+| Concept drift | | | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Type | P(X) | P(Y) | P(Y|X) | Example |
+|------|------|------|--------|---------|
+| **Covariate shift** | Changes | Same | Same | New users, new devices |
+| **Label shift** | Same | Changes | Same | Seasonal demand changes |
+| **Concept drift** | Same | Same | Changes | COVID causes housing prices to drop |
+
+</details>
+
+---
+
+## Exercise W8-6: Detecting Distribution Shifts
+
+| Method | How it works | Pros | Cons |
+|--------|--------------|------|------|
+| Compare statistics | | | |
+| Two-sample test | | | |
+| KS test | | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Method | How it works | Pros | Cons |
+|--------|--------------|------|------|
+| **Compare statistics** | Mean, median, variance, quantiles, skewness, kurtosis | Simple | Not universal; inconclusive |
+| **Two-sample test** | Determine if difference between two populations is statistically significant | Rigorous | Requires assumptions |
+| **KS test** | Kolmogorov-Smirnov test | No parameters, no assumptions | Only works with 1D data |
+
+</details>
+
+---
+
+## Exercise W8-7: Addressing Distribution Shifts
+
+| Strategy | What it does | When to use |
+|----------|--------------|-------------|
+| Train on massive dataset | | |
+| Retrain from scratch | | |
+| Fine-tune | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Strategy | What it does | When to use |
+|----------|--------------|-------------|
+| **Train on massive dataset** | Covers more distribution | When you have diverse data |
+| **Retrain from scratch** | Learn new distribution from scratch | When shift is severe |
+| **Fine-tune** | Adapt existing model to new data | When shift is moderate |
+
+</details>
+
+---
+
+# SECTION 3: MONITORING & OBSERVABILITY
+
+---
+
+## Exercise W8-8: Monitoring vs Observability
+
+| Aspect | Monitoring | Observability |
+|--------|------------|---------------|
+| Definition | | |
+| Purpose | | |
+| Example | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Aspect | Monitoring | Observability |
+|--------|------------|---------------|
+| **Definition** | Tracking, measuring, logging metrics | Setting up system to give visibility into what went wrong |
+| **Purpose** | Determine *when* something goes wrong | Investigate *why* something went wrong |
+| **Example** | Alert when latency > 200ms | Trace a request through the system to find bottleneck |
+
+</details>
+
+---
+
+## Exercise W8-9: Monitoring Metrics
+
+| Type | Examples |
+|------|----------|
+| Operational metrics | |
+| ML-specific metrics | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Type | Examples |
+|------|----------|
+| **Operational metrics** | Latency, throughput, requests/min, % 2XX, CPU/GPU utilization, memory, availability |
+| **ML-specific metrics** | Accuracy, click-through rate, duration watched, prediction distributions, feature statistics |
+
+</details>
+
+---
+
+## Exercise W8-10: Monitoring Predictions and Features
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. Why monitor predictions? | |
+| 2. Why monitor features? | |
+| 3. What are feature schema expectations? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Why monitor predictions | Predictions are low-dim, easy to visualize, and changes in prediction distribution generally mean changes in input distribution |
+| 2. Why monitor features | Most monitoring tools focus on features; feature schema expectations generated from source distribution; violations indicate problems |
+| 3. Feature schema expectations | Common sense (e.g., "the" is most common word); min/max/median in [a,b]; values satisfy regex; categorical data in predefined set; FEATURE_1 > FEATURE_2 |
+
+</details>
+
+---
+
+# SECTION 4: ML REPRODUCIBILITY
+
+---
+
+## Exercise W8-11: Reproducibility
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. Why is ML reproducibility hard? | |
+| 2. What factors contribute to irreproducibility? | |
+| 3. Why does reproducibility matter? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Why it's hard | Same model + same hyperparameters ≠ same results |
+| 2. Factors | Data order, hardware differences, library versions, weight initialization, dropout randomness |
+| 3. Why it matters | ML models impact real world (loans, indictments, sentences, interviews); need to trust results |
+
+</details>
+
+---
+
+## Exercise W8-12: Experiment Tracking (W&B)
+
+| Feature | What it does |
+|---------|--------------|
+| Artifacts | |
+| Tables | |
+| Experiments | |
+| Sweeps | |
+| Reports | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Feature | What it does |
+|---------|--------------|
+| **Artifacts** | Version data & pipelines |
+| **Tables** | Prep & visualize data |
+| **Experiments** | Track model development |
+| **Sweeps** | Optimize models (hyperparameter search) |
+| **Reports** | Collaborative analysis |
+
+</details>
+
+---
+
+# SECTION 5: MODEL SERVING & OPTIMIZATION
+
+---
+
+## Exercise W8-13: Quantization
+
+| Type | How it works | Accuracy | Speedup |
+|------|--------------|----------|---------|
+| Dynamic | | | |
+| Static | | | |
+| Quantization-aware training | | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Type | How it works | Accuracy | Speedup |
+|------|--------------|----------|---------|
+| **Dynamic** | Weights quantized dynamically at inference | 0.902 → 0.895 (BERT) | 1.8× |
+| **Static** | Weights/activations quantized with calibration data | 76.9 → 75.9 (ResNet-50) | 2× |
+| **Quantization-aware training** | Quantization error part of training error | 71.9 → 71.6 (MobileNet-v2) | 5.7× |
+
+</details>
+
+---
+
+## Exercise W8-14: Knowledge Distillation
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is knowledge distillation? | |
+| 2. What are soft labels? | |
+| 3. What are hard labels? | |
+| 4. What is the benefit? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Definition | Training a small "student" model to mimic a large "teacher" model |
+| 2. Soft labels | Teacher's predictions (probabilities) |
+| 3. Hard labels | True labels (one-hot) |
+| 4. Benefit | Smaller model, faster inference, similar performance |
+
+</details>
+
+---
+
+## Exercise W8-15: TorchScript
+
+| Aspect | Tracing | Scripting |
+|--------|---------|-----------|
+| Control flow | | |
+| Sample input | | |
+| Python data structures | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Aspect | Tracing | Scripting |
+|--------|---------|-----------|
+| **Control flow** | Doesn't support | Supports |
+| **Sample input** | Requires | Only requires model |
+| **Python data structures** | Doesn't support | Supports |
+
+</details>
+
+---
+
+## Exercise W8-16: TorchServe
+
+| Feature | What it does |
+|---------|--------------|
+| Multi-model serving | |
+| Model versioning | |
+| Server-side batching | |
+| Pre/post processing | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Feature | What it does |
+|---------|--------------|
+| **Multi-model serving** | Serve multiple models from one server |
+| **Model versioning** | A/B testing different model versions |
+| **Server-side batching** | Batch requests for efficiency |
+| **Pre/post processing** | Handle input/output transformations |
+
+</details>
+
+---
+
+# SECTION 6: DISTRIBUTED TRAINING — COLLECTIVES
+
+---
+
+## Exercise W8-17: Communication Collectives
+
+| Collective | What it does | Used in |
+|------------|--------------|---------|
+| All-Reduce | | |
+| Reduce-Scatter | | |
+| All-Gather | | |
+| All-To-All | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Collective | What it does | Used in |
+|------------|--------------|---------|
+| **All-Reduce** | Sum all tensors; all GPUs get result | DP backward |
+| **Reduce-Scatter** | Sum then scatter pieces | FSDP backward |
+| **All-Gather** | Collect pieces into full tensor | FSDP forward |
+| **All-To-All** | Transpose chunks across GPUs | Ulysses CP |
+
+</details>
+
+---
+
+# SECTION 7: DISTRIBUTED TRAINING — PARALLELISM
+
+---
+
+## Exercise W8-18: Parallelism Strategies
+
+| Strategy | Split Dimension | Used For | Communication |
+|----------|-----------------|----------|---------------|
+| DP | | | |
+| FSDP | | | |
+| HSDP | | | |
+| CP | | | |
+| PP | | | |
+| TP | | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Strategy | Split Dimension | Used For | Communication |
+|----------|-----------------|----------|---------------|
+| **DP** | Batch | Models <1B | All-Reduce |
+| **FSDP** | Weights | Models >1B | All-Gather, Reduce-Scatter |
+| **HSDP** | Weights + Batch | Models >256 GPUs | Local + global |
+| **CP** | Sequence | Long sequences | All-To-All |
+| **PP** | Layers | Deep models | Point-to-point |
+| **TP** | Channels | Wide layers | All-Reduce |
+
+</details>
+
+---
+
+## Exercise W8-19: Data Parallelism
+
+| Step | What happens |
+|------|--------------|
+| 1 | |
+| 2 | |
+| 3 | |
+| 4 | |
+| 5 | |
+| 6 | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Step | What happens |
+|------|--------------|
+| 1 | Each GPU has its own copy of model + optimizer |
+| 2 | Each GPU loads its own batch of data |
+| 3 | Each GPU runs forward to compute loss |
+| 4 | Each GPU runs backward to compute gradients |
+| 5 | Average gradients across all GPUs (All-Reduce) |
+| 6 | Each GPU updates its own weights |
+
+</details>
+
+---
+
+## Exercise W8-20: FSDP
+
+| Step | What happens |
+|------|--------------|
+| 1 | |
+| 2 | |
+| 3 | |
+| 4 | |
+| 5 | |
+| 6 | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Step | What happens |
+|------|--------------|
+| 1 | Before forward for layer i, the GPU that owns W_i broadcasts it to all GPUs |
+| 2 | All GPUs run forward for layer i, then delete their local copy of W_i |
+| 3 | Before backward for layer i, owner broadcasts W_i to all GPUs |
+| 4 | All GPUs run backward for layer i to compute local dL/dW_i and delete W_i |
+| 5 | After backward for layer i, all GPUs send local dL/dW_i to owning GPU and delete local dL/dW_i |
+| 6 | Owner of W_i makes gradient update |
+
+</details>
+
+---
+
+## Exercise W8-21: Activation Checkpointing
+
+| Strategy | Compute | Memory |
+|----------|---------|--------|
+| Forward+backward | | |
+| Full recomputation | | |
+| C checkpoints | | |
+| √N checkpoints | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Strategy | Compute | Memory |
+|----------|---------|--------|
+| **Forward+backward** | O(N) | O(N) |
+| **Full recomputation** | O(N²) | O(1) |
+| **C checkpoints** | O(N²/C) | O(C) |
+| **√N checkpoints** | O(N^1.5) | O(√N) |
+
+</details>
+
+---
+
+## Exercise W8-22: Pipeline Parallelism
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is the idea? | |
+| 2. What is the problem? | |
+| 3. What is the max MFU with N-way PP? | |
+| 4. What is the solution? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Idea | Split the layers of the model across GPUs; copy activations between layers at GPU boundaries |
+| 2. Problem | Sequential dependencies; GPUs are mostly sitting idle (bubbles) |
+| 3. Max MFU | 1/N |
+| 4. Solution | Run multiple **microbatches** at the same time, pipeline them through the GPUs |
+
+</details>
+
+---
+
+## Exercise W8-23: Tensor Parallelism
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is the idea? | |
+| 2. What is the problem? | |
+| 3. What is the trick? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Idea | Split the weights of each linear layer across GPUs, use block matrix multiply |
+| 2. Problem | Need to gather parts of Y after forward, can't overlap with communication |
+| 3. Trick | With 2 consecutive TP layers, shard first over row and second over column to avoid communication |
+
+</details>
+
+---
+
+# SECTION 8: DISTRIBUTED TRAINING — EFFICIENCY
+
+---
+
+## Exercise W8-24: MFU Calculation
+
+| Step | Detail |
+|------|--------|
+| 1 | |
+| 2 | |
+| 3 | |
+| 4 | |
+| 5 | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Step | Detail |
+|------|--------|
+| 1 | `FLOP_theoretical = forward + backward` (backward = 2× forward) |
+| 2 | `FLOP/sec_theoretical = 989.4 TFLOP/sec (H100)` |
+| 3 | `t_theoretical = FLOP_theoretical / FLOP/sec_theoretical` |
+| 4 | `t_actual = measured time for full iteration` |
+| 5 | `MFU = t_theoretical / t_actual` |
+
+</details>
+
+---
+
+## Exercise W8-25: MFU Benchmarks
+
+| Model | Parameters | Accelerator | MFU |
+|-------|------------|-------------|-----|
+| GPT-3 | 175B | V100 | |
+| Gopher | 280B | 4096 TPU v3 | |
+| Megatron-Turing NLG | 530B | 2240 A100 | |
+| PaLM | 540B | 6144 TPU v4 | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Model | Parameters | Accelerator | MFU |
+|-------|------------|-------------|-----|
+| **GPT-3** | 175B | V100 | 21.3% |
+| **Gopher** | 280B | 4096 TPU v3 | 32.5% |
+| **Megatron-Turing NLG** | 530B | 2240 A100 | 30.2% |
+| **PaLM** | 540B | 6144 TPU v4 | 46.2% |
+
+</details>
+
+---
+
+## Exercise W8-26: Scaling Recipe
+
+| Step | Recommendation |
+|------|----------------|
+| 1 | |
+| 2 | |
+| 3 | |
+| 4 | |
+| 5 | |
+| 6 | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Step | Recommendation |
+|------|----------------|
+| 1 | Use **data parallelism** up to ~128 GPUs, models with ~1B params |
+| 2 | Always set per-GPU batch size to max out GPU memory |
+| 3 | If your model is >1B params, consider **FSDP** |
+| 4 | Add **activation checkpointing** to fit larger batches per GPU |
+| 5 | If you have >256 GPUs, consider **HSDP** |
+| 6 | If you have >1K GPUs, models >50B params, or sequence lengths >16K then use **CP, PP, TP** |
+
+</details>
+
+---
+
+# SECTION 9: MASTERY & SYNTHESIS
+
+---
+
+## Exercise W8-27: Complete Cheat Sheet
+
+### Fill in all blanks:
+
+**MLOps:**
+- Research vs Production: ___________
+- ML failures: ___________
+- Distribution shifts: ___________
+- Monitoring: ___________
+
+**Distributed Training:**
+- Communication collectives: ___________
+- Parallelism strategies: ___________
+- FSDP: ___________
+- Activation checkpointing: ___________
+- MFU: ___________
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+**MLOps:**
+- Research vs Production: **Objectives, computational priority, data, fairness, interpretability**
+- ML failures: **Distribution shifts, edge cases, degenerate feedback loops**
+- Distribution shifts: **Covariate shift, label shift, concept drift**
+- Monitoring: **Operational metrics + ML metrics; observability**
+
+**Distributed Training:**
+- Communication collectives: **All-Reduce, Reduce-Scatter, All-Gather, All-To-All**
+- Parallelism strategies: **DP, FSDP, HSDP, CP, PP, TP, EP**
+- FSDP: **Shard weights across GPUs; All-Gather forward, Reduce-Scatter backward**
+- Activation checkpointing: **Recompute activations during backward to save memory**
+- MFU: **Theoretical FLOPs / actual time; >30% good, >40% excellent**
+
+</details>
+
+---
+
+# 📊 COMPLETE COVERAGE SUMMARY
+
+| Category | Concepts | Status |
+|----------|----------|--------|
+| MLOps | Research vs production, ML failures, feedback loops | ✅ 100% |
+| Data Distribution Shifts | Covariate, label, concept drift; detection | ✅ 100% |
+| Monitoring & Observability | Operational metrics, ML metrics, alerts | ✅ 100% |
+| Reproducibility | Seeds, versions, W&B | ✅ 100% |
+| Model Serving | TorchServe, quantization, distillation, TorchScript | ✅ 100% |
+| Distributed Training | Communication collectives | ✅ 100% |
+| Parallelism | DP, FSDP, HSDP, CP, PP, TP, EP | ✅ 100% |
+| Efficiency | Activation checkpointing, MFU | ✅ 100% |
+| Scaling | Scaling recipe, MFU benchmarks | ✅ 100% |
+| **TOTAL** | **All Week 8 DL concepts** | ✅ **100%** |
+
+---
+
+## 📝 How to Use This Document
+
+1. **Read the question**, write your answer in the blank/box
+2. **Click the dropdown** to reveal the model answer
+3. **Compare** your answer to the model
+4. **Re-study** any sections where you got something wrong
+5. **Mark** your confidence level for each topic
+
+---
+
+**Good luck with your studies! 🎯**

@@ -1,0 +1,1614 @@
+# Week 4 DL — Complete Revision Materials
+
+Based on your Week 4 slides covering **CNN Architectures, Transfer Learning, Data Augmentation, Domain Adaptation, and Text Representations**, here are comprehensive revision materials following the established format.
+
+---
+
+## 1. CONFIDENCE TRACKER — WEEK 4 DL
+
+| Confidence Level | Meaning |
+|------------------|---------|
+| 🟢 **Green** | I knew this cold — could explain it to someone else |
+| 🟡 **Yellow** | I got it right, but I wasn't 100% sure / guessed |
+| 🔴 **Red** | I had no idea — got it wrong or completely guessed |
+
+---
+
+| Exercise | Topic | 🟢 | 🟡 | 🔴 | Re-study? |
+|----------|-------|----|----|----|-----------|
+| Ex 1 | CNN Evolution — AlexNet, VGG, Inception, ResNet | | | | ☐ |
+| Ex 2 | Transfer Learning — Feature Extraction vs Fine-Tuning | | | | ☐ |
+| Ex 3 | Fine-Tuning Best Practices | | | | ☐ |
+| Ex 4 | Limitations of Transfer Learning | | | | ☐ |
+| Ex 5 | Data Augmentation Strategies | | | | ☐ |
+| Ex 6 | Advanced Augmentation — Mixup & CutMix | | | | ☐ |
+| Ex 7 | Domain Shift & Domain Adaptation | | | | ☐ |
+| Ex 8 | DANN — Adversarial Domain Adaptation | | | | ☐ |
+| Ex 9 | Self-Supervised Learning — SimCLR, MoCo, BYOL | | | | ☐ |
+| Ex 10 | Data Augmentation Best Practices | | | | ☐ |
+| Ex 11 | Data Leakage in Augmentation | | | | ☐ |
+| Ex 12 | Vision Transformers & Augmentation | | | | ☐ |
+| Ex 13 | Modern CNN Innovations | | | | ☐ |
+| Ex 14 | Hardware-Aware CNN Design | | | | ☐ |
+| Ex 15 | Text Representations — Word2Vec, GloVe | | | | ☐ |
+| Ex 16 | Negative Sampling | | | | ☐ |
+| Ex 17 | Subword Tokenization — BPE, WordPiece, SentencePiece | | | | ☐ |
+| Ex 18 | BPE vs WordPiece vs SentencePiece | | | | ☐ |
+| Ex 19 | Limitations of Static Embeddings | | | | ☐ |
+| Ex 20 | Complete Cheat Sheet | | | | ☐ |
+
+---
+
+## 2. 🎯 TEACH IT SUMMARY
+
+### The Big Picture — Week 4 DL
+
+Week 4 covers how modern computer vision models are built, adapted, and generalized — moving from handcrafted features to deep, trainable architectures and then to systems that can learn from unlabeled data.
+
+**Part 1: CNN Architectures.** The evolution from AlexNet to ResNet shows how depth was the main challenge. AlexNet (2012) proved deep CNNs could work with ReLU, Dropout, and GPUs. VGG (2014) showed that stacking small 3×3 filters enables deeper networks with fewer parameters. Inception (2014) introduced multi-scale processing with 1×1 bottlenecks for efficiency. **ResNet (2015) was the breakthrough** — residual (skip) connections solved the vanishing gradient problem, enabling networks with 100+ layers. The key insight: `H(x) = F(x) + x` makes it easy for gradients to flow directly through the network.
+
+**Part 2: Transfer Learning & Data Augmentation.** Once we have powerful models, we need to adapt them to new tasks. **Transfer learning** lets us reuse features learned on massive datasets (ImageNet) — either by freezing weights and training only a new head (feature extraction) or by fine-tuning with a small learning rate. **Data augmentation** artificially creates variations (rotations, flips, color shifts, Mixup, CutMix) so the model learns to ignore irrelevant changes. The rule: augmentations must be label-preserving — if a transformation changes the object identity, it's not valid.
+
+**Part 3: Domain Adaptation & Self-Supervised Learning.** When training and deployment domains differ (e.g., clear images vs rainy weather), **domain adaptation** aligns the distributions. DANN uses a Gradient Reversal Layer to make features domain-invariant through adversarial training. **Self-supervised learning** goes further — it learns from unlabeled data by creating its own supervision signals. SimCLR uses contrastive learning (positive pairs = augmented views of same image, negative pairs = different images). MoCo uses a queue + momentum encoder to enable large dictionaries. BYOL eliminates negative pairs entirely using asymmetric online/target networks.
+
+**Part 4: Text Representations.** The same principles apply to language: words need dense vector representations (embeddings). Word2Vec (CBOW predicts target from context; Skip-gram predicts context from target) and GloVe (factorizes global co-occurrence) learn dense vectors where proximity = similarity. **Subword tokenization** (BPE, WordPiece, SentencePiece) ensures we never face unknown words by breaking rare words into frequent pieces. The limitation: static embeddings can't handle context — "bank" (river) vs "bank" (financial) share one vector, motivating sequence models (RNNs, Transformers).
+
+**The Connecting Thread:** All these techniques aim to make models **generalize beyond their training data** — whether through architecture (ResNet's skip connections), data (augmentation), task adaptation (transfer learning), or representation (embeddings, SSL).
+
+---
+
+## 3. ⚠️ COMMON PITFALLS IN PRACTICE
+
+**How to use:** These are practical mistakes that happen in code and experiments. Read each pitfall and the fix before your next project.
+
+| Pitfall | Why It Happens | How to Avoid |
+|---------|----------------|--------------|
+| **1. Data leakage in normalization** | Computing mean/std on the full dataset before splitting — test statistics influence training. | Fit scaler **ONLY on training data**. Transform train, val, test using train's statistics. |
+| **2. Catastrophic forgetting in fine-tuning** | Learning rate is too high — the model overwrites useful pre-trained features. | Use **1/10th to 1/100th** of the pre-training learning rate. Start with frozen backbone, gradually unfreeze. |
+| **3. Over-augmentation** | Aggressive transformations distort semantic meaning — e.g., rotating a "6" into a "9" breaks the label. | **Visualize your augmentations**. Test them on a few samples. Use RandAugment for automatic magnitude control. |
+| **4. Confusing BPE and WordPiece** | Both are subword tokenizers but use different merge criteria — they produce different vocabularies. | **BPE**: raw frequency. **WordPiece**: normalized likelihood (`count(ab)/(count(a)×count(b))`). Check which one your model uses. |
+| **5. SSL model collapse** | The network outputs the same constant vector for all inputs — contrastive loss fails without enough negatives. | For BYOL: ensure the target network is a **slow-moving average** of the online network. For SimCLR: use large batches (4096+) or MoCo's queue. |
+| **6. Applying augmentation to validation/test** | Augmentation is applied to all data before splitting, or validation data is augmented during evaluation. | **Never augment validation or test**. They must reflect the true distribution. Validation = no augmentation, no transformations. |
+| **7. Negative transfer in fine-tuning** | Source domain (ImageNet) is too dissimilar from target (medical X-rays, satellite imagery). Pre-trained features hurt performance. | Compare: train from scratch vs using pre-trained. If pre-trained is **worse**, use domain-specific pre-training or lighter feature extraction. |
+| **8. Tuning augmentation on validation** | Adjusting augmentation parameters (rotation degree, color jitter strength) based on validation performance. | **This is data leakage** — you're effectively training on validation data. Use a separate validation set for hyperparameter tuning. |
+| **9. Misunderstanding transfer learning strategies** | Assuming fine-tuning is always better than feature extraction for small datasets. | **Small dataset → Feature Extraction** (less risk of overfitting). **Large dataset → Fine-Tuning** (can adapt features safely). |
+| **10. Polysemy in static embeddings** | Word2Vec/GloVe give one vector per word — "bank" means both riverbank and financial institution. | Use **contextual embeddings** (ELMo, BERT) for tasks where word sense matters. Static embeddings are still fine for many classification tasks. |
+
+---
+
+## 4. ONE-SENTENCE SUMMARY — WEEK 4 DL
+
+**How to use:** For each concept, try to write your own one-sentence summary *before* clicking to reveal the model answer.
+
+---
+
+### CNN Architectures
+
+<details>
+<summary><b>AlexNet</b> — Try your own first</summary>
+
+**Model Answer:** The 2012 breakthrough that introduced ReLU, Dropout, and GPU training to vision, proving deep CNNs could beat traditional computer vision methods.
+
+</details>
+
+---
+
+<details>
+<summary><b>VGG</b> — Try your own first</summary>
+
+**Model Answer:** Demonstrated that stacking small 3×3 filters enables deep networks with fewer parameters while increasing representational power through more non-linearities.
+
+</details>
+
+---
+
+<details>
+<summary><b>Inception (GoogLeNet)</b> — Try your own first</summary>
+
+**Model Answer:** Uses multi-scale parallel convolutions (1×1, 3×3, 5×5) with 1×1 bottlenecks for efficiency, enabling wider rather than just deeper networks.
+
+</details>
+
+---
+
+<details>
+<summary><b>ResNet</b> — Try your own first</summary>
+
+**Model Answer:** Introduced residual (skip) connections that allow gradients to flow directly through the network, enabling training of hundreds of layers by solving the vanishing gradient problem.
+
+</details>
+
+---
+
+<details>
+<summary><b>Residual Connection (Skip Connection)</b> — Try your own first</summary>
+
+**Model Answer:** Adds the input to the output of a layer (`H(x) = F(x) + x`), providing a gradient "highway" that bypasses weight layers and prevents vanishing gradients in deep networks.
+
+</details>
+
+---
+
+<details>
+<summary><b>Transfer Learning</b> — Try your own first</summary>
+
+**Model Answer:** Leveraging a model pre-trained on a large dataset (e.g., ImageNet) and adapting it to a smaller target task, drastically reducing data and training requirements.
+
+</details>
+
+---
+
+<details>
+<summary><b>Feature Extraction (Transfer Learning)</b> — Try your own first</summary>
+
+**Model Answer:** Using a pre-trained model as a fixed feature extractor — freezing all weights and training only a new classifier on top.
+
+</details>
+
+---
+
+<details>
+<summary><b>Fine-Tuning (Transfer Learning)</b> — Try your own first</summary>
+
+**Model Answer:** Unfreezing some or all pre-trained layers and training them further on target data with a small learning rate to adapt features to the new domain.
+
+</details>
+
+---
+
+<details>
+<summary><b>Negative Transfer</b> — Try your own first</summary>
+
+**Model Answer:** When the source domain is too dissimilar to the target domain, pre-trained features become irrelevant or misleading, harming performance rather than helping.
+
+</details>
+
+---
+
+<details>
+<summary><b>Catastrophic Forgetting</b> — Try your own first</summary>
+
+**Model Answer:** When fine-tuning on a new task with too high a learning rate, the model overwrites useful pre-trained features and forgets what it learned on the source domain.
+
+</details>
+
+---
+
+### Data Augmentation
+
+<details>
+<summary><b>Data Augmentation</b> — Try your own first</summary>
+
+**Model Answer:** Artificially expanding the training set by applying label-preserving transformations, forcing the model to become invariant to non-semantic variations.
+
+</details>
+
+---
+
+<details>
+<summary><b>Mixup</b> — Try your own first</summary>
+
+**Model Answer:** Blends two images and their labels (`x̃ = λx₁ + (1-λ)x₂`, `ỹ = λy₁ + (1-λ)y₂`), encouraging smooth, linear decision boundaries between classes.
+
+</details>
+
+---
+
+<details>
+<summary><b>CutMix</b> — Try your own first</summary>
+
+**Model Answer:** Cuts a patch from one image and pastes it onto another, mixing labels proportionally to patch area; encourages local feature learning and improves localization.
+
+</details>
+
+---
+
+<details>
+<summary><b>Domain Adaptation</b> — Try your own first</summary>
+
+**Model Answer:** Techniques that bridge the gap between training (source) and deployment (target) domains when data distributions differ, using feature alignment or adversarial training.
+
+</details>
+
+---
+
+<details>
+<summary><b>DANN (Domain-Adversarial Neural Network)</b> — Try your own first</summary>
+
+**Model Answer:** Uses a Gradient Reversal Layer (GRL) to make features domain-invariant — the feature extractor learns to fool a domain classifier, forcing it to ignore domain-specific information.
+
+</details>
+
+---
+
+<details>
+<summary><b>Self-Supervised Learning (SSL)</b> — Try your own first</summary>
+
+**Model Answer:** Learning robust representations from unlabeled data by creating supervisory signals from the data itself, often through contrastive or predictive tasks.
+
+</details>
+
+---
+
+<details>
+<summary><b>SimCLR</b> — Try your own first</summary>
+
+**Model Answer:** A contrastive SSL method that maximizes agreement between differently augmented views of the same image (positive pairs) and minimizes agreement between different images (negative pairs).
+
+</details>
+
+---
+
+<details>
+<summary><b>MoCo (Momentum Contrast)</b> — Try your own first</summary>
+
+**Model Answer:** Uses a dynamic dictionary (queue) of negative samples and a momentum encoder to enable contrastive learning without requiring massive batch sizes.
+
+</details>
+
+---
+
+<details>
+<summary><b>BYOL (Bootstrap Your Own Latent)</b> — Try your own first</summary>
+
+**Model Answer:** A non-contrastive SSL method that uses two asymmetric encoders (online + target) with no negative pairs, preventing collapse through a slow-moving average of the online network.
+
+</details>
+
+---
+
+### Text Representations
+
+<details>
+<summary><b>Word2Vec — Skip-gram</b> — Try your own first</summary>
+
+**Model Answer:** Predicts context words given a target word; slower to train but better for rare words since each context word provides a separate training signal.
+
+</details>
+
+---
+
+<details>
+<summary><b>Word2Vec — CBOW</b> — Try your own first</summary>
+
+**Model Answer:** Predicts a target word from the average of its surrounding context words; faster to train and smoother, but works better for frequent words.
+
+</details>
+
+---
+
+<details>
+<summary><b>Negative Sampling</b> — Try your own first</summary>
+
+**Model Answer:** Replaces the expensive full softmax over the vocabulary with binary classification on a small set of sampled negative (word, context) pairs, reducing training cost from O(|V|) to O(k).
+
+</details>
+
+---
+
+<details>
+<summary><b>GloVe (Global Vectors)</b> — Try your own first</summary>
+
+**Model Answer:** Learns embeddings by explicitly factorizing global word-word co-occurrence statistics from the entire corpus, unifying count-based and prediction-based approaches.
+
+</details>
+
+---
+
+<details>
+<summary><b>Distributional Hypothesis</b> — Try your own first</summary>
+
+**Model Answer:** "A word is characterized by the company it keeps" — words that occur in similar contexts tend to have similar meanings, the foundation of distributional semantics.
+
+</details>
+
+---
+
+<details>
+<summary><b>BPE (Byte-Pair Encoding)</b> — Try your own first</summary>
+
+**Model Answer:** A greedy, frequency-driven subword tokenizer that iteratively merges the most frequent adjacent symbol pairs, building a vocabulary from characters up.
+
+</details>
+
+---
+
+<details>
+<summary><b>WordPiece</b> — Try your own first</summary>
+
+**Model Answer:** Similar to BPE but merges pairs that maximize corpus likelihood under a language model (`score = count(ab)/(count(a)×count(b))`), favoring statistically surprising combinations.
+
+</details>
+
+---
+
+<details>
+<summary><b>SentencePiece</b> — Try your own first</summary>
+
+**Model Answer:** A framework that treats raw text as a Unicode stream (no pre-tokenization), with whitespace encoded as `_`; supports both BPE and Unigram modes, making it language-agnostic.
+
+</details>
+
+---
+
+<details>
+<summary><b>Static Embeddings Limitations</b> — Try your own first</summary>
+
+**Model Answer:** Word2Vec and GloVe assign one fixed vector per word type, failing to handle polysemy (multiple meanings) and lacking sequential context needed for language understanding.
+
+</details>
+
+---
+
+## 5. QUICK REFERENCE CHEAT SHEET — WEEK 4 DL
+
+### CNN Architecture Evolution
+
+<details>
+<summary><b>Milestone Architectures</b> — Try to recall first</summary>
+
+| Architecture | Year | Key Innovation | Impact |
+|--------------|------|----------------|--------|
+| **AlexNet** | 2012 | ReLU, Dropout, GPU | Proved deep CNNs work |
+| **VGG** | 2014 | 3×3 filters stacked | Depth + parameter efficiency |
+| **Inception** | 2014 | Multi-scale + 1×1 bottlenecks | Wider, computationally efficient |
+| **ResNet** | 2015 | Residual/skip connections | Enabled 100+ layer networks |
+
+</details>
+
+---
+
+### Transfer Learning Strategies
+
+<details>
+<summary><b>Feature Extraction vs Fine-Tuning</b> — Try to recall first</summary>
+
+| Strategy | Weights | Learning Rate | Best For |
+|----------|---------|---------------|----------|
+| **Feature Extraction** | Freeze all pre-trained | Only new head | Small target dataset |
+| **Fine-Tuning** | Unfreeze some/all | Small (1/10th) | Large target dataset |
+
+</details>
+
+---
+
+### Data Augmentation
+
+<details>
+<summary><b>Augmentation Types</b> — Try to recall first</summary>
+
+| Category | Examples | Purpose |
+|----------|----------|---------|
+| **Geometric** | Flipping, rotation, cropping, scaling | Translation/rotation invariance |
+| **Color** | Brightness, contrast, saturation, hue | Illumination invariance |
+| **Advanced** | Mixup, CutMix | Smooth decision boundaries, localization |
+
+</details>
+
+---
+
+### Domain Adaptation
+
+<details>
+<summary><b>Domain Adaptation Techniques</b> — Try to recall first</summary>
+
+| Technique | Mechanism | Key Component |
+|-----------|-----------|---------------|
+| **Feature Alignment** | Learn shared representation space | Distribution matching |
+| **Adversarial (DANN)** | Min-max game with domain classifier | Gradient Reversal Layer (GRL) |
+| **Self-Training** | Pseudo-label target data | Iterative fine-tuning |
+
+</details>
+
+---
+
+### Self-Supervised Learning
+
+<details>
+<summary><b>SSL Methods</b> — Try to recall first</summary>
+
+| Method | Type | Key Feature |
+|--------|------|-------------|
+| **SimCLR** | Contrastive | Large batches, strong augmentation |
+| **MoCo** | Contrastive | Queue + momentum encoder |
+| **BYOL** | Non-contrastive | Asymmetric online/target networks, no negatives |
+
+</details>
+
+---
+
+### Text Representations
+
+<details>
+<summary><b>Word Embeddings</b> — Try to recall first</summary>
+
+| Method | Approach | Trade-off |
+|--------|----------|-----------|
+| **CBOW** | Predict target from context | Faster, better for frequent words |
+| **Skip-gram** | Predict context from target | Slower, better for rare words |
+| **GloVe** | Factorize global co-occurrence | Global statistics, interpretable |
+
+</details>
+
+---
+
+<details>
+<summary><b>Subword Tokenization</b> — Try to recall first</summary>
+
+| Method | Merge Criterion | Used By |
+|--------|-----------------|---------|
+| **BPE** | Raw pair frequency | GPT, LLaMA, Mistral |
+| **WordPiece** | Normalized likelihood gain | BERT, DistilBERT |
+| **SentencePiece (BPE)** | Raw pair frequency on raw text | LLaMA 1/2 |
+| **SentencePiece (Unigram)** | Max likelihood with pruning | T5, ALBERT, Gemma |
+
+</details>
+
+---
+
+### Key Numbers
+
+<details>
+<summary><b>Key Defaults</b> — Try to recall first</summary>
+
+| Concept | Number |
+|---------|--------|
+| Fine-tuning learning rate | `1/10th` to `1/100th` of pre-training LR |
+| Dropout in AlexNet | 0.5 |
+| Typical batch size for SimCLR | 4096+ |
+| MoCo queue size | Up to 65536 |
+| Negative samples in MoCo | Decoupled from batch size |
+
+</details>
+
+---
+
+## 6. CONNECTIONS MAP — WEEK 4 DL
+
+### 🌳 TEXT-BASED CONCEPT MAP
+
+```
+╔══════════════════════════════════════════════════════════════════════════╗
+║                                                                          ║
+║                    WEEK 4 DL: VISION & LANGUAGE                         ║
+║                                                                          ║
+║                    ┌─────────────────────────────────────┐              ║
+║                    │   CNN ARCHITECTURES                 │              ║
+║                    └──────────────┬──────────────────────┘              ║
+║                                   │                                      ║
+║    ┌──────────────────────────────┼──────────────────────────────┐      ║
+║    │                              │                              │      ║
+║    ▼                              ▼                              ▼      ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │   ALEXNET    │          │     VGG      │          │  INCEPTION   │  ║
+║ │  ReLU, Dropout│          │  3×3 stacks  │          │ Multi-scale  │  ║
+║ └──────────────┘          └──────────────┘          └──────────────┘  ║
+║        │                         │                         │          ║
+║        └─────────────────────────┼─────────────────────────┘          ║
+║                                  │                                     ║
+║                                  ▼                                     ║
+║                    ┌─────────────────────────────────────┐             ║
+║                    │   RESNET (Residual Connections)    │             ║
+║                    │   Solves Vanishing Gradient        │             ║
+║                    └──────────────┬──────────────────────┘             ║
+║                                   │                                     ║
+║    ┌──────────────────────────────┼──────────────────────────────┐     ║
+║    │                              │                              │     ║
+║    ▼                              ▼                              ▼     ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │  TRANSFER    │          │   DATA       │          │  TEXT        │  ║
+║ │  LEARNING    │          │  AUGMENTATION│          │  REPRESENT-  │  ║
+║ │              │          │              │          │  ATIONS      │  ║
+║ └──────────────┘          └──────────────┘          └──────────────┘  ║
+║        │                         │                         │          ║
+║        ▼                         ▼                         ▼          ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │• Feature     │          │• Geometric   │          │• Word2Vec    │  ║
+║ │  Extraction  │          │• Color       │          │• GloVe       │  ║
+║ │• Fine-Tuning │          │• Mixup       │          │• Subword     │  ║
+║ │• Negative    │          │• CutMix      │          │  (BPE, WP,   │  ║
+║ │  Transfer    │          │              │          │   Sentence)  │  ║
+║ └──────────────┘          └──────────────┘          └──────────────┘  ║
+║                                                                         ║
+║                    ┌─────────────────────────────────────┐             ║
+║                    │   DOMAIN ADAPTATION & SSL           │             ║
+║                    │   DANN · SimCLR · MoCo · BYOL     │             ║
+║                    └─────────────────────────────────────┘             ║
+║                                                                         ║
+╚══════════════════════════════════════════════════════════════════════════╝
+```
+
+---
+
+### 🔗 KEY CONNECTION EXPLANATIONS
+
+<details>
+<summary><b>Connection 1: How did CNNs evolve?</b></summary>
+
+```
+AlexNet (2012)
+    ↓ (proved depth works)
+VGG (2014)
+    ↓ (small filters → deeper)
+Inception (2014)
+    ↓ (wider + efficient)
+ResNet (2015)
+    ↓ (skip connections → very deep)
+Modern: Attention + Hybrid
+```
+
+**Key insight:** Each milestone solved a specific limitation — AlexNet proved the concept, VGG refined depth strategy, Inception added width efficiency, and ResNet enabled training beyond 100 layers.
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 2: How does Transfer Learning relate to CNN architectures?</b></summary>
+
+```
+Pre-trained CNN (ResNet/VGG) → Feature Extractor → Target Task
+                              ↓
+                    Fine-Tune with small LR
+                              ↓
+                    Adapted to new domain
+
+Key insight: The hierarchical features (edges→textures→parts→objects)
+learned on ImageNet transfer well to many visual tasks.
+```
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 3: How does Data Augmentation connect to regularization?</b></summary>
+
+```
+Data Augmentation
+    │
+    ├── Geometric (flips, crops, rotation)
+    │   → Translation/Rotation Invariance
+    │
+    ├── Color (brightness, contrast, hue)
+    │   → Illumination Invariance
+    │
+    ├── Mixup (linear interpolation)
+    │   → Smooth Decision Boundaries
+    │
+    └── CutMix (patch pasting)
+        → Local Feature Learning + Localization
+
+All forms of regularization — preventing overfitting
+by exposing model to more variations.
+```
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 4: How do SSL, Domain Adaptation, and Augmentation relate?</b></summary>
+
+```
+Augmentation → SSL → Domain Adaptation → Generalization
+    │            │            │
+    │            │            └── Align source/target distributions
+    │            └── Learn from unlabeled data
+    └── Create variations → build invariance
+
+All three aim to improve generalization beyond the training distribution.
+```
+
+</details>
+
+---
+
+## 7. COMMON MISCONCEPTIONS — WEEK 4 DL
+
+**How to use:** Read each misconception first. Try to identify what's wrong. Then click to reveal the reality.
+
+---
+
+### Misconception 1: "More depth is always better for CNNs."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Deeper networks always perform better. | ResNet was needed because deeper networks **degrade** in accuracy without skip connections. The "degradation problem" makes deeper networks harder to optimize, not just overfit. |
+
+**Key insight:** Depth is powerful but requires architectural innovations (residual connections) to realize the benefits.
+
+</details>
+
+---
+
+### Misconception 2: "Fine-tuning always beats feature extraction."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Fine-tuning is always better than freezing features. | For **small datasets**, fine-tuning can cause **catastrophic forgetting** and overfitting. Feature extraction with a new classifier head is safer and often works better. |
+
+**Rule of thumb:** Small dataset → feature extraction; large, diverse dataset → fine-tuning.
+
+</details>
+
+---
+
+### Misconception 3: "Data augmentation is just about getting more data."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Augmentation just adds more examples. | Augmentation is about **building invariance** — teaching the model that semantic meaning doesn't change under transformations. Mixup/CutMix also regularize the **decision boundary** itself. |
+
+**Key insight:** Augmentation shapes what the model learns to ignore (variations) and what it learns to focus on (the object itself).
+
+</details>
+
+---
+
+### Misconception 4: "More augmentation is always better."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Aggressive augmentation always improves performance. | **Over-augmentation** can create unrealistic images that introduce noise and degrade training. For orientation-sensitive tasks (e.g., digit "6" vs "9"), rotations may break label-preserving assumptions. |
+
+**Rule of thumb:** Augmentations must be **label-preserving**. Test your augmentations visually.
+
+</details>
+
+---
+
+### Misconception 5: "Self-supervised learning is just a cheaper supervised learning."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| SSL is a cost-saving alternative to supervised learning. | SSL often produces **better representations** than supervised pre-training on the same data for downstream tasks, because it learns broader invariances and can leverage orders of magnitude more unlabeled data. |
+
+**Key insight:** SSL isn't a compromise — it's a different and often superior paradigm for representation learning.
+
+</details>
+
+---
+
+### Misconception 6: "Word2Vec and GloVe produce contextual embeddings."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Word2Vec and GloVe understand context. | They produce **static embeddings** — one vector per word regardless of context. "Bank" (river) and "bank" (financial) share the same vector, causing polysemy problems. |
+
+**Key insight:** Static embeddings capture "what a word can mean on average," not "what it means here." Contextual embeddings (ELMo, BERT) solve this.
+
+</details>
+
+---
+
+### Misconception 7: "BPE and WordPiece are the same algorithm."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| BPE and WordPiece are interchangeable. | They differ in **merge criterion**: BPE merges by raw frequency; WordPiece merges by normalized likelihood gain (`count(ab)/(count(a)×count(b))`). This leads to different vocabularies from the same corpus. |
+
+**Key insight:** Even "preprocessing" choices encode modeling assumptions about what makes a useful subword unit.
+
+</details>
+
+---
+
+### Misconception 8: "SentencePiece is just another tokenizer."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| SentencePiece is one of many tokenizers. | SentencePiece is a **framework** that removes language-specific pre-tokenization. It treats raw text as a Unicode stream with whitespace as `_`, making it **language-agnostic** — crucial for multilingual models. |
+
+**Key insight:** SentencePiece solves the "hidden assumption" that words are already whitespace-delimited.
+
+</details>
+
+---
+
+### Misconception 9: "Domain adaptation is only needed when domains are very different."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Similar domains don't need adaptation. | Even subtle distribution shifts (lighting, camera, style) can cause significant performance drops. Domain adaptation is often needed whenever there's any gap between training and deployment data.
+
+</details>
+
+---
+
+### Misconception 10: "CNNs are translation-invariant."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| CNNs naturally handle translations. | CNNs have **translation equivariance** (feature maps shift with input) but **translation invariance** comes from pooling and data augmentation, not the architecture itself. Without augmentation, a shifted object can still confuse a CNN.
+
+</details>
+
+---
+
+### Misconception 11: "Transfer learning works for any domain."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Pre-trained ImageNet features work everywhere. | **Negative transfer** occurs when source and target domains are too dissimilar. Medical X-rays, satellite imagery, or thermal images may not benefit from ImageNet pre-training because the low-level features (edges, textures) are fundamentally different.
+
+</details>
+
+---
+
+### Misconception 12: "GloVe is better than Word2Vec."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| GloVe is objectively superior. | Word2Vec and GloVe produce **comparable embeddings** in practice. They differ in training signal (local prediction vs global counts) but converge to similar geometric structures because both are modeling co-occurrence statistics.
+
+</details>
+
+---
+
+## 📊 QUICK REFERENCE: MISCONCEPTIONS vs REALITY
+
+| Misconception | Reality |
+|---------------|---------|
+| More depth is always better | ResNet was needed to make depth trainable |
+| Fine-tuning always beats feature extraction | Small datasets → feature extraction |
+| Augmentation just adds data | Augmentation builds invariance |
+| More augmentation is always better | Over-augmentation hurts; must be label-preserving |
+| SSL is cheaper supervised learning | SSL often produces better representations |
+| Word2Vec/GloVe are contextual | They're static (one vector per word) |
+| BPE = WordPiece | Different merge criteria (frequency vs likelihood) |
+| SentencePiece is just another tokenizer | Language-agnostic framework, no pre-tokenization |
+| Domain adaptation is rarely needed | Even subtle shifts cause performance drops |
+| CNNs are translation-invariant | Equivariance + pooling + augmentation |
+| Transfer learning works everywhere | Negative transfer possible for dissimilar domains |
+| GloVe is objectively better | Word2Vec and GloVe are comparable |
+
+---
+
+# 📚 WEEK 4 DL — COMPLETE STUDY GUIDE
+## All Exercises with Answers in Spoiler Format
+
+---
+
+# SECTION 1: CNN ARCHITECTURES
+
+---
+
+## Exercise CA-1: CNN Evolution Timeline
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What were the four milestone CNN architectures and their years? | |
+| 2. What was AlexNet's key contribution to deep learning? | |
+| 3. What design principle did VGG establish? | |
+| 4. What problem did Inception solve? | |
+| 5. What problem did ResNet solve? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Four milestone architectures | **AlexNet (2012)** — ReLU, Dropout, GPU training. **VGG (2014)** — stacked 3×3 filters. **Inception (2014)** — multi-scale + 1×1 bottlenecks. **ResNet (2015)** — residual/skip connections. |
+| 2. AlexNet's key contribution | Proved deep CNNs could beat traditional computer vision by introducing ReLU (to mitigate vanishing gradients), Dropout (to prevent overfitting), and GPU acceleration. |
+| 3. VGG's design principle | Stacking small **3×3 filters** instead of larger ones — two 3×3 layers = 5×5 receptive field with fewer parameters and more non-linearity. |
+| 4. Inception's problem | Choosing the "right" kernel size — Inception modules run parallel convolutions (1×1, 3×3, 5×5) and concatenate outputs, using 1×1 bottlenecks for efficiency. |
+| 5. ResNet's problem | The **degradation problem** — deeper networks became harder to optimize (accuracy saturated and degraded). Residual connections (`H(x) = F(x) + x`) solved this by providing a gradient highway. |
+
+</details>
+
+---
+
+## Exercise CA-2: CNN Architecture Comparison
+
+| Aspect | AlexNet | VGG | Inception | ResNet |
+|--------|---------|-----|-----------|--------|
+| Key innovation | | | | |
+| Activation function | | | | |
+| Regularization | | | | |
+| Parameter efficiency | | | | |
+| Depth enabled | | | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Aspect | AlexNet | VGG | Inception | ResNet |
+|--------|---------|-----|-----------|--------|
+| Key innovation | ReLU + Dropout + GPU | 3×3 filter stacking | Multi-scale + 1×1 bottlenecks | Residual/skip connections |
+| Activation function | ReLU | ReLU | ReLU | ReLU |
+| Regularization | Dropout (0.5) | Dropout | Dropout | Batch Norm |
+| Parameter efficiency | Moderate | Poor (large FC layers) | Good (1×1 bottlenecks) | Excellent (skip connections) |
+| Depth enabled | 8 layers | 16-19 layers | 22 layers | 100+ layers |
+
+</details>
+
+---
+
+## Exercise CA-3: Residual Connections Explained
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is the "degradation problem" in deep networks? | |
+| 2. Write the mathematical form of a residual block. | |
+| 3. How do skip connections help with vanishing gradients? | |
+| 4. What is the benefit of identity mapping in ResNet? | |
+| 5. Why is `H(x) = F(x) + x` easier to learn than `H(x)` directly? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Degradation problem | As networks become deeper, training accuracy **saturates and then degrades** — not due to overfitting, but because deeper networks are harder to optimize. |
+| 2. Residual block formula | `H(x) = F(x) + x` where `F(x)` is the residual (learned transformation) and `x` is the input via shortcut. |
+| 3. Skip connections and gradients | Gradients can flow **directly** through the shortcut connection, bypassing weight layers, preventing exponential decay in very deep networks. |
+| 4. Identity mapping benefit | The shortcut connection is just `x` (no learned parameters), so the network can trivially learn identity if needed — it doesn't have to "work" to preserve information. |
+| 5. Why residual is easier | If the optimal mapping is identity, it's easier to learn `F(x) = 0` than `H(x) = x`; if the optimal mapping has small changes, residual learning focuses on the **difference** from identity. |
+
+</details>
+
+---
+
+# SECTION 2: TRANSFER LEARNING
+
+---
+
+## Exercise TL-1: Transfer Learning Fundamentals
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is transfer learning? | |
+| 2. What are the two primary transfer learning strategies? | |
+| 3. When would you use feature extraction vs fine-tuning? | |
+| 4. What is "catastrophic forgetting" in fine-tuning? | |
+| 5. What is "negative transfer"? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Transfer learning | Leveraging a model pre-trained on a large-scale dataset (e.g., ImageNet) and adapting it to a smaller target dataset, reusing learned visual features. |
+| 2. Two primary strategies | **Feature Extraction**: freeze pre-trained weights, train only new classifier head. **Fine-Tuning**: unfreeze some/all pre-trained layers and train further with small learning rate. |
+| 3. When to use each | **Feature Extraction**: target dataset is small (risk of overfitting). **Fine-Tuning**: target dataset is large and diverse, or domain is similar enough that fine-tuning helps. |
+| 4. Catastrophic forgetting | When fine-tuning with too high a learning rate, the model overwrites useful pre-trained features and "forgets" what it learned on the source domain. |
+| 5. Negative transfer | When the source domain is too dissimilar from the target domain, pre-trained features are irrelevant or misleading, causing harm rather than improvement. |
+
+</details>
+
+---
+
+## Exercise TL-2: Fine-Tuning Best Practices
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What learning rate should you use for fine-tuning? | |
+| 2. What is "gradual unfreezing"? | |
+| 3. What are "differential learning rates"? | |
+| 4. When should you keep more layers frozen? | |
+| 5. What is the recommended workflow for fine-tuning? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Learning rate for fine-tuning | Use a **significantly smaller** learning rate — typically `1/10th` or `1/100th` of the standard learning rate used for training from scratch. |
+| 2. Gradual unfreezing | Start with only the new classification head trainable. After it converges, **slowly unfreeze top layers** (closest to output) and continue training, working backward through the network. |
+| 3. Differential learning rates | Assign **different learning rates** to different parts of the network — lower for the base (pre-trained features), higher for the custom head (new task). |
+| 4. When to keep more layers frozen | If the target dataset is **small**, keep more layers frozen to avoid overfitting. If the target dataset is **large and diverse**, fine-tune the entire network. |
+| 5. Recommended workflow | **Step 1**: Train only new head with frozen backbone. **Step 2**: After convergence, unfreeze top layers. **Step 3**: Gradually unfreeze more layers with very low learning rate. **Step 4**: Monitor validation loss for signs of overfitting. |
+
+</details>
+
+---
+
+## Exercise TL-3: Transfer Learning Limitations
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What causes negative transfer? | |
+| 2. What is domain mismatch in transfer learning? | |
+| 3. What is "pre-training bias"? | |
+| 4. How can you tell if transfer learning is hurting performance? | |
+| 5. What should you do if transfer learning doesn't help? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Causes of negative transfer | Source domain is too dissimilar from target domain (e.g., ImageNet natural images → medical X-rays, satellite imagery). Features learned are irrelevant or misleading. |
+| 2. Domain mismatch | Large differences in lighting, resolution, acquisition hardware, or semantic categories between pre-training and target datasets. |
+| 3. Pre-training bias | Models inherit biases (demographic, cultural, visual) from massive pre-training datasets, which propagate into downstream applications. |
+| 4. How to detect negative transfer | Compare performance: training from scratch vs using pre-trained weights. If pre-trained performs **worse**, transfer is negative. |
+| 5. What to do if transfer doesn't help | Try different pre-training (e.g., domain-specific pre-training), use smaller learning rates, unfreeze fewer layers, or train from scratch with more data/regularization. |
+
+</details>
+
+---
+
+# SECTION 3: DATA AUGMENTATION
+
+---
+
+## Exercise DA-1: Data Augmentation Strategies
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is the core idea of data augmentation? | |
+| 2. What are geometric transformations? Give examples. | |
+| 3. What are color space transformations? Give examples. | |
+| 4. What is the purpose of color jittering? | |
+| 5. Why should augmentations be "label-preserving"? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Core idea | Artificially increasing the size and diversity of the training set without collecting more data, forcing the model to become invariant to non-semantic transformations. |
+| 2. Geometric transformations | **Basic**: random horizontal flips, rotations, scaling, cropping (RandomResizedCrop). **Advanced**: elastic deformations, perspective warping. |
+| 3. Color space transformations | Adjusting brightness, contrast, saturation, and hue. Also grayscale conversion to encourage focus on edges/textures over color. |
+| 4. Purpose of color jittering | Prevents the model from relying on color as a static feature for object identification — forces learning of shape and texture. |
+| 5. Label-preserving constraint | Augmentations must preserve the semantic meaning of the label (e.g., rotating a "6" might make it a "9" — not label-preserving). |
+
+</details>
+
+---
+
+## Exercise DA-2: Advanced Augmentation — Mixup & CutMix
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. How does Mixup work? | |
+| 2. Write the Mixup formula. | |
+| 3. How does CutMix work? | |
+| 4. What is the advantage of CutMix over Mixup? | |
+| 5. Why do Mixup and CutMix improve generalization? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Mixup | Blends two images and their labels using a weighted average — creates "ghost" images that combine features of both classes. |
+| 2. Mixup formula | `x̃ = λx₁ + (1-λ)x₂`, `ỹ = λy₁ + (1-λ)y₂` where `λ ~ Beta(α, α)`. |
+| 3. CutMix | Cuts a patch from one image and pastes it onto another, mixing labels proportionally to patch area. The original image structure is mostly preserved. |
+| 4. Mixup vs CutMix advantage | **Mixup** creates "ghosting" (blurred blending). **CutMix** preserves local structure, encouraging the model to identify objects from partial views and improving localization ability. |
+| 5. Why they improve generalization | Forces the model to behave **linearly between training samples** (smoother decision boundaries), cannot rely on a single feature, must recognize global and local features simultaneously. |
+
+</details>
+
+---
+
+## Exercise DA-3: Automated Augmentation
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is AutoAugment? | |
+| 2. What is RandAugment? | |
+| 3. What is the advantage of RandAugment over AutoAugment? | |
+| 4. When should validation data be augmented? | |
+| 5. Why should augmentation not be applied to test data? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. AutoAugment | Uses **reinforcement learning** to search for the best augmentation policies (combinations of transformations and magnitudes) for a specific dataset. |
+| 2. RandAugment | A simpler, parameter-free approach that **randomly samples** from a set of operations with varying magnitudes; often yields superior results with less computation. |
+| 3. RandAugment advantage | No expensive search phase; simpler to implement; often performs as well or better than learned policies. |
+| 4. Validation data augmentation | **Never augment validation data**. Validation should represent the true distribution without any transformations. |
+| 5. Why not augment test data | Test data must reflect real-world distribution — applying augmentation would make evaluation metrics meaningless (inflated or deflated performance). |
+
+</details>
+
+---
+
+## Exercise DA-4: Data Augmentation and Robustness
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. How does augmentation build translation invariance? | |
+| 2. How does augmentation build rotation/scale invariance? | |
+| 3. How does augmentation build illumination invariance? | |
+| 4. What is under-augmentation? | |
+| 5. What is over-augmentation? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Translation invariance | CNNs naturally have some translation invariance due to shared weights; augmentation (shifting/cropping) **reinforces** it by showing the same object in different positions. |
+| 2. Rotation/scale invariance | Crucial for aerial imagery or medical scans where orientation is arbitrary — augmentations teach the model that these variations don't change the object identity. |
+| 3. Illumination invariance | Color jittering helps the model ignore lighting variations, focusing on object shape and texture rather than color intensity. |
+| 4. Under-augmentation | Leads to **overfitting** — the model memorizes the specific lighting/pose of training data and fails on variations. |
+| 5. Over-augmentation | Creates "unrealistic" images (e.g., extreme distortions) that introduce **noise** and degrade training stability. |
+
+</details>
+
+---
+
+## Exercise DA-5: Data Augmentation and Bias Mitigation
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. How does augmentation address selection bias? | |
+| 2. What is "shortcut learning" in augmentation? | |
+| 3. How can you detect shortcut learning? | |
+| 4. What is fairness-aware augmentation? | |
+| 5. What is a risk of using augmentation for fairness? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Addressing selection bias | Augmentation can synthetically **balance underrepresented groups** (e.g., color augmentations to reduce skin-tone bias in facial analysis, lighting variations for different demographics). |
+| 2. Shortcut learning | When augmentation introduces **artifacts** that the model learns to rely on instead of the actual target feature (e.g., a specific texture added during augmentation becomes a class identifier). |
+| 3. Detecting shortcut learning | Monitor feature importance (e.g., using **Grad-CAM** or **Integrated Gradients**) to see what the model is actually looking at. |
+| 4. Fairness-aware augmentation | Actively applying augmentations that emphasize **invariant features** across sensitive groups to ensure performance parity. |
+| 5. Risk of fairness augmentation | Can introduce artifacts that the model learns as shortcuts — requires careful monitoring and validation. |
+
+</details>
+
+---
+
+# SECTION 4: DOMAIN ADAPTATION & SSL
+
+---
+
+## Exercise DA-6: Domain Shift and Adaptation
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is domain shift? | |
+| 2. What are the three main domain adaptation techniques? | |
+| 3. What is feature alignment in domain adaptation? | |
+| 4. What is adversarial domain adaptation? | |
+| 5. What is self-training (pseudo-labeling)? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Domain shift | Statistical differences between training distribution `P_S(x)` and testing distribution `P_T(x)` — models trained on source fail on target due to different lighting, resolution, or sensor types. |
+| 2. Three main techniques | **Feature Alignment**: learn common representation where source/target features are indistinguishable. **Adversarial Adaptation**: use discriminator to identify domain, feature extractor tries to fool it. **Self-Training**: predict labels on unlabeled target data and use them to fine-tune. |
+| 3. Feature alignment | Learning a common representation space where source and target features overlap, so the label predictor can't tell which domain the features came from. |
+| 4. Adversarial domain adaptation | A **Minimax game** — Feature Extractor tries to fool Domain Discriminator, Discriminator tries to identify domain. The Gradient Reversal Layer (GRL) reverses gradients to force domain-invariant features. |
+| 5. Self-training (pseudo-labeling) | Predicting labels on **unlabeled target data** (pseudo-labels), then using those predictions to further fine-tune the model on the target domain. |
+
+</details>
+
+---
+
+## Exercise DA-7: DANN Architecture
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What does DANN stand for? | |
+| 2. What are the three components of DANN? | |
+| 3. What is the Gradient Reversal Layer (GRL)? | |
+| 4. What is the training objective of DANN? | |
+| 5. What is the outcome of DANN training? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. DANN | **Domain-Adversarial Neural Network** |
+| 2. Three components | **Feature Extractor** (learns representations), **Label Predictor** (classifies source examples), **Domain Classifier** (identifies source vs target). |
+| 3. Gradient Reversal Layer (GRL) | A trick where the gradient from the domain classifier is **negated** during backpropagation, forcing the feature extractor to learn features that confuse the domain classifier. |
+| 4. Training objective | Feature extractor learns to **minimize** classification error AND **maximize** domain classifier's error — making features domain-invariant. |
+| 5. Outcome | Features become **domain-invariant** — the label predictor cannot tell if data came from source or target, forcing it to rely on shared semantic cues. |
+
+</details>
+
+---
+
+## Exercise DA-8: Self-Supervised Learning
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is the motivation for SSL? | |
+| 2. What is contrastive learning? | |
+| 3. What are "positive" and "negative" pairs in contrastive learning? | |
+| 4. How does SimCLR work? | |
+| 5. What is the computational challenge with SimCLR? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Motivation for SSL | Labeling data is expensive and time-consuming — SSL aims to learn robust visual representations from **massive amounts of unlabeled data**. |
+| 2. Contrastive learning | Maximize agreement between **differently augmented views of the same image** (positive pairs) and minimize agreement between views of **different images** (negative pairs). |
+| 3. Positive/Negative pairs | **Positive pair**: two augmented views of the same image (should be similar). **Negative pair**: views of different images (should be dissimilar). |
+| 4. SimCLR | Uses **large batch sizes** and a **projection head (MLP)** to learn representations; relies heavily on strong data augmentation (random crop + color jitter). |
+| 5. SimCLR challenge | Requires very **large batch sizes** (e.g., 4096+) to maintain sufficient negative pairs in the contrastive loss, causing high memory overhead. |
+
+</details>
+
+---
+
+## Exercise DA-9: MoCo and BYOL
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is MoCo's innovation over SimCLR? | |
+| 2. What is the "queue" in MoCo? | |
+| 3. What is the "momentum encoder" in MoCo? | |
+| 4. What is BYOL's key innovation? | |
+| 5. How does BYOL prevent model collapse? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. MoCo's innovation | Uses a **dynamic dictionary** (queue) of negative samples, decoupling batch size from the number of negative samples. Enables contrastive learning without massive batches. |
+| 2. Queue in MoCo | Maintains a large set (e.g., 65536) of previously encoded samples as **negative keys** — the queue is updated by enqueuing new samples and dequeuing old ones. |
+| 3. Momentum encoder | A **slowly progressing moving average** of the main encoder, maintaining consistency in key representations — prevents rapid changes that would make the queue inconsistent. |
+| 4. BYOL's key innovation | **Eliminates the need for negative pairs entirely** — uses asymmetric online/target networks in a predictive architecture. |
+| 5. Preventing model collapse | The **asymmetry** (online network updated via gradients, target network via slow-moving average) prevents the model from outputting the same constant vector for all inputs. |
+
+</details>
+
+---
+
+## Exercise DA-10: Evaluating Domain Adaptation
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is target accuracy in DA evaluation? | |
+| 2. What is A-distance? | |
+| 3. What is the transfer gap? | |
+| 4. Why use t-SNE/UMAP for DA evaluation? | |
+| 5. What do confusion matrices reveal about DA? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Target accuracy | Performance on **labeled target data** — the gold standard for evaluating domain adaptation success. |
+| 2. A-distance | A theoretical measure of the **distance between source and target distributions** — smaller A-distance implies better adaptation potential. |
+| 3. Transfer gap | The **difference** in performance between a model trained on source vs one adapted to target — smaller gap = better adaptation. |
+| 4. t-SNE/UMAP visualization | Projects high-dimensional feature embeddings into 2D to see if **source and target clusters overlap** — overlap = successful domain-invariant representation. |
+| 5. Confusion matrices | Identify **specific classes that fail to adapt** — classes with different visual representations across domains show up as errors. |
+
+</details>
+
+---
+
+# SECTION 5: TEXT REPRESENTATIONS
+
+---
+
+## Exercise TR-1: Word Embeddings Fundamentals
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is the core problem in text representation? | |
+| 2. What is the distributional hypothesis? | |
+| 3. What is the problem with one-hot encoding? | |
+| 4. What is the goal of word embeddings? | |
+| 5. What does geometric proximity mean in embedding space? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Core problem | Neural networks operate on continuous vectors, not raw symbols — text must be mapped to `ℝᵈ` before any learning can happen. |
+| 2. Distributional hypothesis | "A word is characterized by the company it keeps" (Firth, 1957) — words that occur in similar contexts tend to have similar meanings. |
+| 3. One-hot encoding problem | Produces sparse, high-dimensional vectors with **no notion of similarity** — every pair of words is equidistant. |
+| 4. Goal of word embeddings | Learn **dense, low-dimensional embeddings** where geometric proximity reflects semantic or syntactic similarity. |
+| 5. Geometric proximity | Words with similar meanings are **close in vector space** — e.g., `v_king - v_man + v_woman ≈ v_queen` captures analogical structure. |
+
+</details>
+
+---
+
+## Exercise TR-2: Word2Vec — CBOW vs Skip-gram
+
+| Question | CBOW | Skip-gram |
+|----------|------|-----------|
+| 1. What does it predict? | | |
+| 2. What is the input? | | |
+| 3. Training speed | | |
+| 4. Best for which words? | | |
+| 5. Why? | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | CBOW | Skip-gram |
+|----------|------|-----------|
+| 1. What does it predict? | Target word from context | Context words from target |
+| 2. What is the input? | Average of surrounding context words | Single target (center) word |
+| 3. Training speed | **Faster** — smooths over multiple context words | **Slower** — each context word is separate signal |
+| 4. Best for which words? | Frequent words | **Rare words** — each context word provides separate training signal |
+| 5. Why? | Smooths over multiple contexts, good for common words | Rare words get more attention because each context pair is a training example |
+
+</details>
+
+---
+
+## Exercise TR-3: Negative Sampling
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is the "softmax bottleneck"? | |
+| 2. How does negative sampling solve it? | |
+| 3. Write the negative sampling objective. | |
+| 4. How are negative samples selected? | |
+| 5. Why use the 3/4 power unigram distribution? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Softmax bottleneck | Full softmax over vocabulary `|V|` (often hundreds of thousands) requires normalizing over every word at every training step — computationally prohibitive. |
+| 2. Negative sampling solution | Reframes multi-class prediction as **binary classification** on a small set of negative pairs — is this a real or randomly sampled (word, context) pair? |
+| 3. Negative sampling objective | `log σ(v_c·v_w) + Σᵢ E_{w_i~P_n(w)}[log σ(-v_{w_i}·v_w)]` |
+| 4. Negative sample selection | Sampled from a **unigram distribution** raised to the 3/4 power — up-weights rare words relative to their raw frequency. |
+| 5. Why 3/4 power | Up-weights **rare words**, down-weights very frequent words (stopwords) — gives more informative negative examples. |
+
+</details>
+
+---
+
+## Exercise TR-4: GloVe
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is the motivation for GloVe? | |
+| 2. What does GloVe start with? | |
+| 3. Write the GloVe objective. | |
+| 4. What does `f(X_ij)` do in GloVe? | |
+| 5. How does GloVe compare to Word2Vec? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. GloVe motivation | Word2Vec only looks at local context windows; GloVe explicitly exploits **global corpus-wide co-occurrence statistics**. |
+| 2. GloVe starting point | Global word-word co-occurrence matrix `X` where `X_ij` counts how often word `j` appears in the context of word `i`. |
+| 3. GloVe objective | `J = Σᵢⱼ f(X_ij)(v_i·v_j + b_i + b_j - log X_ij)²` |
+| 4. `f(X_ij)` function | Weighting function that **down-weights very frequent** (stopword) co-occurrences and avoids overweighting rare, noisy ones. |
+| 5. Word2Vec vs GloVe | Both produce comparable embeddings. **Word2Vec**: local prediction, streaming-friendly. **GloVe**: global co-occurrence, batch, interpretable. |
+
+</details>
+
+---
+
+## Exercise TR-5: Subword Tokenization
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is the OOV (Out-of-Vocabulary) problem? | |
+| 2. Why is OOV a problem for morphologically rich languages? | |
+| 3. What is subword tokenization? | |
+| 4. What is the advantage of subword tokenization? | |
+| 5. What coverage guarantee does subword tokenization provide? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. OOV problem | Word-level vocabularies are fixed at training time; any unseen word at inference becomes an unusable `<UNK>` token. |
+| 2. Morphologically rich languages | Every inflected form is a distinct token → vocabulary grows very large (e.g., agglutinative languages with many word forms). |
+| 3. Subword tokenization | Breaks rare or unseen words into smaller, frequently occurring pieces (subwords, down to characters) — a middle ground between word and character level. |
+| 4. Advantage | Guarantees **full vocabulary coverage** — any string can be represented as a sequence of known subword units. Common words stay whole, rare words decompose. |
+| 5. Coverage guarantee | Since subwords can be as small as characters, and characters are always in the vocabulary, **no OOV is possible**. |
+
+</details>
+
+---
+
+## Exercise TR-6: BPE, WordPiece, SentencePiece
+
+| Question | BPE | WordPiece | SentencePiece |
+|----------|-----|-----------|---------------|
+| 1. Merge criterion | | | |
+| 2. Pre-tokenization? | | | |
+| 3. Whitespace handling | | | |
+| 4. Used by | | | |
+| 5. Modes supported | | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | BPE | WordPiece | SentencePiece |
+|----------|-----|-----------|---------------|
+| 1. Merge criterion | **Raw pair frequency** | **Normalized likelihood** (`count(ab)/(count(a)×count(b))`) | Depends on mode (BPE or Unigram) |
+| 2. Pre-tokenization? | Yes (assumes whitespace-delimited) | Yes (assumes whitespace-delimited) | **No** — treats raw text as Unicode stream |
+| 3. Whitespace handling | Boundary fixed | Boundary fixed | Whitespace encoded as `_` (recoverable) |
+| 4. Used by | GPT, LLaMA, Mistral | BERT, DistilBERT | T5, ALBERT, LLaMA 1/2, Gemma |
+| 5. Modes supported | Only BPE | Only WordPiece | **BPE** and **Unigram** modes |
+
+</details>
+
+---
+
+## Exercise TR-7: BPE vs WordPiece Comparison
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. Both BPE and WordPiece are what type of algorithm? | |
+| 2. What is the key difference in merge criterion? | |
+| 3. Which merge is chosen in the example corpus? | |
+| 4. Why does WordPiece choose a lower-frequency pair? | |
+| 5. Which model families use each? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Algorithm type | Both are **greedy, bottom-up merge algorithms** that build a fixed-size subword vocabulary from characters upward. |
+| 2. Merge criterion difference | **BPE**: merges by raw pair frequency. **WordPiece**: merges by normalized likelihood gain — `score = count(ab)/(count(a)×count(b))`. |
+| 3. Example corpus merge | BPE: `e+s` (most frequent). WordPiece: `i+d` (occurs 3 times, but `i` and `d` never appear except together → maximal score). |
+| 4. Why WordPiece chooses lower frequency | WordPiece rewards **statistically surprising co-occurrences** over merely common ones — `i` and `d` are always together, making their co-occurrence highly informative. |
+| 5. Model families | **BPE (byte-level)**: GPT, LLaMA, Mistral. **WordPiece**: BERT, DistilBERT. **SentencePiece**: T5, ALBERT, LLaMA 1/2, Gemini. |
+
+</details>
+
+---
+
+## Exercise TR-8: Limitations of Static Embeddings
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is the polysemy problem? | |
+| 2. Give an example of polysemy. | |
+| 3. What does a static embedding represent? | |
+| 4. What is missing from static embeddings? | |
+| 5. What motivates sequence models? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Polysemy problem | Word2Vec and GloVe assign **exactly one vector per word type**, regardless of context — words with multiple meanings share a single, averaged representation. |
+| 2. Polysemy example | "bank" = financial institution vs riverbank — same vector for both meanings, forcing them to be conflated. |
+| 3. What static embeddings represent | "What a word **can** mean on average" — not "what it **means here**." |
+| 4. What's missing | **Sequential structure** — no word order or how meaning is composed across a sentence. |
+| 5. Motivation for sequence models | Tasks like language modelling, translation, and sentiment analysis require modelling **sequences**, not just individual token identities — leading to RNNs, LSTMs, and Transformers. |
+
+</details>
+
+---
+
+# SECTION 6: MODERN INNOVATIONS
+
+---
+
+## Exercise MI-1: Modern CNN Innovations
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is EfficientNet's compound scaling? | |
+| 2. What is DenseNet's key innovation? | |
+| 3. What do Squeeze-and-Excitation (SE) networks do? | |
+| 4. What are non-local blocks? | |
+| 5. How are CNNs being hybridized with Transformers? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. EfficientNet compound scaling | Balances **network depth, width, and resolution** simultaneously using a compound scaling method — rather than scaling just one dimension. |
+| 2. DenseNet key innovation | Connects **each layer to every other layer** in a feed-forward fashion — maximum information flow and feature reuse. |
+| 3. SE Networks | **Squeeze-and-Excitation** blocks — adaptive recalibration of channel-wise feature responses, allowing the network to perform feature "selection." |
+| 4. Non-local blocks | Captures **long-range spatial dependencies**, mimicking the global receptive field of Transformers within CNNs. |
+| 5. CNN + Transformer hybrids | Use CNNs for low-level texture/edge extraction and **Attention/Transformers** for high-level semantic reasoning — combining inductive bias with global modelling. |
+
+</details>
+
+---
+
+## Exercise MI-2: Hardware-Aware CNN Design
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. Why don't FLOPs always correlate with speed? | |
+| 2. What are depthwise separable convolutions? | |
+| 3. Where are depthwise separable convolutions used? | |
+| 4. What is Neural Architecture Search (NAS)? | |
+| 5. Why is hardware-aware design important? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. FLOPs vs speed | Theoretical FLOPs don't always correlate with actual latency on hardware — **memory access patterns** (DRAM vs cache) play a massive role in real-world speed. |
+| 2. Depthwise separable convolutions | Splits a standard convolution into **depthwise** (per-channel) and **pointwise** (1×1) components, drastically reducing computation. |
+| 3. Where used | MobileNet, ShuffleNet — designed for mobile/edge deployment with limited compute. |
+| 4. Neural Architecture Search (NAS) | Using automated search algorithms (reinforcement learning or evolutionary strategies) to find the optimal layer configuration for a specific hardware target. |
+| 5. Why hardware-aware design matters | Designing for the hardware is as important as designing for accuracy — optimizing memory movement and processing patterns achieves significant speedups. |
+
+</details>
+
+---
+
+## Exercise MI-3: Vision Transformers & Augmentation
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What challenge do ViTs face compared to CNNs? | |
+| 2. Why do ViTs need more augmentation? | |
+| 3. What augmentation strategies work well for ViTs? | |
+| 4. Why is color jitter + strong cropping essential for ViTs? | |
+| 5. What is Masked Image Modeling (MIM)? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. ViT challenge | Unlike CNNs, ViTs **lack strong inductive biases** like translation invariance — they treat image patches like tokens, with no built-in spatial priors. |
+| 2. Why more augmentation | ViTs are more "flexible" than CNNs → **prone to overfitting** on small datasets without significant, diverse data augmentation. |
+| 3. Augmentation for ViTs | **Jigsaw puzzles** (shuffle patches to learn spatial relationships), **Masked Image Modeling** (predict masked patches), **strong cropping + color jitter**. |
+| 4. Why strong cropping + color jitter | Prevents ViTs from "memorizing" the **global layout** of training images — forces learning of invariant features. |
+| 5. Masked Image Modeling (MIM) | Similar to BERT in NLP — **masking random patches** and training the model to reconstruct them, encouraging understanding of spatial structure. |
+
+</details>
+
+---
+
+## Exercise MI-4: Future Trends
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is multimodal SSL? | |
+| 2. What is CLIP and what does it learn? | |
+| 3. Why is video-based pre-training important? | |
+| 4. What are foundation models? | |
+| 5. What is shifting in the foundation model paradigm? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Multimodal SSL | Aligning representations across **different modalities** (e.g., Image-Text pairs) — learning a unified latent space where images and captions share the same vector location. |
+| 2. CLIP | Learns a **shared embedding space** for images and text — images and their corresponding captions map to the same location, enabling zero-shot classification. |
+| 3. Video-based pre-training | Moving beyond static images to leverage **temporal continuity** in video — learning "object permanence" and "action invariance" by predicting future frames. |
+| 4. Foundation models | Massive models trained once and **fine-tuned (or prompted)** for a wide array of downstream tasks — the "one model, many tasks" paradigm. |
+| 5. Shifting paradigm | Importance of **data curation and quality control** over raw dataset size — cleaning and selecting data matters more than collecting more. |
+
+</details>
+
+---
+
+# SECTION 7: DATA LEAKAGE
+
+---
+
+## Exercise DL-1: Data Leakage in Augmentation
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is data leakage in augmentation? | |
+| 2. What is the global normalization pitfall? | |
+| 3. What is the duplicate data pitfall? | |
+| 4. What is the "tuning on validation" pitfall? | |
+| 5. What is the golden rule for augmentation and data splits? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Data leakage in augmentation | When information from the **test/validation set** "leaks" into the training process through augmentation — giving a false sense of performance. |
+| 2. Global normalization pitfall | Calculating mean/std deviation on the **entire dataset** (including test set) before splitting — test statistics influence training. |
+| 3. Duplicate data pitfall | Applying different augmentations to the same source image and having **identical images appear in both training and testing sets**. |
+| 4. Tuning on validation pitfall | Tuning augmentation parameters (e.g., rotation degree) based on validation performance — effectively "training" on validation data. |
+| 5. Golden rule | **Never apply augmentation to validation or test sets** — use them only to expose the model to variance during training. Validation/test must reflect true distribution. |
+
+</details>
+
+---
+
+## Exercise DL-2: Data Leakage Detection
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What are the signs of data leakage? | |
+| 2. How can you test for leakage? | |
+| 3. Why does leakage create a false sense of performance? | |
+| 4. What is the validation protocol for augmentation? | |
+| 5. Why must the validation pipeline remain isolated? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Signs of data leakage | Unrealistically high validation accuracy; performance gap between validation and production; similar images across splits. |
+| 2. Testing for leakage | Manually inspect images across splits; check if augmentations applied to validation data; verify normalization statistics computed only on training data. |
+| 3. Why false sense of performance | The model has effectively "seen" validation data during training through leakage — performance is inflated and doesn't reflect true generalization. |
+| 4. Validation protocol | Validation pipeline must be **strictly isolated** from training transformations — no augmentation, no normalization fit, no duplicate samples. |
+| 5. Why isolation matters | To ensure true generalization — the model must perform well on completely unseen data, not data that was indirectly used during training. |
+
+</details>
+
+---
+
+# 📊 COMPLETE COVERAGE SUMMARY
+
+| Category | Concepts | Status |
+|----------|----------|--------|
+| CNN Architectures | AlexNet, VGG, Inception, ResNet | ✅ 100% |
+| Transfer Learning | Feature extraction, fine-tuning, negative transfer | ✅ 100% |
+| Data Augmentation | Geometric, color, Mixup, CutMix | ✅ 100% |
+| Domain Adaptation | DANN, feature alignment, self-training | ✅ 100% |
+| Self-Supervised Learning | SimCLR, MoCo, BYOL | ✅ 100% |
+| Text Representations | Word2Vec, GloVe, negative sampling | ✅ 100% |
+| Subword Tokenization | BPE, WordPiece, SentencePiece | ✅ 100% |
+| Modern Innovations | EfficientNet, SE, ViT, hardware-aware | ✅ 100% |
+| Data Leakage | Pitfalls, detection, isolation | ✅ 100% |
+| **TOTAL** | **All Week 4 DL concepts** | ✅ **100%** |
+
+---
+
+## 📝 How to Use This Document
+
+1. **Read the question**, write your answer in the blank/box
+2. **Click the dropdown** to reveal the model answer
+3. **Compare** your answer to the model
+4. **Re-study** any sections where you got something wrong
+5. **Mark** your confidence level for each topic
+
+---
+
+**Good luck with your studies! 🎯**

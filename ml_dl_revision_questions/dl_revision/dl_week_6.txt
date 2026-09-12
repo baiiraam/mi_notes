@@ -1,0 +1,1436 @@
+# Week 6 DL — Pretrained Language Models & RAG
+
+Based on your Week 6 slides covering **BERT (Pretrained Language Models), GPT (Decoder-Only Models), Scaling Laws, Efficient Fine-Tuning, and Retrieval-Augmented Generation (RAG)** , here are comprehensive revision materials following the established format.
+
+---
+
+## 1. CONFIDENCE TRACKER — WEEK 6 DL
+
+| Confidence Level | Meaning |
+|------------------|---------|
+| 🟢 **Green** | I knew this cold — could explain it to someone else |
+| 🟡 **Yellow** | I got it right, but I wasn't 100% sure / guessed |
+| 🔴 **Red** | I had no idea — got it wrong or completely guessed |
+
+---
+
+| Exercise | Topic | 🟢 | 🟡 | 🔴 | Re-study? |
+|----------|-------|----|----|----|-----------|
+| Ex 1 | Static Embeddings & The Pretrain-Fine-Tune Paradigm | | | | ☐ |
+| Ex 2 | BERT — Encoder-Only Architecture | | | | ☐ |
+| Ex 3 | BERT — Input Representation (Tokens, Segments, Positions) | | | | ☐ |
+| Ex 4 | BERT — Pretraining Objectives (MLM & NSP) | | | | ☐ |
+| Ex 5 | MLM — The 80/10/10 Masking Rule | | | | ☐ |
+| Ex 6 | Fine-Tuning BERT — Classification, NER, QA | | | | ☐ |
+| Ex 7 | GPT — Decoder-Only Architecture | | | | ☐ |
+| Ex 8 | Causal Self-Attention & Autoregressive LM Objective | | | | ☐ |
+| Ex 9 | Generation — Sampling Strategies (Temperature, Top-k, Top-p) | | | | ☐ |
+| Ex 10 | Scaling Laws & Chinchilla | | | | ☐ |
+| Ex 11 | In-Context Learning & Emergent Abilities | | | | ☐ |
+| Ex 12 | Efficient Fine-Tuning — Adapters & LoRA | | | | ☐ |
+| Ex 13 | Model Compression — Quantization | | | | ☐ |
+| Ex 14 | Knowledge Distillation | | | | ☐ |
+| Ex 15 | Retrieval-Augmented Generation (RAG) — Overview | | | | ☐ |
+| Ex 16 | RAG — Retrieval Strategies & Vector Databases | | | | ☐ |
+| Ex 17 | RAG — Chunking Strategies | | | | ☐ |
+| Ex 18 | Complete Cheat Sheet | | | | ☐ |
+
+---
+
+## 2. 🎯 TEACH IT SUMMARY
+
+### The Big Picture — Week 6 DL
+
+Week 6 covers **pretrained language models** — the foundation of modern NLP — from BERT (understanding) through GPT (generation) to RAG (connecting LLMs to external knowledge).
+
+**Part 1: BERT — Deep Bidirectional Representations.** BERT (`Bidirectional Encoder Representations from Transformers`, Devlin et al., 2018) uses the **encoder-only** Transformer stack to learn **deeply bidirectional** representations. Unlike ELMo (which concatenates separate left-to-right and right-to-left LSTMs — "shallow" bidirectionality), BERT's self-attention lets every token attend to every other token at every layer. The input is the sum of **token embeddings** (WordPiece subwords), **segment embeddings** (sentence A vs B), and **learned positional embeddings**. Special tokens: `[CLS]` (classification aggregate), `[SEP]` (separator), `[MASK]` (pretraining placeholder). **Masked Language Modeling (MLM)** masks 15% of tokens and trains the model to predict them using bidirectional context — the 80/10/10 rule (80% `[MASK]`, 10% random token, 10% unchanged) prevents train/inference mismatch. **Next Sentence Prediction (NSP)** trains on sentence pairs (50% real consecutive, 50% random) to learn inter-sentence relationships. Fine-tuning adapts the same encoder to classification ( `[CLS]` head), NER (token-level head), and QA (start/end span prediction). RoBERTa later removed NSP and trained longer, DistilBERT distilled it to be smaller/faster.
+
+**Part 2: GPT — Decoder-Only Generation.** GPT (`Generative Pre-trained Transformer`) uses the **decoder-only** Transformer stack with **causal (masked) self-attention** — each token can only attend to previous tokens, exactly matching generation. The **autoregressive language modeling** objective predicts every next token: `L(θ) = -Σ log P(xₜ | x₁...xₜ₋₁; θ)`. Generation uses **sampling** strategies: **temperature** (T→0 = deterministic/greedy, T>1 = more random), **top-k** (sample from top k tokens), and **top-p/nucleus** (sample from smallest set with cumulative probability ≥ p). **Scaling laws** (Kaplan et al., 2020) show test loss decreases as a power law in model size, data, and compute. **Chinchilla** (Hoffmann et al., 2022) found most models were undertrained — optimal is roughly `D ≈ 20N` tokens. **In-context learning** lets large models adapt to tasks from prompt examples with no weight updates (zero-shot, one-shot, few-shot). **Emergent abilities** (multi-step reasoning, chain-of-thought) appear sharply once model scale crosses a threshold.
+
+**Part 3: Efficient Fine-Tuning & Compression.** **LoRA** (`Low-Rank Adaptation`) freezes pretrained weights and learns a low-rank update `ΔW = BA` where `r ≪ d` — 250× fewer parameters to train. **Quantization** reduces weight precision (FP32 → FP16/INT8/INT4) to shrink memory. **Knowledge distillation** trains a smaller "student" model to mimic a larger "teacher" using soft labels.
+
+**Part 4: Retrieval-Augmented Generation (RAG).** LLMs hallucinate because they generate "probable" text, not "truthful" text. RAG solves this by retrieving relevant documents from a knowledge base and inserting them into the prompt. **Semantic search** uses embedding models to find similar vectors; **keyword search** (BM25/TF-IDF) uses exact matches. **Reciprocal Rank Fusion (RRF)** combines rankings. **Chunking** splits documents into pieces — overlapping chunks preserve context. Vector databases (Weaviate, Pinecone) use **HNSW** (Hierarchical Navigable Small World) for fast approximate nearest neighbor search (logarithmic vs linear scaling).
+
+**The Connecting Thread:** Pretrained encoders (BERT) understand text; pretrained decoders (GPT) generate it; RAG connects both to external knowledge. Scaling laws make progress predictable; LoRA and quantization make deployment affordable.
+
+---
+
+## 3. ⚠️ COMMON PITFALLS IN PRACTICE
+
+| Pitfall | Why It Happens | How to Avoid |
+|---------|----------------|--------------|
+| **1. Using BERT for generation** | BERT is encoder-only — can't generate text | Use GPT or encoder-decoder for generation |
+| **2. Using GPT for bidirectional tasks** | GPT is causal — misses right context | Use BERT or bidirectional model for classification/understanding |
+| **3. Forgetting the 80/10/10 rule in MLM** | 100% [MASK] creates train/inference mismatch | Follow 80% [MASK], 10% random, 10% unchanged |
+| **4. Fine-tuning with too high learning rate** | Catastrophic forgetting of pretrained knowledge | Use 10-100× smaller LR (e.g., 2e-5) |
+| **5. Not using early stopping for fine-tuning** | Fine-tuning too long → overfitting | 2-4 epochs often enough |
+| **6. Using greedy decoding for creative tasks** | Greedy produces repetitive/robotic text | Use temperature + top-p sampling |
+| **7. Ignoring the Chinchilla scaling rule** | Too many params, too little data | Target D ≈ 20N tokens |
+| **8. Applying LoRA to all layers uniformly** | Some layers need more adaptation | Tune rank per layer; experiment with r |
+| **9. Quantizing without calibration** | Naive quantization hurts accuracy | Use GPTQ with calibration dataset |
+| **10. Chunking without overlap** | Context cut off at boundaries | Use overlapping chunks (10-25% overlap) |
+| **11. Using only semantic search** | Misses exact keyword matches | Combine semantic + keyword with RRF |
+| **12. Adding everything to RAG context** | Exceeds context window; expensive | Use retrieval to select only relevant chunks |
+
+---
+
+## 4. ONE-SENTENCE SUMMARY — WEEK 6 DL
+
+**How to use:** For each concept, try to write your own one-sentence summary *before* clicking to reveal the model answer.
+
+---
+
+### BERT & Pretraining
+
+<details>
+<summary><b>BERT</b> — Try your own first</summary>
+
+**Model Answer:** Bidirectional Encoder Representations from Transformers — an encoder-only Transformer pretrained on MLM and NSP to learn deep bidirectional representations that transfer to many NLP tasks.
+
+</details>
+
+---
+
+<details>
+<summary><b>ELMo vs BERT</b> — Try your own first</summary>
+
+**Model Answer:** ELMo concatenates separate left-to-right and right-to-left LSTMs (shallow bidirectionality); BERT uses self-attention at every layer to condition on both directions simultaneously (deep bidirectionality).
+
+</details>
+
+---
+
+<details>
+<summary><b>MLM (Masked Language Modeling)</b> — Try your own first</summary>
+
+**Model Answer:** Masks 15% of tokens and trains the model to predict them from bidirectional context — a denoising autoencoder objective that prevents "cheating" by seeing the answer.
+
+</details>
+
+---
+
+<details>
+<summary><b>80/10/10 Masking Rule</b> — Try your own first</summary>
+
+**Model Answer:** Of masked tokens: 80% replaced with `[MASK]`, 10% with random token, 10% unchanged — prevents train/inference mismatch since `[MASK]` never appears at fine-tuning time.
+
+</details>
+
+---
+
+<details>
+<summary><b>NSP (Next Sentence Prediction)</b> — Try your own first</summary>
+
+**Model Answer:** Given sentence pairs, predict if B follows A (50% real, 50% random) — teaches inter-sentence relationships; later removed by RoBERTa.
+
+</details>
+
+---
+
+<details>
+<summary><b>`[CLS]` Token</b> — Try your own first</summary>
+
+**Model Answer:** Prepended to every input; its final hidden state serves as an aggregate representation of the whole sequence for classification tasks.
+
+</details>
+
+---
+
+<details>
+<summary><b>Fine-Tuning BERT</b> — Try your own first</summary>
+
+**Model Answer:** Same pretrained encoder with small task-specific heads: classification ( `[CLS]` head), NER (token-level head), QA (start/end span prediction), all trained end-to-end.
+
+</details>
+
+---
+
+### GPT & Generation
+
+<details>
+<summary><b>GPT</b> — Try your own first</summary>
+
+**Model Answer:** Generative Pre-trained Transformer — a decoder-only Transformer with causal self-attention, trained with autoregressive language modeling to predict the next token.
+
+</details>
+
+---
+
+<details>
+<summary><b>Causal Self-Attention</b> — Try your own first</summary>
+
+**Model Answer:** Masks out future positions so token t can only attend to tokens ≤ t — matches left-to-right generation at inference time.
+
+</details>
+
+---
+
+<details>
+<summary><b>Autoregressive LM Objective</b> — Try your own first</summary>
+
+**Model Answer:** `L(θ) = -Σ log P(xₜ | x₁...xₜ₋₁; θ)` — predicts every next token from left context only; fully self-supervised from raw text.
+
+</details>
+
+---
+
+<details>
+<summary><b>Temperature Sampling</b> — Try your own first</summary>
+
+**Model Answer:** Rescales logits by temperature T — T→0 = greedy/deterministic; T>1 = more random/diverse; T=1 = unmodified distribution.
+
+</details>
+
+---
+
+<details>
+<summary><b>Top-k Sampling</b> — Try your own first</summary>
+
+**Model Answer:** Restricts sampling to the k highest-probability tokens; filters out the long, low-probability "tail" of implausible tokens.
+
+</details>
+
+---
+
+<details>
+<summary><b>Top-p (Nucleus) Sampling</b> — Try your own first</summary>
+
+**Model Answer:** Samples from the smallest set of tokens whose cumulative probability exceeds p — adapts candidate pool size to model confidence.
+
+</details>
+
+---
+
+### Scaling & Efficiency
+
+<details>
+<summary><b>Scaling Laws (Kaplan et al.)</b> — Try your own first</summary>
+
+**Model Answer:** Test loss decreases as a power law in model size, data, and compute — enabling prediction of larger model performance from smaller experiments.
+
+</details>
+
+---
+
+<details>
+<summary><b>Chinchilla (Hoffmann et al.)</b> — Try your own first</summary>
+
+**Model Answer:** Found most large models were undertrained — compute-optimal training uses roughly D ≈ 20N tokens; a smaller model on more data can beat a larger model on less data.
+
+</details>
+
+---
+
+<details>
+<summary><b>In-Context Learning</b> — Try your own first</summary>
+
+**Model Answer:** Models adapt to new tasks from prompt examples without weight updates (zero-shot, one-shot, few-shot) — using self-attention to infer the task pattern.
+
+</details>
+
+---
+
+<details>
+<summary><b>Emergent Abilities</b> — Try your own first</summary>
+
+**Model Answer:** Capabilities like multi-step reasoning appear sharply at certain scales rather than gradually — unpredictable from small-scale experiments.
+
+</details>
+
+---
+
+<details>
+<summary><b>LoRA (Low-Rank Adaptation)</b> — Try your own first</summary>
+
+**Model Answer:** Freezes pretrained weights and learns a low-rank update `ΔW = BA` where r ≪ d — 250× fewer parameters for fine-tuning.
+
+</details>
+
+---
+
+<details>
+<summary><b>Quantization</b> — Try your own first</summary>
+
+**Model Answer:** Stores weights in lower precision (FP32 → FP16/INT8/INT4) — halves memory at each step; modern methods like GPTQ minimize accuracy loss.
+
+</details>
+
+---
+
+<details>
+<summary><b>Knowledge Distillation</b> — Try your own first</summary>
+
+**Model Answer:** Trains a smaller "student" model to mimic a larger "teacher" using soft labels — DistilBERT is 40% smaller, 60% faster with ~97% of BERT's performance.
+
+</details>
+
+---
+
+### RAG
+
+<details>
+<summary><b>RAG (Retrieval-Augmented Generation)</b> — Try your own first</summary>
+
+**Model Answer:** Retrieves relevant documents from a knowledge base and inserts them into the prompt to ground LLM responses in external, up-to-date information.
+
+</details>
+
+---
+
+<details>
+<summary><b>Semantic Search vs Keyword Search</b> — Try your own first</summary>
+
+**Model Answer:** Keyword search counts exact terms (TF-IDF/BM25); semantic search uses embeddings to find meaning similarity; combining both with RRF is best.
+
+</details>
+
+---
+
+<details>
+<summary><b>RRF (Reciprocal Rank Fusion)</b> — Try your own first</summary>
+
+**Model Answer:** Combines rankings from multiple retrievers — score = Σ 1/(k + rank) — rewards documents highly ranked by any method.
+
+</details>
+
+---
+
+<details>
+<summary><b>HNSW (Hierarchical Navigable Small World)</b> — Try your own first</summary>
+
+**Model Answer:** A graph-based approximate nearest neighbor algorithm with logarithmic search time — powers modern vector databases (Weaviate, Pinecone).
+
+</details>
+
+---
+
+<details>
+<summary><b>Chunking (RAG)</b> — Try your own first</summary>
+
+**Model Answer:** Splits documents into smaller pieces to improve retrieval relevance — overlapping chunks preserve context across boundaries.
+
+</details>
+
+---
+
+## 5. QUICK REFERENCE CHEAT SHEET — WEEK 6 DL
+
+### BERT Model Sizes
+
+<details>
+<summary><b>BERT Base vs Large</b> — Try to recall first</summary>
+
+| Model | Layers | Hidden Size | Attention Heads | Parameters |
+|-------|--------|-------------|-----------------|------------|
+| **BERT-Base** | 12 | 768 | 12 | 110M |
+| **BERT-Large** | 24 | 1024 | 16 | 340M |
+
+</details>
+
+---
+
+### Three Transformer Families
+
+<details>
+<summary><b>Encoder, Decoder, Encoder-Decoder</b> — Try to recall first</summary>
+
+| Family | Attention Pattern | Best For | Example |
+|--------|-------------------|----------|---------|
+| **Encoder-Only** | Fully bidirectional | Understanding (classification, NER, QA) | BERT |
+| **Decoder-Only** | Causal (left-to-right) | Generation | GPT |
+| **Encoder-Decoder** | Bidirectional enc. + causal dec. | Translation, summarization | T5 |
+
+</details>
+
+---
+
+### BERT Pretraining Objectives
+
+<details>
+<summary><b>MLM & NSP</b> — Try to recall first</summary>
+
+| Objective | What It Does | Why It Matters |
+|-----------|--------------|----------------|
+| **MLM** | Mask 15% of tokens; predict from context | Deep bidirectionality |
+| **NSP** | Predict if sentence B follows A | Inter-sentence relationships (removed in RoBERTa) |
+
+</details>
+
+---
+
+### MLM — 80/10/10 Rule
+
+<details>
+<summary><b>80/10/10 Masking Rule</b> — Try to recall first</summary>
+
+| Percentage | What Happens | Why |
+|------------|--------------|-----|
+| **80%** | Replaced with `[MASK]` | Learn to predict from context |
+| **10%** | Replaced with random token | Robust representations for all tokens |
+| **10%** | Left unchanged | No train/inference mismatch |
+
+</details>
+
+---
+
+### BERT Fine-Tuning Heads
+
+<details>
+<summary><b>Task-Specific Heads</b> — Try to recall first</summary>
+
+| Task | Head | Input | Output |
+|------|------|-------|--------|
+| **Classification** | Linear + Softmax on `[CLS]` | `[CLS] + text + [SEP]` | Class label |
+| **NER** | Linear per token | `[CLS] + text + [SEP]` | Label per token |
+| **QA (Span)** | Start + End vectors | `[CLS] + question + [SEP] + passage + [SEP]` | Start/end positions |
+
+</details>
+
+---
+
+### Generation Sampling Strategies
+
+<details>
+<summary><b>Sampling Methods</b> — Try to recall first</summary>
+
+| Method | How It Works | Effect |
+|--------|--------------|--------|
+| **Greedy** | Always pick argmax | Deterministic, can be repetitive |
+| **Temperature** | Rescale logits by T | T→0 = greedy; T>1 = more random |
+| **Top-k** | Sample from top k tokens | Filters implausible tail |
+| **Top-p (Nucleus)** | Sample from smallest set with cumulative p ≥ p | Adapts to model confidence |
+
+</details>
+
+---
+
+### Scaling Laws
+
+<details>
+<summary><b>Scaling Laws & Chinchilla</b> — Try to recall first</summary>
+
+| Concept | Finding |
+|---------|---------|
+| **Kaplan et al. (2020)** | Loss ∝ power law in N, D, C — predictable scaling |
+| **Chinchilla (2022)** | Compute-optimal: D ≈ 20N tokens |
+| **Practical Implication** | Smaller model + more data can beat larger model + less data at same compute |
+
+</details>
+
+---
+
+### Efficient Fine-Tuning
+
+<details>
+<summary><b>LoRA, Quantization, Distillation</b> — Try to recall first</summary>
+
+| Method | How It Works | Savings |
+|--------|--------------|---------|
+| **LoRA** | Low-rank update `ΔW = BA`, r ≪ d | 250× fewer trainable params |
+| **Quantization** | Lower precision (FP32 → FP16/INT8/INT4) | 2×, 4×, 8× memory reduction |
+| **Distillation** | Smaller student mimics teacher | DistilBERT: 40% smaller, 60% faster, ~97% performance |
+
+</details>
+
+---
+
+### LoRA Formula
+
+<details>
+<summary><b>LoRA Forward Pass</b> — Try to recall first</summary>
+
+**Formula:** `h = W₀x + BAx` where `r ≪ d`
+
+**Initialization:** `A` random small; `B = 0` → starts as pretrained model
+
+</details>
+
+---
+
+### RAG — Key Components
+
+<details>
+<summary><b>RAG Architecture</b> — Try to recall first</summary>
+
+1. **Knowledge Base** — Documents, databases, private data
+2. **Retrieval** — Semantic search + keyword search → RRF
+3. **Augmented Prompt** — Query + Retrieved Documents
+4. **LLM** — Generate grounded response
+
+</details>
+
+---
+
+### RAG — Search Types
+
+<details>
+<summary><b>Semantic vs Keyword</b> — Try to recall first</summary>
+
+| Method | How It Works | Strengths |
+|--------|--------------|-----------|
+| **Keyword (BM25/TF-IDF)** | Counts exact term matches | Fast, exact matching |
+| **Semantic (Embedding)** | Vector similarity | Meaning-based, synonyms |
+| **RRF (Combined)** | Reciprocal rank fusion | Best of both worlds |
+
+</details>
+
+---
+
+### RAG — Chunking
+
+<details>
+<summary><b>Chunking Strategies</b> — Try to recall first</summary>
+
+| Strategy | Description | Best For |
+|----------|-------------|----------|
+| **Fixed size** | Split by token/character count | Simple, general |
+| **Overlapping** | Overlap chunks by 10-25% | Preserves context across boundaries |
+| **Semantic** | Split by sentences/paragraphs | Preserves meaning |
+| **Document-aware** | Split by headers, function definitions | Code, HTML, structured docs |
+
+</details>
+
+---
+
+### Key Defaults
+
+<details>
+<summary><b>Key Defaults</b> — Try to recall first</summary>
+
+| Concept | Default |
+|---------|---------|
+| BERT fine-tuning LR | 2-5 × 10⁻⁵ |
+| Fine-tuning epochs | 2-4 |
+| MLM mask rate | 15% |
+| MLM 80/10/10 rule | 80% [MASK], 10% random, 10% unchanged |
+| LoRA rank r | 4-16 |
+| Temperature | 0.7-1.0 |
+| Top-p | 0.9-0.95 |
+| Chunk overlap | 10-25% |
+
+</details>
+
+---
+
+## 6. CONNECTIONS MAP — WEEK 6 DL
+
+### 🌳 TEXT-BASED CONCEPT MAP
+
+```
+╔══════════════════════════════════════════════════════════════════════════╗
+║                                                                          ║
+║                    WEEK 6 DL: PRETRAINED LANGUAGE MODELS               ║
+║                                                                          ║
+║                    ┌─────────────────────────────────────┐              ║
+║                    │   PRETRAIN-FINE-TUNE PARADIGM      │              ║
+║                    │   Train once on unlabeled text     │              ║
+║                    │   Adapt cheaply to many tasks      │              ║
+║                    └──────────────┬──────────────────────┘              ║
+║                                   │                                      ║
+║    ┌──────────────────────────────┼──────────────────────────────┐      ║
+║    │                              │                              │      ║
+║    ▼                              ▼                              ▼      ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │   BERT       │          │    GPT       │          │    RAG       │  ║
+║ │ (Encoder-    │          │  (Decoder-   │          │  (Retrieval- │  ║
+║ │  Only)       │          │   Only)      │          │  Augmented)  │  ║
+║ └──────┬───────┘          └──────┬───────┘          └──────┬───────┘  ║
+║        │                         │                         │          ║
+║        ▼                         ▼                         ▼          ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │  MLM + NSP   │          │ Autoregressive│          │  Retrieval   │  ║
+║ │  Bidirectional│          │   LM          │          │  + Augmented │  ║
+║ │  (Deep       │          │  Causal       │          │  Prompt      │  ║
+║ │  Bidirectional)│          │  Self-Attention│          └──────────────┘  ║
+║ └──────────────┘          └──────────────┘                              ║
+║        │                         │                                      ║
+║        └─────────────────────────┼──────────────────────────────────┐   ║
+║                                  │                                  │   ║
+║                                  ▼                                  │   ║
+║                    ┌─────────────────────────────────────┐          │   ║
+║                    │   EFFICIENT ADAPTATION              │          │   ║
+║                    │   LoRA · Quantization · Distillation│          │   ║
+║                    └──────────────┬──────────────────────┘          │   ║
+║                                   │                                 │   ║
+║    ┌──────────────────────────────┼──────────────────────────────┐  │   ║
+║    │                              │                              │  │   ║
+║    ▼                              ▼                              ▼  │   ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐│   ║
+║ │   LORA       │          │ QUANTIZATION │          │ DISTILLATION ││   ║
+║ │  Low-Rank    │          │  FP32→INT8   │          │  Teacher→    ││   ║
+║ │  Update BA   │          │  GPTQ        │          │  Student     ││   ║
+║ │  250× fewer  │          │  4-bit with  │          │  DistilBERT  ││   ║
+║ │  params      │          │  minimal     │          │  40% smaller ││   ║
+║ └──────────────┘          │  loss        │          └──────────────┘│   ║
+║                           └──────────────┘                         │   ║
+║                                                                         ║
+║                    ┌─────────────────────────────────────┐             ║
+║                    │   SCALING LAWS                       │             ║
+║                    │   Power law: Loss ∝ N^α            │             ║
+║                    │   Chinchilla: D ≈ 20N tokens      │             ║
+║                    └─────────────────────────────────────┘             ║
+║                                                                         ║
+╚══════════════════════════════════════════════════════════════════════════╝
+```
+
+---
+
+### 🔗 KEY CONNECTION EXPLANATIONS
+
+<details>
+<summary><b>Connection 1: How does BERT achieve deep bidirectionality vs ELMo?</b></summary>
+
+```
+ELMo (Shallow Bidirectionality)
+    │
+    ├── Left-to-right LSTM → hidden state
+    ├── Right-to-left LSTM → hidden state
+    └── CONCATENATE outputs at the end
+    → Directions never see each other during training
+
+BERT (Deep Bidirectionality)
+    │
+    ├── One Transformer Encoder
+    ├── Self-attention at EVERY layer
+    ├── Token attends to ALL other tokens
+    └── Both directions at EVERY layer
+    → True bidirectional context throughout
+
+Key Insight: ELMo is "shallow" because bidirectionality is only at the output;
+BERT is "deep" because it's built into every layer of representation.
+```
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 2: Why does MLM use the 80/10/10 rule?</b></summary>
+
+```
+MLM OBJECTIVE
+    │
+    ├── PROBLEM: [MASK] never appears at fine-tuning time
+    │       └── Train/inference mismatch → poor performance
+    │
+    └── SOLUTION: 80/10/10 Rule
+            │
+            ├── 80% → [MASK] (learn prediction from context)
+            ├── 10% → random token (robust representations for all tokens)
+            └── 10% → unchanged (model sees ordinary text too)
+
+Key Insight: The mix forces the model to build representations for EVERY token,
+not just the ones marked [MASK], ensuring transfer to fine-tuning.
+```
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 3: How do BERT and GPT differ in architecture and use?</b></summary>
+
+```
+BERT (Encoder-Only)
+    │
+    ├── Fully bidirectional self-attention
+    ├── MLM + NSP pretraining
+    ├── `[CLS]` token for classification
+    └── Best for: Understanding, classification, NER, QA
+    │
+    └── CANNOT generate text
+
+GPT (Decoder-Only)
+    │
+    ├── Causal (masked) self-attention
+    ├── Autoregressive LM pretraining
+    ├── Next-token prediction
+    └── Best for: Generation, chat, completion
+    │
+    └── CANNOT use bidirectional context
+
+Key Insight: Architecture dictates capability — bidirectional = understand;
+causal = generate. Use the right tool for the job.
+```
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 4: How do scaling laws and Chinchilla guide model design?</b></summary>
+
+```
+SCALING LAWS (Kaplan et al., 2020)
+    │
+    ├── Loss ∝ power law in N (parameters)
+    ├── Loss ∝ power law in D (data)
+    ├── Loss ∝ power law in C (compute)
+    └── Predictable improvement with scale
+
+    ↓ But: "How should we spend a fixed compute budget?"
+
+CHINCHILLA (Hoffmann et al., 2022)
+    │
+    ├── Found most models were undertrained
+    ├── Optimal: D ≈ 20N tokens
+    └── Smaller model + more data → same compute → better performance
+
+Key Insight: Scaling laws tell us "bigger is better"; Chinchilla tells us
+"how to distribute that bigness" between parameters and data.
+```
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 5: How does RAG fix LLM hallucinations?</b></summary>
+
+```
+LLM HALLUCINATION
+    │
+    ├── LLMs generate "probable" text, not "truthful" text
+    ├── Knowledge gaps → inaccurate responses
+    └── Training data is static → no up-to-date info
+
+    ↓ SOLUTION
+
+RAG (Retrieval-Augmented Generation)
+    │
+    ├── 1. Query → retrieve relevant documents from knowledge base
+    ├── 2. Augment prompt with retrieved documents
+    ├── 3. LLM generates grounded response
+    └── Response is grounded in retrieved facts
+
+Key Insight: RAG doesn't change the LLM's weights — it changes what
+information the LLM has access to at inference time.
+```
+
+</details>
+
+---
+
+### 📊 CONNECTION MATRIX
+
+| Concept A | Connects To | Why |
+|-----------|-------------|-----|
+| **BERT** | MLM | MLM enables deep bidirectionality |
+| **BERT** | Fine-Tuning | Same encoder + task-specific head |
+| **GPT** | Causal Attention | Left-to-right only matches generation |
+| **GPT** | Sampling | Temperature/top-k/top-p control output |
+| **Scaling Laws** | Chinchilla | Scaling laws guide optimal N/D balance |
+| **Chinchilla** | GPT-3 | GPT-3 was undertrained; Chinchilla out-performed |
+| **LoRA** | Fine-Tuning | Cheap adaptation of large models |
+| **Quantization** | Deployment | Smaller memory, faster inference |
+| **Distillation** | Deployment | Smaller models, cheaper inference |
+| **RAG** | LLM Hallucination | Grounds responses in retrieved facts |
+| **RAG** | Vector DB | HNSW enables fast semantic search |
+| **Chunking** | RAG | Splits documents for better retrieval |
+
+---
+
+## 7. COMMON MISCONCEPTIONS — WEEK 6 DL
+
+**How to use:** Read each misconception first. Try to identify what's wrong. Then click to reveal the reality.
+
+---
+
+### Misconception 1: "BERT is just a bigger version of Word2Vec."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| BERT is a more advanced static embedding method. | Word2Vec/GloVe are **static** — one vector per word. BERT is **contextual** — the representation of "bank" changes depending on whether it's in "river bank" or "money bank." BERT uses a Transformer encoder, not a shallow embedding lookup. |
+
+**Key insight:** Static embeddings = one vector per word type; BERT = dynamic vectors per word occurrence.
+
+</details>
+
+---
+
+### Misconception 2: "ELMo and BERT both use bidirectional LSTMs."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| ELMo and BERT are both bidirectional models. | ELMo concatenates separate left-to-right and right-to-left LSTMs at the **end** (shallow bidirectionality). BERT uses **self-attention at every layer** where every token attends to every other token (deep bidirectionality). In ELMo, directions never see each other during training. |
+
+**Key insight:** ELMo = "shallow" bidirectional (concatenation at the end); BERT = "deep" bidirectional (attention throughout).
+
+</details>
+
+---
+
+### Misconception 3: "MLM predicts every token like a language model."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| MLM predicts all tokens in a sequence. | MLM only predicts **15%** of tokens (the masked ones). The unmasked tokens are used as context but have no loss. This makes MLM more efficient than autoregressive LM (which predicts every token) and enables bidirectionality (the model can use right context). |
+
+**Key insight:** MLM = denoising autoencoder for text; AR LM = next-token prediction.
+
+</details>
+
+---
+
+### Misconception 4: "GPT can use bidirectional context during fine-tuning."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| GPT can be fine-tuned to use bidirectional attention. | GPT's architecture is **causal** — masked self-attention is built in. It cannot use bidirectional context without changing the model architecture. Fine-tuning doesn't remove the causal mask. This is why BERT (encoder-only) is better for understanding tasks and GPT (decoder-only) is better for generation. |
+
+**Key insight:** Architecture = capability. Causal attention is structural, not just a training choice.
+
+</details>
+
+---
+
+### Misconception 5: "In-context learning updates the model's weights."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| In-context learning is a form of fine-tuning. | In-context learning updates **no weights**. All adaptation happens within the prompt at inference time via self-attention over the examples. The model's parameters remain completely frozen. It's "learning" in the sense of behavior change, not weight update. |
+
+**Key insight:** In-context learning = inference-time pattern matching, not gradient-based learning.
+
+</details>
+
+---
+
+### Misconception 6: "Scaling laws mean bigger is always better with no trade-offs."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Scaling laws say just make models bigger. | Scaling laws say performance improves predictably with scale, but **compute is finite**. Chinchilla showed that for a fixed compute budget, smaller models on more data can outperform larger models on less data. There's an optimal N/D trade-off: D ≈ 20N tokens. |
+
+**Key insight:** Scaling laws answer "does scale help?" Chinchilla answers "how to distribute scale optimally."
+
+</details>
+
+---
+
+### Misconception 7: "Emergent abilities are predictable from scaling laws."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Scaling laws predict emergent abilities too. | Scaling laws predict **loss** smoothly. **Emergent abilities** (like chain-of-thought reasoning) appear sharply at certain scales — near-random performance, then a jump. They cannot be predicted by extrapolating loss curves from smaller models. |
+
+**Key insight:** Loss scales smoothly; abilities can emerge abruptly. This is why small experiments don't always predict large model behavior.
+
+</details>
+
+---
+
+### Misconception 8: "LoRA is just a way to train fewer parameters."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| LoRA is a parameter-saving trick. | LoRA is based on the observation that weight updates during fine-tuning have **low intrinsic rank**. By learning a low-rank decomposition `ΔW = BA`, it not only saves parameters but also enables **multiple tasks to share the same base model** with swappable (A,B) pairs. This is a structural insight, not just an implementation detail. |
+
+**Key insight:** LoRA = low-rank adaptation, not just parameter reduction. It reveals something about how models adapt.
+
+</details>
+
+---
+
+### Misconception 9: "RAG and fine-tuning are mutually exclusive approaches."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| You either use RAG or fine-tuning, not both. | RAG and fine-tuning are **complementary**. Fine-tuning adapts the model's weights to a domain; RAG provides up-to-date, retrievable information at inference. They can be used together — a fine-tuned model plus RAG often performs better than either alone. |
+
+**Key insight:** Fine-tuning = change weights; RAG = change what information the model has access to. Use both.
+
+</details>
+
+---
+
+### Misconception 10: "RAG eliminates LLM hallucinations completely."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| RAG solves the hallucination problem. | RAG **reduces** hallucinations by grounding responses in retrieved documents, but doesn't eliminate them entirely. If the retrieval is wrong, or if the LLM ignores the retrieved context, hallucinations can still occur. Also, the LLM may still "fill in" gaps with plausible but incorrect information. |
+
+**Key insight:** RAG = hallucination mitigation, not hallucination elimination. Use with careful evaluation.
+
+</details>
+
+---
+
+### Misconception 11: "Quantization always hurts model accuracy significantly."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Quantization reduces model quality substantially. | Modern methods like **GPTQ** can quantize to INT4 with **minimal accuracy loss** (often < 1% on benchmarks). Layer-wise calibration using a small dataset minimizes reconstruction error, preserving the model's capabilities while reducing memory by 8×. |
+
+**Key insight:** Neural networks are robust to numerical precision — most information is in the structure, not the exact bit values.
+
+</details>
+
+---
+
+### Misconception 12: "Knowledge distillation just creates a smaller copy of the teacher."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Distillation = shrink the model with minimal loss. | Distillation uses **soft labels** from the teacher (the full probability distribution), which encode more information than hard labels. The student learns the teacher's "dark knowledge" — e.g., "70% cat, 25% dog, 5% fox" reveals similarity structure. This enables the student to outperform training on labels alone. |
+
+**Key insight:** Distillation transfers knowledge, not just predictions. Soft labels = richer training signal.
+
+</details>
+
+---
+
+### Misconception 13: "Chunking is just about fitting within token limits."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Chunking is a technical limitation to handle context windows. | Chunking also improves **relevance**. A single vector for a whole book is an "average" representation — it can't represent specific chapters or topics well. Chunks let the retriever find the most relevant passage, not just a vague summary. Overlapping chunks preserve context across boundaries. |
+
+**Key insight:** Chunking = better retrieval, not just token management.
+
+</details>
+
+---
+
+## 📊 QUICK REFERENCE: MISCONCEPTIONS vs REALITY
+
+| Misconception | Reality |
+|---------------|---------|
+| BERT = bigger Word2Vec | BERT is contextual, static embeddings are not |
+| ELMo = BERT | ELMo is shallow bidirectional; BERT is deep |
+| MLM predicts every token | MLM predicts only 15% (masked tokens) |
+| GPT can be bidirectional | Causal attention is architectural, cannot be removed |
+| In-context learning = fine-tuning | No weight changes; only prompt conditioning |
+| Scaling laws = just make bigger | Chinchilla: optimal N/D balance matters |
+| Emergent abilities are predictable | Emerge sharply, not smooth like loss |
+| LoRA = parameter saving | Also reveals low-rank adaptation structure |
+| RAG = fine-tuning alternative | Complementary — can use both |
+| RAG eliminates hallucinations | Reduces but doesn't eliminate |
+| Quantization hurts accuracy | GPTQ can do INT4 with <1% loss |
+| Distillation = shrinking | Transfers richer knowledge via soft labels |
+| Chunking = token management | Also improves retrieval relevance |
+
+---
+
+# 📚 WEEK 6 DL — COMPLETE STUDY GUIDE
+## All Exercises with Answers in Spoiler Format
+
+---
+
+# SECTION 1: BERT & ENCODER-ONLY MODELS
+
+---
+
+## Exercise BERT-1: BERT Fundamentals
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What does BERT stand for and who introduced it? | |
+| 2. What architecture does BERT use? | |
+| 3. What is the key difference between BERT and ELMo? | |
+| 4. What are the two BERT model sizes? | |
+| 5. What is the significance of BERT's impact? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. BERT | **Bidirectional Encoder Representations from Transformers** — introduced by Devlin et al. (2018). |
+| 2. Architecture | **Encoder-only** Transformer stack (no decoder). Fully bidirectional self-attention at every layer. |
+| 3. BERT vs ELMo | ELMo = **shallow** bidirectionality (concatenates separate LSTM directions). BERT = **deep** bidirectionality (self-attention at every layer conditions on both directions simultaneously). |
+| 4. Model sizes | **BERT-Base**: 12 layers, 768 hidden, 12 heads, 110M params. **BERT-Large**: 24 layers, 1024 hidden, 16 heads, 340M params. |
+| 5. Impact | Set SOTA on 11 NLP benchmarks simultaneously, popularized pretrain-fine-tune paradigm for NLP. |
+
+</details>
+
+---
+
+## Exercise BERT-2: Input Representation
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What are the three embedding components in BERT's input? | |
+| 2. What do the special tokens `[CLS]`, `[SEP]`, and `[MASK]` do? | |
+| 3. How are the three embeddings combined? | |
+| 4. What tokenizer does BERT use? | |
+| 5. What does `##` mean in WordPiece tokenization? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Three components | **Token Embeddings** (WordPiece subword embeddings), **Segment Embeddings** (sentence A vs B), **Position Embeddings** (learned, not sinusoidal). |
+| 2. Special tokens | `[CLS]`: prepended; final hidden state is aggregate representation. `[SEP]`: separates sentences and marks end. `[MASK]`: placeholder token used only in pretraining. |
+| 3. Combination | The three embeddings are **summed** elementwise to form each token's input vector. |
+| 4. Tokenizer | **WordPiece** — similar to BPE but merges based on likelihood under a language model. |
+| 5. `##` meaning | Marks a subword piece that continues the previous token (no preceding space). |
+
+</details>
+
+---
+
+## Exercise BERT-3: MLM — Masked Language Modeling
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What problem does MLM solve for bidirectionality? | |
+| 2. What is the MLM objective? | |
+| 3. What is the 80/10/10 masking rule? | |
+| 4. Why is the 80/10/10 rule necessary? | |
+| 5. Write the MLM loss formula. | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Problem solved | Without MLM, a bidirectional model could "cheat" by copying the answer from the input (seeing the word it's supposed to predict). MLM masks tokens to prevent this. |
+| 2. MLM objective | Mask 15% of input tokens, train the model to predict only the masked tokens from bidirectional context — a denoising autoencoder objective. |
+| 3. 80/10/10 rule | Of the 15% selected tokens: **80%** → `[MASK]`, **10%** → random token, **10%** → unchanged. |
+| 4. Why necessary | `[MASK]` never appears at fine-tuning time. The mix prevents train/inference mismatch and forces robust representations for all tokens. |
+| 5. MLM loss | `L_MLM = -Σ_{i∈M} log P(x_i | x\M; θ)` where `M` is masked positions and `x\M` is corrupted input. |
+
+</details>
+
+---
+
+## Exercise BERT-4: NSP — Next Sentence Prediction
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is the NSP objective? | |
+| 2. What is the training data mix for NSP? | |
+| 3. Why was NSP included? | |
+| 4. What did RoBERTa find about NSP? | |
+| 5. What does this tell us about auxiliary objectives? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. NSP objective | Given sentence pair (A, B), predict if B is the sentence that actually follows A (`IsNext`) or a random sentence (`NotNext`). |
+| 2. Training data mix | **50%** real consecutive sentences, **50%** random pairings. |
+| 3. Why included | Many downstream tasks (QA, NLI) require understanding relationships between sentences, not just single-sentence meaning. |
+| 4. RoBERTa finding | Removing NSP entirely and training only with MLM on longer text chunks **improved** performance. |
+| 5. Lesson | NSP conflated topic prediction with coherence modeling — plausible-sounding objectives don't always earn their complexity. |
+
+</details>
+
+---
+
+## Exercise BERT-5: Fine-Tuning BERT
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is the general fine-tuning recipe for BERT? | |
+| 2. How do you fine-tune for text classification? | |
+| 3. How do you fine-tune for NER (token classification)? | |
+| 4. How do you fine-tune for question answering (span extraction)? | |
+| 5. What learning rate is typical for fine-tuning? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. General recipe | Start from pretrained BERT weights, attach a task-specific head, train end-to-end on labeled downstream data for 2-4 epochs with small LR. |
+| 2. Classification | Feed `[CLS] + text + [SEP]`; take final `[CLS]` hidden state → linear layer + Softmax over class labels. |
+| 3. NER | Attach linear layer to **every token's** final hidden state; each token gets independent label prediction (B-PER, I-PER, O, etc.). |
+| 4. QA (span) | Learn start vector `S` and end vector `E`; each passage token gets start-score `S·T_i` and end-score `E·T_i`; predict span (i,j) maximizing `S·T_i + E·T_j`. |
+| 5. Learning rate | Typically **2-5 × 10⁻⁵** — 10-100× smaller than pretraining to avoid catastrophic forgetting. |
+
+</details>
+
+---
+
+# SECTION 2: GPT & DECODER-ONLY MODELS
+
+---
+
+## Exercise GPT-1: GPT Fundamentals
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What does GPT stand for and who introduced it? | |
+| 2. What architecture does GPT use? | |
+| 3. What is the key difference between BERT and GPT? | |
+| 4. What sublayer does GPT remove from the original Transformer decoder? | |
+| 5. What are the GPT model sizes? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. GPT | **Generative Pre-trained Transformer** — introduced by Radford et al. (2018). |
+| 2. Architecture | **Decoder-only** Transformer — keeps only masked self-attention and feedforward sublayers (removes cross-attention, no encoder). |
+| 3. BERT vs GPT | BERT = encoder-only, bidirectional → understanding. GPT = decoder-only, causal → generation. |
+| 4. Removed sublayer | **Cross-attention** (there is no encoder to attend to). |
+| 5. Model sizes | **GPT-1**: 117M, 512 context. **GPT-2**: 1.5B, 1024 context. **GPT-3**: 175B, 2048 context. **GPT-4**: undisclosed, up to 128K context. |
+
+</details>
+
+---
+
+## Exercise GPT-2: Autoregressive Language Modeling
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is the autoregressive LM objective? | |
+| 2. Write the AR LM loss formula. | |
+| 3. How is AR LM different from MLM? | |
+| 4. Why is causal self-attention necessary for generation? | |
+| 5. How does training and inference compare for AR LM? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. AR LM objective | Given prefix `x₁...x_{t-1}`, predict next token `xₜ` — repeat for every position. Fully self-supervised from raw text. |
+| 2. Loss formula | `L(θ) = -Σ_{t=1}^T log P(x_t | x₁...x_{t-1}; θ)` — factorizes sequence probability via chain rule. |
+| 3. AR LM vs MLM | MLM predicts 15% masked tokens from bidirectional context. AR LM predicts **every token** from left-to-right only. |
+| 4. Why causal needed | At generation time, future tokens don't exist. Causal attention makes training and inference use the same computational pattern. |
+| 5. Training vs inference | Training: predict every next token in parallel. Inference: generate one word at a time, feeding output back in. |
+
+</details>
+
+---
+
+## Exercise GPT-3: Generation Sampling Strategies
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is greedy decoding and its trade-off? | |
+| 2. How does temperature sampling work? | |
+| 3. What is top-k sampling? | |
+| 4. What is top-p (nucleus) sampling? | |
+| 5. Which strategy is used in most production systems? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Greedy decoding | Always pick argmax token. Deterministic, focused but can be repetitive/robotic. |
+| 2. Temperature | Rescale logits by T: `P(x_i) = exp(z_i/T)/Σ exp(z_j/T)`. T→0 = greedy; T>1 = more random/creative; T=1 = unmodified. |
+| 3. Top-k | Restrict sampling to the k highest-probability tokens; discard the long, low-probability tail. |
+| 4. Top-p (Nucleus) | Keep the smallest set whose cumulative probability ≥ p; adapts candidate pool size to model confidence. |
+| 5. Production default | **Top-k + Top-p** with moderate temperature — balances coherence and diversity. |
+
+</details>
+
+---
+
+# SECTION 3: SCALING & EFFICIENCY
+
+---
+
+## Exercise SCALING-1: Scaling Laws
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What did Kaplan et al. (2020) find about scaling? | |
+| 2. What is the Chinchilla finding? | |
+| 3. What is the Chinchilla rule of thumb for optimal N/D? | |
+| 4. Why was Chinchilla important? | |
+| 5. What is the practical implication for model development? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Kaplan et al. | Test loss decreases as a **power law** in model size `N`, data `D`, and compute `C` — predictable improvement with scale, no wall observed. |
+| 2. Chinchilla (2022) | Most large models were **undertrained** — too many parameters, too little data. Compute-optimal training uses roughly `D ≈ 20N` tokens. |
+| 3. Rule of thumb | For a 70B parameter model, train on ~1.4T tokens. |
+| 4. Why important | A smaller model on more data can outperform a larger model on less data at the **same compute cost**. |
+| 5. Practical implication | Instead of just making models bigger, optimize the N/D ratio for the available compute budget. |
+
+</details>
+
+---
+
+## Exercise SCALING-2: In-Context Learning & Emergent Abilities
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is in-context learning? | |
+| 2. What are zero-shot, one-shot, and few-shot prompting? | |
+| 3. How does in-context learning work without weight updates? | |
+| 4. What are emergent abilities? | |
+| 5. Give an example of an emergent ability. | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. In-context learning | Models adapt to new tasks from prompt examples without any weight updates — all adaptation happens via self-attention at inference time. |
+| 2. Zero/one/few-shot | **Zero-shot**: task description only. **One-shot**: one example. **Few-shot**: several examples (a handful to dozens) in the prompt. |
+| 3. How it works | Self-attention over the prompt lets the model infer the task pattern from examples; no gradients are involved. |
+| 4. Emergent abilities | Capabilities that appear sharply at certain scales rather than gradually — near-random performance, then a jump. |
+| 5. Example | Chain-of-thought reasoning, multi-step arithmetic, instruction following — near zero in smaller models, strong in larger ones. |
+
+</details>
+
+---
+
+## Exercise SCALING-3: Efficient Fine-Tuning — LoRA
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What problem does LoRA solve? | |
+| 2. How does LoRA work? | |
+| 3. Write the LoRA forward pass formula. | |
+| 4. How many parameters does LoRA train vs full fine-tuning? | |
+| 5. What is the initialization strategy for LoRA? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Problem solved | Full fine-tuning of large models is expensive. LoRA adapts models with far fewer trainable parameters. |
+| 2. How LoRA works | Freezes pretrained weights `W₀`, learns low-rank update `ΔW = BA` where `r ≪ d` (`B ∈ ℝ^{d×r}`, `A ∈ ℝ^{r×d}`). |
+| 3. Formula | `h = W₀x + BAx` — the adapted forward pass adds a low-rank term. |
+| 4. Parameter savings | Training `2dr` instead of `d²` parameters. For `d=4096, r=8`: **250× fewer** trainable parameters. |
+| 5. Initialization | `A` initialized randomly (small values), `B = 0` — the adapted model starts identical to the pretrained one. |
+
+</details>
+
+---
+
+## Exercise SCALING-4: Quantization & Distillation
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is quantization? | |
+| 2. What are common quantization targets? | |
+| 3. How does GPTQ work? | |
+| 4. What is knowledge distillation? | |
+| 5. What is the benefit of distillation? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Quantization | Store and compute weights using lower precision (FP32 → FP16/INT8/INT4) to reduce memory and speed up inference. |
+| 2. Common targets | FP16/BF16 (16-bit), INT8 (8-bit), INT4 (4-bit) — each roughly halves memory. |
+| 3. GPTQ | Quantizes layer-by-layer using a small calibration dataset to minimize reconstruction error — achieves INT4 with minimal accuracy loss. |
+| 4. Knowledge distillation | Train a smaller "student" model to mimic a larger "teacher" using soft labels (teacher's full output distribution). |
+| 5. Benefit | DistilBERT: 40% smaller, 60% faster, retaining ~97% of BERT's performance. Soft labels encode richer information than hard labels. |
+
+</details>
+
+---
+
+# SECTION 4: RAG — RETRIEVAL-AUGMENTED GENERATION
+
+---
+
+## Exercise RAG-1: Fundamentals
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What problem does RAG solve? | |
+| 2. Why do LLMs hallucinate? | |
+| 3. What is the RAG architecture? | |
+| 4. What is the difference between RAG and fine-tuning? | |
+| 5. What is semantic search vs keyword search? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Problem solved | LLMs hallucinate and lack up-to-date/private information. RAG grounds responses in retrieved documents. |
+| 2. Why LLMs hallucinate | LLMs generate "probable" text, not "truthful" text. Knowledge gaps → plausible but incorrect responses. |
+| 3. RAG architecture | Query → Retrieve relevant documents → Augment prompt → LLM generates grounded response. |
+| 4. RAG vs fine-tuning | Fine-tuning changes weights; RAG changes what information the model has access to. They are complementary. |
+| 5. Semantic vs keyword | Keyword (BM25/TF-IDF) = exact term matches. Semantic = embedding similarity. Best: combine both with RRF. |
+
+</details>
+
+---
+
+## Exercise RAG-2: Retrieval & Vector Databases
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is RRF (Reciprocal Rank Fusion)? | |
+| 2. What is HNSW? | |
+| 3. Why is HNSW more efficient than KNN? | |
+| 4. What is the role of a vector database in RAG? | |
+| 5. What are common vector databases? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. RRF | Combines rankings from multiple retrievers: `score = Σ 1/(k + rank)` — rewards documents highly ranked by any method. |
+| 2. HNSW | **Hierarchical Navigable Small World** — a graph-based approximate nearest neighbor algorithm with logarithmic search time. |
+| 3. HNSW vs KNN | KNN = O(n·d) linear search. HNSW = O(log n) via hierarchical graphs with exponentially fewer vectors in each layer. |
+| 4. Vector database role | Stores document embeddings and enables fast semantic search at scale (billions of vectors). |
+| 5. Common VDBs | Weaviate, Pinecone, Qdrant, Milvus, pgvector. |
+
+</details>
+
+---
+
+## Exercise RAG-3: Chunking Strategies
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. Why do we need chunking in RAG? | |
+| 2. What is the problem with using whole documents? | |
+| 3. What is overlapping chunking? | |
+| 4. What is semantic chunking? | |
+| 5. Why does chunking improve retrieval? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Why chunking | LLMs have token limits, and whole documents create "averaged" representations → poor retrieval relevance. |
+| 2. Problem with whole documents | Single vector for a book can't represent specific chapters/topics → compresses all content into "average" representation. |
+| 3. Overlapping chunking | Chunks overlap by 10-25% to preserve context across boundaries — words near the edge appear in multiple chunks. |
+| 4. Semantic chunking | Split by sentences, paragraphs, headers, or function definitions — preserves meaning boundaries. |
+| 5. Why improves retrieval | Chunks let the retriever find the most relevant passage, not just a vague summary of the whole document. |
+
+</details>
+
+---
+
+## Exercise RAG-4: Complete Cheat Sheet
+
+### Fill in all blanks:
+
+**BERT Model Type:** ___________ (encoder/decoder) with ___________ attention.
+
+**BERT Pretraining Objectives:** ___________ (masked tokens) and ___________ (sentence pairs).
+
+**80/10/10 Rule:** 80% → ___________, 10% → ___________, 10% → ___________.
+
+**GPT Model Type:** ___________ (encoder/decoder) with ___________ attention.
+
+**Autoregressive LM Objective:** `L(θ) = ___________`
+
+**Scaling Laws:** Loss ∝ ___________ in model size, data, and compute.
+
+**Chinchilla Rule:** Optimal D ≈ ___________ tokens.
+
+**LoRA:** Freezes ___________ and learns `ΔW = ___________` where `r ≪ d`.
+
+**Quantization:** FP32 → ___________ → ___________ → ___________
+
+**RAG Pipeline:** Query → ___________ → Augmented Prompt → ___________
+
+**RRF:** `score = Σ 1/(___________ + rank)`
+
+**HNSW:** ___________ (Hierarchical Navigable Small World) — approximate ___________ search.
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+**BERT Model Type:** **encoder-only** with **fully bidirectional** attention.
+
+**BERT Pretraining Objectives:** **MLM** (masked tokens) and **NSP** (sentence pairs).
+
+**80/10/10 Rule:** 80% → **[MASK]** , 10% → **random token** , 10% → **unchanged**.
+
+**GPT Model Type:** **decoder-only** with **causal** attention.
+
+**Autoregressive LM Objective:** `L(θ) = **-Σ log P(xₜ | x₁...xₜ₋₁; θ)**`
+
+**Scaling Laws:** Loss ∝ **power law** in model size, data, and compute.
+
+**Chinchilla Rule:** Optimal D ≈ **20N** tokens.
+
+**LoRA:** Freezes **W₀** and learns `ΔW = **BA**` where `r ≪ d`.
+
+**Quantization:** FP32 → **FP16/BF16** → **INT8** → **INT4**
+
+**RAG Pipeline:** Query → **Retrieval** → Augmented Prompt → **LLM**
+
+**RRF:** `score = Σ 1/(**k** + rank)`
+
+**HNSW:** **Hierarchical Navigable Small World** — approximate **nearest neighbor** search.
+
+</details>
+
+---
+
+# 📊 COMPLETE COVERAGE SUMMARY
+
+| Category | Concepts | Status |
+|----------|----------|--------|
+| BERT | Encoder-only, MLM, NSP, 80/10/10 | ✅ 100% |
+| BERT Fine-Tuning | Classification, NER, QA | ✅ 100% |
+| GPT | Decoder-only, causal attention, AR LM | ✅ 100% |
+| Generation | Temperature, top-k, top-p | ✅ 100% |
+| Scaling Laws | Kaplan, Chinchilla, D ≈ 20N | ✅ 100% |
+| In-Context Learning | Zero/one/few-shot, emergent abilities | ✅ 100% |
+| Efficient Fine-Tuning | LoRA, quantization, distillation | ✅ 100% |
+| RAG | Architecture, retrieval, chunking | ✅ 100% |
+| Vector Databases | HNSW, semantic search, RRF | ✅ 100% |
+| **TOTAL** | **All Week 6 DL concepts** | ✅ **100%** |
+
+---
+
+## 📝 How to Use This Document
+
+1. **Read the question**, write your answer in the blank/box
+2. **Click the dropdown** to reveal the model answer
+3. **Compare** your answer to the model
+4. **Re-study** any sections where you got something wrong
+5. **Mark** your confidence level for each topic
+
+---
+
+**Good luck with your studies! 🎯**

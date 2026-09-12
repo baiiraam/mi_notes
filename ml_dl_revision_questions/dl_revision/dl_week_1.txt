@@ -1,0 +1,1662 @@
+# Week 1 DL — Complete Revision Materials
+
+Based on your Week 1 slides covering **Why Deep Learning, MLPs, MLE Framework, and Activation Functions**, here are comprehensive revision materials following the established format.
+
+---
+
+## 1. CONFIDENCE TRACKER — WEEK 1 DL
+
+| Confidence Level | Meaning |
+|------------------|---------|
+| 🟢 **Green** | I knew this cold — could explain it to someone else |
+| 🟡 **Yellow** | I got it right, but I wasn't 100% sure / guessed |
+| 🔴 **Red** | I had no idea — got it wrong or completely guessed |
+
+---
+
+| Exercise | Topic | 🟢 | 🟡 | 🔴 | Re-study? |
+|----------|-------|----|----|----|-----------|
+| Ex 1 | Why Deep Learning? — Paradigm Shift | | | | ☐ |
+| Ex 2 | The 3 Pillars (Data, Compute, Algorithms) | | | | ☐ |
+| Ex 3 | Architecture Matching — MLP, CNN, RNN, Transformer | | | | ☐ |
+| Ex 4 | MLP Fundamentals — Forward Pass | | | | ☐ |
+| Ex 5 | MLE Framework — Loss Functions | | | | ☐ |
+| Ex 6 | MSE — Regression Loss | | | | ☐ |
+| Ex 7 | Binary Cross-Entropy — Classification Loss | | | | ☐ |
+| Ex 8 | Categorical Cross-Entropy — Multiclass Loss | | | | ☐ |
+| Ex 9 | Weight Initialization — Xavier vs He | | | | ☐ |
+| Ex 10 | Activation Functions — Sigmoid, Tanh, ReLU | | | | ☐ |
+| Ex 11 | Activation Functions — Leaky ReLU, ELU, GELU | | | | ☐ |
+| Ex 12 | Vanishing Gradients — Causes and Fixes | | | | ☐ |
+| Ex 13 | Dying ReLU — Causes and Fixes | | | | ☐ |
+| Ex 14 | The Geometry of Loss Landscapes | | | | ☐ |
+| Ex 15 | Regularization — L1, L2, Dropout | | | | ☐ |
+| Ex 16 | The Black Box Problem & XAI | | | | ☐ |
+| Ex 17 | Data Bottlenecks in Deep Learning | | | | ☐ |
+| Ex 18 | Compute Bottlenecks & Hardware | | | | ☐ |
+| Ex 19 | Feature Engineering vs Representation Learning | | | | ☐ |
+| Ex 20 | Complete Cheat Sheet | | | | ☐ |
+
+---
+
+## 2. 🎯 TEACH IT SUMMARY
+
+### The Big Picture — Week 1 DL
+
+Week 1 introduces the **foundations of deep learning** — why it works, what makes it different from classical machine learning, and the core building blocks of neural networks.
+
+**Part 1: Why Deep Learning?** The key idea is **representation learning** — instead of manually engineering features (like SIFT for images or TF-IDF for text), deep learning learns features automatically from raw data. This is a paradigm shift from "feature engineering" to "feature learning." Three things made this possible: massive data (we have more than ever), compute power (GPUs/TPUs make training feasible), and algorithmic advances (backpropagation, better optimizers). Deep learning models continue improving with more data, while classical models plateau.
+
+**Part 2: MLPs & How They Learn.** A Multi-Layer Perceptron (MLP) is the foundational neural network architecture. It consists of input, hidden, and output layers where each neuron connects to every neuron in the next layer (fully connected). The learning process has three steps: forward pass (compute predictions), loss computation (measure error), and backpropagation (compute gradients). The MLE (Maximum Likelihood Estimation) framework tells us which loss function to use: MSE for regression (Gaussian noise assumption), Binary Cross-Entropy for binary classification (Bernoulli assumption), and Categorical Cross-Entropy for multiclass classification (Multinomial assumption).
+
+**Part 3: Activation Functions.** These introduce non-linearity — without them, multiple layers collapse to a single linear transformation. ReLU (`max(0,x)`) is the default for hidden layers because it's cheap, sparse, and avoids vanishing gradients. Sigmoid and Tanh saturate at extremes, causing vanishing gradients in deep networks. GELU is the state-of-the-art for Transformers. The choice of activation function directly impacts gradient flow and thus trainability.
+
+**The Connecting Thread:** Deep learning replaces manual feature engineering with learnable representations. The architecture (MLP), loss function (from MLE), and activation functions work together to enable learning from raw data. The trade-off is that deep learning trades interpretability and data efficiency for scalability and performance.
+
+---
+
+## 3. ⚠️ COMMON PITFALLS IN PRACTICE
+
+**How to use:** These are practical mistakes that happen in code and experiments. Read each pitfall and the fix before your next project.
+
+| Pitfall | Why It Happens | How to Avoid |
+|---------|----------------|--------------|
+| **1. Using Sigmoid/Tanh in deep networks** | Gradients saturate at tails → vanish through many layers | Use **ReLU** or **GELU** for hidden layers. Save Sigmoid for binary output only. |
+| **2. Confusing Xavier and He initialization** | Using Xavier with ReLU → variance halves each layer → signal dies | **He** for ReLU/GELU; **Xavier** for Sigmoid/Tanh. |
+| **3. Choosing wrong loss function** | Using MSE for classification (saturates with Sigmoid) | MSE for **regression**; Cross-Entropy for **classification**. |
+| **4. Ignoring Dying ReLU** | Learning rate too high → many neurons stuck at 0 | Use **Leaky ReLU**, **ELU**, or **He initialization**. Monitor dead neuron fraction. |
+| **5. Not standardizing inputs** | Features on different scales → gradients dominated by large features | **Standardize** (Z-score) before training. |
+| **6. Misunderstanding the paradigm shift** | Still manually engineering features for deep learning | Let the network learn features. Focus on **architecture and data**. |
+| **7. Assuming more data always helps** | Low-quality, imbalanced, or noisy data hurts | Clean data first. Use augmentation, transfer learning. |
+| **8. Forgetting the bias-variance tradeoff** | Deep models overfit on small datasets | Use **regularization** (Dropout, L2), early stopping, or transfer learning. |
+| **9. Misdiagnosing loss curves** | Plateau could be saddle, noise floor, or dead units | Check gradient norms and activation histograms. |
+| **10. Confusing local vs global minima** | Thinking every stationary point is a minimum | In non-convex networks, saddles dominate. Use noise to escape. |
+
+---
+
+## 4. ONE-SENTENCE SUMMARY — WEEK 1 DL
+
+**How to use:** For each concept, try to write your own one-sentence summary *before* clicking to reveal the model answer.
+
+---
+
+### Why Deep Learning & Paradigm Shift
+
+<details>
+<summary><b>Paradigm Shift (Feature Engineering → Representation Learning)</b> — Try your own first</summary>
+
+**Model Answer:** Deep learning replaces manual feature engineering with automatic representation learning from raw data — the model learns what features matter rather than relying on human experts.
+
+</details>
+
+---
+
+<details>
+<summary><b>Representation Learning</b> — Try your own first</summary>
+
+**Model Answer:** A set of techniques that allow a system to automatically discover the representations needed for feature detection or classification from raw data, learning hierarchical features from simple edges to complex objects.
+
+</details>
+
+---
+
+<details>
+<summary><b>The 3 Pillars of Deep Learning</b> — Try your own first</summary>
+
+**Model Answer:** Data (massive datasets), Compute (GPUs/TPUs for parallel processing), and Algorithms (backpropagation, attention, better optimizers) — all three are necessary for deep learning's success.
+
+</details>
+
+---
+
+<details>
+<summary><b>Feature Engineering (Classical ML)</b> — Try your own first</summary>
+
+**Model Answer:** Domain experts manually design features (like SIFT for images or TF-IDF for text) which are brittle, subjective, and don't scale with data volume or complexity.
+
+</details>
+
+---
+
+<details>
+<summary><b>Data Bottleneck</b> — Try your own first</summary>
+
+**Model Answer:** Deep learning models continue improving with more data, but they require large, diverse, labeled datasets — traditional ML algorithms plateau beyond a certain data volume.
+
+</details>
+
+---
+
+<details>
+<summary><b>Compute Bottleneck</b> — Try your own first</summary>
+
+**Model Answer:** GPUs/TPUs enable massive parallel matrix multiplication, making deep learning practical and allowing training of billion-parameter models.
+
+</details>
+
+---
+
+<details>
+<summary><b>Black Box Problem</b> — Try your own first</summary>
+
+**Model Answer:** Deep models are opaque — we can't easily understand why they make decisions, which is critical in high-stakes applications like healthcare, autonomous driving, and finance.
+
+</details>
+
+---
+
+<details>
+<summary><b>XAI (Explainable AI)</b> — Try your own first</summary>
+
+**Model Answer:** Tools like saliency maps, SHAP, and LIME help us understand what the model is "looking at" and why it made a particular decision.
+
+</details>
+
+---
+
+<details>
+<summary><b>Foundation Models</b> — Try your own first</summary>
+
+**Model Answer:** Large models (like GPT) pre-trained on massive, diverse datasets that can be adapted to a wide array of downstream tasks via prompting or fine-tuning.
+
+</details>
+
+---
+
+<details>
+<summary><b>Multimodal AI</b> — Try your own first</summary>
+
+**Model Answer:** Models that process and reason across multiple data types (text, images, audio, video) simultaneously in a unified representation space.
+
+</details>
+
+---
+
+### MLP Fundamentals
+
+<details>
+<summary><b>MLP (Multi-Layer Perceptron)</b> — Try your own first</summary>
+
+**Model Answer:** A foundational feedforward neural network with fully connected (dense) layers; works for tabular data but assumes no spatial or temporal structure.
+
+</details>
+
+---
+
+<details>
+<summary><b>Forward Pass</b> — Try your own first</summary>
+
+**Model Answer:** The process of passing input data through the network layer by layer, applying affine transformations (`z = W·a + b`) and non-linear activations (`a = σ(z)`) to generate a prediction.
+
+</details>
+
+---
+
+<details>
+<summary><b>Backpropagation</b> — Try your own first</summary>
+
+**Model Answer:** The algorithm that efficiently computes gradients of the loss with respect to every weight using the chain rule, enabling training via gradient descent.
+
+</details>
+
+---
+
+<details>
+<summary><b>MLE (Maximum Likelihood Estimation)</b> — Try your own first</summary>
+
+**Model Answer:** A statistical framework where we find parameters that maximize the probability of observing our training data — the foundation for deriving loss functions.
+
+</details>
+
+---
+
+<details>
+<summary><b>MSE (Mean Squared Error)</b> — Try your own first</summary>
+
+**Model Answer:** Under MLE, assuming Gaussian noise in regression, minimizing MSE (`(1/N)Σ(ŷ−y)²`) is equivalent to maximizing likelihood.
+
+</details>
+
+---
+
+<details>
+<summary><b>Binary Cross-Entropy (BCE)</b> — Try your own first</summary>
+
+**Model Answer:** Under MLE, assuming a Bernoulli distribution for binary classification, minimizing BCE (`-[y·log(ŷ)+(1-y)·log(1-ŷ)]`) is equivalent to maximizing likelihood.
+
+</details>
+
+---
+
+<details>
+<summary><b>Categorical Cross-Entropy (CCE)</b> — Try your own first</summary>
+
+**Model Answer:** Under MLE, assuming a Multinomial distribution for multiclass classification, minimizing CCE (`-log(ŷ_target)`) is equivalent to maximizing likelihood.
+
+</details>
+
+---
+
+<details>
+<summary><b>Softmax</b> — Try your own first</summary>
+
+**Model Answer:** Turns logits into a valid probability distribution (all values between 0 and 1, summing to 1) for multiclass classification using `softmax(z)_i = e^z_i / Σ e^z_j`.
+
+</details>
+
+---
+
+<details>
+<summary><b>Xavier (Glorot) Initialization</b> — Try your own first</summary>
+
+**Model Answer:** Weight initialization designed for Sigmoid/Tanh activations to maintain variance across layers, with `Var(W) = 1/n_in`.
+
+</details>
+
+---
+
+<details>
+<summary><b>He (Kaiming) Initialization</b> — Try your own first</summary>
+
+**Model Answer:** Weight initialization designed for ReLU activations; scales weights by a factor of 2 to compensate for ReLU zeroing out half the inputs, with `Var(W) = 2/n_in`.
+
+</details>
+
+---
+
+### Activation Functions
+
+<details>
+<summary><b>ReLU (Rectified Linear Unit)</b> — Try your own first</summary>
+
+**Model Answer:** The default hidden-layer activation — outputs 0 for negatives, x for positives (`max(0,x)`); cheap, sparse, and avoids vanishing gradients in the positive regime.
+
+</details>
+
+---
+
+<details>
+<summary><b>Sigmoid</b> — Try your own first</summary>
+
+**Model Answer:** Squashes outputs to (0,1) using `1/(1+e^(-z))`; historically popular but suffers from vanishing gradients and is not zero-centered.
+
+</details>
+
+---
+
+<details>
+<summary><b>Tanh</b> — Try your own first</summary>
+
+**Model Answer:** Squashes outputs to (-1,1) using `(e^z-e^(-z))/(e^z+e^(-z))`; zero-centered but still suffers from vanishing gradients.
+
+</details>
+
+---
+
+<details>
+<summary><b>Dying ReLU</b> — Try your own first</summary>
+
+**Model Answer:** When a neuron's input is consistently negative, it outputs 0 and its gradient is 0, making it permanently "dead" and unable to contribute to learning.
+
+</details>
+
+---
+
+<details>
+<summary><b>Leaky ReLU</b> — Try your own first</summary>
+
+**Model Answer:** Fixes Dying ReLU by allowing a small, non-zero gradient for negative inputs (`f(z) = max(αz, z)` with α≈0.01), keeping neurons "alive."
+
+</details>
+
+---
+
+<details>
+<summary><b>ELU (Exponential Linear Unit)</b> — Try your own first</summary>
+
+**Model Answer:** A smoother variant of ReLU with a negative region that pushes mean activations closer to zero, improving training stability.
+
+</details>
+
+---
+
+<details>
+<summary><b>GELU (Gaussian Error Linear Unit)</b> — Try your own first</summary>
+
+**Model Answer:** The standard for Transformers — a smooth, probabilistic activation (`z·Φ(z)`) that weights inputs by their magnitude, providing soft gating.
+
+</details>
+
+---
+
+<details>
+<summary><b>Vanishing Gradients</b> — Try your own first</summary>
+
+**Model Answer:** Gradients become exponentially small through many layers, preventing early layers from learning; fixed by ReLU/GELU, Batch Normalization, and residual connections.
+
+</details>
+
+---
+
+<details>
+<summary><b>Sparsity (in ReLU)</b> — Try your own first</summary>
+
+**Model Answer:** In ReLU, many neurons output 0, creating sparse representations that are computationally efficient and act as implicit regularization.
+
+</details>
+
+---
+
+<details>
+<summary><b>Loss Landscape</b> — Try your own first</summary>
+
+**Model Answer:** The high-dimensional surface of the loss function; for deep networks it's non-convex with saddle points and plateaus, unlike the simple convex bowl of linear models.
+
+</details>
+
+---
+
+### Architecture Comparison
+
+<details>
+<summary><b>CNN (Convolutional Neural Network)</b> — Try your own first</summary>
+
+**Model Answer:** Designed for grid-like data (images); uses sliding filters (convolutions) to exploit spatial locality and translation invariance with far fewer parameters than fully connected layers.
+
+</details>
+
+---
+
+<details>
+<summary><b>RNN (Recurrent Neural Network)</b> — Try your own first</summary>
+
+**Model Answer:** Designed for sequences; maintains a hidden "memory" state updated at each time step but suffers from vanishing gradients and is hard to parallelize.
+
+</details>
+
+---
+
+<details>
+<summary><b>Transformer</b> — Try your own first</summary>
+
+**Model Answer:** Uses self-attention to process entire sequences in parallel and capture long-range dependencies; powers modern LLMs and has become the default for sequence modeling.
+
+</details>
+
+---
+
+<details>
+<summary><b>Inductive Bias</b> — Try your own first</summary>
+
+**Model Answer:** The built-in assumption an architecture makes about the data — CNN assumes spatial locality matters; Transformer assumes global attention; MLP assumes nothing.
+
+</details>
+
+---
+
+<details>
+<summary><b>Weight Sharing (CNN)</b> — Try your own first</summary>
+
+**Model Answer:** The same filter is applied everywhere in the image, drastically reducing the number of parameters and enabling translation invariance.
+
+</details>
+
+---
+
+<details>
+<summary><b>Translation Invariance</b> — Try your own first</summary>
+
+**Model Answer:** A feature (like an edge) can be detected regardless of where it appears in the image because the same filter slides across all spatial locations.
+
+</details>
+
+---
+
+## 5. QUICK REFERENCE CHEAT SHEET — WEEK 1 DL
+
+### Key Formulas
+
+<details>
+<summary><b>MSE (Mean Squared Error)</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Formula** | `MSE = (1/N) Σ (ŷ - y)²` |
+| **Task** | Regression |
+| **MLE Assumption** | Gaussian (Normal) noise |
+
+</details>
+
+---
+
+<details>
+<summary><b>BCE (Binary Cross-Entropy)</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Formula** | `BCE = -[y·log(ŷ) + (1-y)·log(1-ŷ)]` |
+| **Task** | Binary Classification |
+| **MLE Assumption** | Bernoulli distribution |
+
+</details>
+
+---
+
+<details>
+<summary><b>CCE (Categorical Cross-Entropy)</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Formula** | `CCE = -log(ŷ_target)` |
+| **Task** | Multiclass Classification |
+| **MLE Assumption** | Multinomial distribution |
+
+</details>
+
+---
+
+<details>
+<summary><b>Softmax</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Formula** | `Softmax(z)_i = e^z_i / Σ e^z_j` |
+| **Task** | Multiclass probability distribution |
+| **Range** | (0,1), sums to 1 |
+
+</details>
+
+---
+
+<details>
+<summary><b>ReLU</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Formula** | `ReLU(z) = max(0, z)` |
+| **Range** | [0, ∞) |
+| **Pros** | Fast, sparse, no vanishing gradient |
+| **Cons** | Dying ReLU |
+
+</details>
+
+---
+
+<details>
+<summary><b>Sigmoid</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Formula** | `Sigmoid(z) = 1/(1 + e^(-z))` |
+| **Range** | (0, 1) |
+| **Pros** | Natural for binary probability |
+| **Cons** | Vanishing gradients, not zero-centered |
+
+</details>
+
+---
+
+<details>
+<summary><b>Tanh</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Formula** | `Tanh(z) = (e^z - e^(-z))/(e^z + e^(-z))` |
+| **Range** | (-1, 1) |
+| **Pros** | Zero-centered |
+| **Cons** | Vanishing gradients |
+
+</details>
+
+---
+
+<details>
+<summary><b>GELU</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Formula** | `GELU(z) = z·Φ(z)` |
+| **Range** | (-∞, ∞) |
+| **Pros** | Smooth, state-of-the-art for Transformers |
+| **Cons** | Expensive to compute |
+
+</details>
+
+---
+
+### Weight Initialization
+
+<details>
+<summary><b>Xavier (Glorot) vs He (Kaiming)</b> — Try to recall first</summary>
+
+| Method | Best For | Scale | Why |
+|--------|----------|-------|-----|
+| **Xavier (Glorot)** | Sigmoid / Tanh | `Var(W) = 1/n_in` | Maintains variance across layers |
+| **He (Kaiming)** | ReLU / Leaky ReLU | `Var(W) = 2/n_in` | Compensates for ReLU zeroing out half inputs |
+
+</details>
+
+---
+
+### Architecture Comparison
+
+<details>
+<summary><b>MLP, CNN, RNN, Transformer</b> — Try to recall first</summary>
+
+| Architecture | Data Type | Key Bias | Key Mechanism |
+|--------------|-----------|----------|---------------|
+| **MLP** | Tabular | None (General) | Dense/Fully-connected layers |
+| **CNN** | Grid (Images) | Spatial Locality | Convolution kernels |
+| **RNN** | Sequence | Temporal Order | Hidden state (memory) |
+| **Transformer** | Sequence | Global Attention | Self-attention |
+
+</details>
+
+---
+
+### MLE → Loss Function Mapping
+
+<details>
+<summary><b>MLE Loss Mapping</b> — Try to recall first</summary>
+
+| Task | Assumed Distribution | Loss Function |
+|------|---------------------|---------------|
+| Regression | Gaussian (Normal) | **MSE** |
+| Binary Classification | Bernoulli | **Binary Cross-Entropy** |
+| Multiclass Classification | Multinomial | **Categorical Cross-Entropy** |
+
+</details>
+
+---
+
+### Key Defaults
+
+<details>
+<summary><b>Key Defaults</b> — Try to recall first</summary>
+
+| Concept | Default |
+|---------|---------|
+| Default hidden activation | **ReLU** |
+| Default output for binary classification | **Sigmoid** |
+| Default output for multiclass | **Softmax** |
+| Default output for regression | **Linear** (no activation) |
+| He initialization scale | `Var(W) = 2/n_in` |
+| Xavier initialization scale | `Var(W) = 1/n_in` |
+| Dropout default rate | 0.5 |
+
+</details>
+
+---
+
+## 6. CONNECTIONS MAP — WEEK 1 DL
+
+### 🌳 TEXT-BASED CONCEPT MAP
+
+```
+╔══════════════════════════════════════════════════════════════════════════╗
+║                                                                          ║
+║                    WEEK 1 DL: DEEP LEARNING FOUNDATIONS                ║
+║                                                                          ║
+║                    ┌─────────────────────────────────────┐              ║
+║                    │   WHY DEEP LEARNING?               │              ║
+║                    └──────────────┬──────────────────────┘              ║
+║                                   │                                      ║
+║    ┌──────────────────────────────┼──────────────────────────────┐      ║
+║    │                              │                              │      ║
+║    ▼                              ▼                              ▼      ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │  REPRESENT-  │          │  THE 3       │          │  LIMITATIONS │  ║
+║ │  ATION       │          │  PILLARS     │          │  OF FEATURE  │  ║
+║ │  LEARNING    │          │  Data,       │          │  ENGINEERING │  ║
+║ └──────┬───────┘          │  Compute,    │          └──────┬───────┘  ║
+║        │                  │  Algorithms  │                 │          ║
+║        │                  └──────────────┘                 │          ║
+║        └─────────────────────────┬─────────────────────────┘          ║
+║                                  │                                     ║
+║                                  ▼                                     ║
+║                    ┌─────────────────────────────────────┐             ║
+║                    │       ARCHITECTURES                 │             ║
+║                    └──────────────┬──────────────────────┘             ║
+║                                   │                                     ║
+║    ┌──────────────────────────────┼──────────────────────────────┐     ║
+║    │                              │                              │     ║
+║    ▼                              ▼                              ▼     ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │   MLP        │          │   CNN        │          │   RNN        │  ║
+║ │  (Tabular)   │          │  (Images)    │          │ (Sequences)  │  ║
+║ │  Dense layers│          │  Convolution │          │  Hidden State│  ║
+║ └──────┬───────┘          └──────┬───────┘          └──────┬───────┘  ║
+║        │                         │                         │          ║
+║        └─────────────────────────┼─────────────────────────┘          ║
+║                                  │                                     ║
+║                                  ▼                                     ║
+║                    ┌─────────────────────────────────────┐             ║
+║                    │   TRANSFORMER (Self-Attention)     │             ║
+║                    │   Parallel · Global Context        │             ║
+║                    └──────────────┬──────────────────────┘             ║
+║                                   │                                     ║
+║                                   ▼                                     ║
+║                    ┌─────────────────────────────────────┐             ║
+║                    │   TRAINING PROCESS                  │             ║
+║                    └──────────────┬──────────────────────┘             ║
+║                                   │                                     ║
+║    ┌──────────────────────────────┼──────────────────────────────┐     ║
+║    │                              │                              │     ║
+║    ▼                              ▼                              ▼     ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │  FORWARD     │          │  LOSS        │          │  BACKPROP    │  ║
+║ │  PASS        │          │  FUNCTIONS   │          │  (Gradients) │  ║
+║ │  z = W·a + b │          │  MSE / BCE   │          │  Chain Rule  │  ║
+║ │  a = σ(z)   │          │  / CCE       │          │              │  ║
+║ └──────┬───────┘          └──────┬───────┘          └──────┬───────┘  ║
+║        │                         │                         │          ║
+║        └─────────────────────────┼─────────────────────────┘          ║
+║                                  │                                     ║
+║                                  ▼                                     ║
+║                    ┌─────────────────────────────────────┐             ║
+║                    │   ACTIVATION FUNCTIONS              │             ║
+║                    │   ReLU · Sigmoid · Tanh · GELU     │             ║
+║                    │   Introduce Non-Linearity           │             ║
+║                    └──────────────┬──────────────────────┘             ║
+║                                   │                                     ║
+║                                   ▼                                     ║
+║                    ┌─────────────────────────────────────┐             ║
+║                    │   GRADIENT FLOW                     │             ║
+║                    │   Vanishing · Exploding · Dying    │             ║
+║                    └──────────────┬──────────────────────┘             ║
+║                                   │                                     ║
+║                                   ▼                                     ║
+║                    ┌─────────────────────────────────────┐             ║
+║                    │   CHALLENGES & DIAGNOSTICS         │             ║
+║                    │   Black Box · Data · Compute       │             ║
+║                    └─────────────────────────────────────┘             ║
+║                                                                         ║
+╚══════════════════════════════════════════════════════════════════════════╝
+```
+
+---
+
+### 🔗 KEY CONNECTION EXPLANATIONS
+
+<details>
+<summary><b>Connection 1: How does the paradigm shift connect everything?</b></summary>
+
+```
+Classical ML              →    Deep Learning
+───────────────────────────────────────────────────────────
+Manual Feature Engineering →    Representation Learning
+    ↓                              ↓
+Features are human-designed →    Features are learned
+    ↓                              ↓
+Limited by human intuition →    Optimized by data
+    ↓                              ↓
+Brittle, non-scalable      →    Adaptable, scalable
+    ↓                              ↓
+Requires domain experts    →    Requires data + compute
+
+The cascade: Once you shift to representation learning, you need:
+→ Architectures that can learn representations (MLP/CNN/RNN/Transformer)
+→ A learning process (forward pass + loss + backpropagation)
+→ The right activation functions to keep gradients flowing
+```
+
+**Key insight:** The paradigm shift is not just about "using neural networks" — it's about fundamentally changing how we approach problems.
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 2: How does activation function choice affect training?</b></summary>
+
+```
+MLE Framework → Loss Function → Backpropagation → Activation Function → Gradient Flow → Training Stability
+
+The activation function determines how gradients flow during backpropagation:
+• Sigmoid/Tanh: gradients ≤ 0.25 → VANISH in deep networks
+• ReLU: gradient = 1 for positive inputs → FLOWS through layers
+• GELU: smooth, non-saturating → STABLE for very deep networks
+
+So the choice of activation isn't arbitrary — it directly impacts whether the network can learn at all!
+```
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 3: How do MLE and loss functions connect to output activations?</b></summary>
+
+```
+Problem Type → MLE Distribution → Loss Function → Output Activation
+
+┌─────────────────────────────────────────────────────────────┐
+│ Regression (predict numbers)                              │
+│   → Gaussian distribution                                 │
+│   → Mean Squared Error (MSE)                             │
+│   → Linear output (no activation)                        │
+├─────────────────────────────────────────────────────────────┤
+│ Binary Classification (yes/no)                           │
+│   → Bernoulli distribution                                │
+│   → Binary Cross-Entropy (BCE)                          │
+│   → Sigmoid output (probability [0,1])                   │
+├─────────────────────────────────────────────────────────────┤
+│ Multiclass Classification (choose A/B/C)                 │
+│   → Multinomial distribution                             │
+│   → Categorical Cross-Entropy (CCE)                     │
+│   → Softmax output (probabilities sum to 1)             │
+└─────────────────────────────────────────────────────────────┘
+
+The architecture follows from the problem you're solving!
+```
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 4: How does data type determine architecture?</b></summary>
+
+```
+Data Type                →   Architecture Choice    →   Natural Regularization
+─────────────────────────────────────────────────────────────────────────────
+Tabular (no structure)   →   MLP                    →   None (Dropout helps)
+Grid (images)            →   CNN                    →   Translation invariance
+Sequences (time/text)    →   RNN                    →   Temporal constraints
+Sequences (long)         →   Transformer            →   Attention (global)
+
+The architecture's inductive bias acts as a form of regularization!
+• CNN assumes spatial locality → fewer ways to overfit
+• Transformer assumes global attention → learns long-range patterns
+• MLP assumes nothing → needs the most regularization (Dropout, L2)
+```
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 5: The Optimization Chain</b></summary>
+
+```
+Weight Initialization
+    ↓
+If wrong → {Exploding Gradients, Vanishing Gradients, Dying ReLU}
+    ↓
+Need Activation Functions to manage gradients
+    ↓
+If gradients flow → Forward pass works → Loss is computed
+    ↓
+Backpropagation uses chain rule to update weights
+    ↓
+Loss decreases → BUT watch for overfitting!
+    ↓
+Regularization prevents memorization
+    ↓
+Early Stopping + Validation set
+    ↓
+Model generalizes to test data
+```
+
+**The chain must work at every step.** A break at any point → training fails.
+
+</details>
+
+---
+
+### 📊 CONNECTION MATRIX
+
+| Concept A | Connects To | Why |
+|-----------|-------------|-----|
+| **MLE** | Loss Functions | MLE derives MSE/BCE/CCE |
+| **Loss Functions** | Backpropagation | Loss provides gradient signal |
+| **Activation Functions** | Gradient Flow | Non-saturating activations = good gradients |
+| **Gradient Flow** | Weight Initialization | Bad init → gradients explode/vanish |
+| **Regularization** | Generalization | Prevents overfitting on training data |
+| **Inductive Bias** | Architecture | Built-in assumptions reduce search space |
+| **Data Type** | Architecture Choice | Grid → CNN, Text → Transformer |
+| **Loss Function** | Output Activation | MSE → linear, BCE → Sigmoid, CCE → Softmax |
+
+---
+
+## 7. COMMON MISCONCEPTIONS — WEEK 1 DL
+
+**How to use:** Read each misconception first. Try to identify what's wrong. Then click to reveal the reality.
+
+---
+
+### Misconception 1: "Deep learning is just bigger neural networks."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Deep learning is just scaling up neural networks. | Deep learning represents a **paradigm shift** — from manual feature engineering to automatic representation learning. It's not just bigger networks; it's a fundamentally different approach to how features are created and learned. |
+
+**Key insight:** The "deep" in deep learning refers to learning hierarchical representations (edges→textures→parts→objects), not just having many layers.
+
+</details>
+
+---
+
+### Misconception 2: "ReLU is always the best activation function."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| ReLU is universally superior to all other activations. | ReLU is the **default** for hidden layers in CNNs and MLPs, but **NOT always best**: |
+| | • **Transformers** → GELU (smoother, better convergence) |
+| | • **Binary output** → Sigmoid (probability output) |
+| | • **Multiclass** → Softmax (probability distribution) |
+| | • **If Dying ReLU** → Leaky ReLU or ELU |
+
+**Rule of thumb:** Default to ReLU for hidden layers, but match output activation to the task. Know when to deviate!
+
+</details>
+
+---
+
+### Misconception 3: "CNN and Transformer are completely different — you use one or the other."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| CNNs are for images, Transformers are for text — they don't overlap. | Modern architectures **merge** both! |
+| | • **Vision Transformers (ViT)** use attention on image patches |
+| | • **ConvNeXt** uses CNN-style architectures with Transformer-like design |
+| | • Transformers can **simulate** CNN behavior (local attention) given enough data |
+
+**Analogy:** It's not a competition — they're tools that are converging. The best architecture often combines strengths from both!
+
+</details>
+
+---
+
+### Misconception 4: "A lower training loss always means a better model."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| If training loss is low, the model is good. | **Overfitting alert!** A model can memorize training data (0 loss) but fail completely on new data. |
+| | **What actually matters:** Performance on **validation/test sets** (generalization). |
+
+**Classic example:**
+```
+Training loss: 0.001  ✅ Looks great!
+Validation loss: 0.8  ❌ Actually terrible!
+→ The model memorized the training set and can't generalize.
+```
+
+**Rule:** Always watch validation loss. When it stops decreasing (or increases), stop training.
+
+</details>
+
+---
+
+### Misconception 5: "MLE and Cross-Entropy are unrelated."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Cross-Entropy loss is just a heuristic someone invented for classification. | Cross-Entropy is **derived directly from MLE**! |
+| | 1. Choose the distribution that matches your problem |
+| | 2. Write the likelihood function |
+| | 3. Take negative log → **that's your loss function!** |
+
+```
+Binary Classification:
+Likelihood: P(y|x) = ŷ^y · (1-ŷ)^(1-y)
+Negative Log: -[y·log(ŷ) + (1-y)·log(1-ŷ)] = Binary Cross-Entropy
+
+Regression:
+Likelihood: P(y|x) ∝ exp(-(y-ŷ)²/2σ²)
+Negative Log: (y-ŷ)² = Mean Squared Error
+```
+
+**MLE is the theory; Cross-Entropy is the practical loss that implements the theory!**
+
+</details>
+
+---
+
+### Misconception 6: "More data always helps."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| More data = always better | **Not necessarily:**
+| | • **Low-quality data** → garbage in, garbage out
+| | • **Imbalanced data** → more data can make it worse
+| | • **Label noise** → more wrong labels = worse model
+| | • **Dataset shift** → data from wrong distribution hurts
+| | • **Diminishing returns** → at some point, more data barely helps |
+
+**Analogy:** A bigger bucket can hold more water, but if the water is dirty, you get more dirty water. Quality > Quantity!
+
+</details>
+
+---
+
+### Misconception 7: "Dropout is a training-only technique. It doesn't affect how the model works at test time."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Dropout is just a training trick with no impact on inference. | **Actually, dropout changes the model architecture:**
+| | • During training: Randomly drop neurons → prevents co-adaptation
+| | • At test time: **Scale weights** by dropout rate (e.g., 0.5 → halve weights)
+| | • This is necessary because the network has N times as many active neurons at test time |
+
+**Analogy:** Training a team where half the members are randomly absent (so everyone learns to do everything). On game day, everyone shows up, but they're calibrated to work together (weight scaling).
+
+</details>
+
+---
+
+### Misconception 8: "CNNs are translation invariant because they learn to ignore position."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| CNNs magically ignore where things are in an image. | CNNs have **translation equivariance** (not invariance): |
+| | • If you shift the input, the feature map shifts the same way
+| | • Translation **invariance** comes from **pooling layers** (max pooling) and **fully connected layers** aggregating features |
+| | • Positional information is **not** ignored — it's gradually abstracted away |
+
+**Analogy:** Your eye sees objects at different positions (equivariance). Your brain recognizes the object regardless of position (invariance). CNNs mimic both!
+
+</details>
+
+---
+
+### Misconception 9: "Loss landscapes in deep learning are hopelessly messy with many bad local minima."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Deep networks have terrible loss landscapes with millions of bad local minima. | **Actually:**
+| | • In high dimensions, **saddle points** are more common than local minima
+| | • Most local minima in deep networks have **similar performance**
+| | • The problem is **saddle points** (flat regions) where gradients vanish, not local minima
+| | • Adaptive optimizers (Adam, RMSProp) are designed to handle saddle points and plateaus |
+
+**Surprising finding:** Even if there are many local minima, they tend to be "good enough" — the challenge is navigating the landscape, not avoiding minima.
+
+</details>
+
+---
+
+### Misconception 10: "The Universal Approximation Theorem means a single hidden layer is enough."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| A single hidden layer with enough neurons can approximate any function, so depth is unnecessary. | The theorem guarantees **existence**, not **discoverability**. A shallow network would need **exponentially more neurons** to represent the same function as a deep network. Depth enables **hierarchical representation learning** — simple features (edges) → complex features (objects). |
+
+**Example:**
+- Shallow network to recognize faces: needs to learn every pixel combination directly → impossible
+- Deep network: layer 1 learns edges, layer 2 learns shapes, layer 3 learns parts, layer 4 learns faces → efficient!
+
+</details>
+
+---
+
+### Misconception 11: "Xavier and He initialization are interchangeable."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Xavier and He initialization are both fine — just use either. | **They are designed for different activation functions:**
+| | • **Xavier (Glorot)**: `Var(W) = 1/n_in` — for Sigmoid/Tanh
+| | • **He (Kaiming)**: `Var(W) = 2/n_in` — for ReLU (compensates for zeroing out half the inputs)
+| | Using Xavier with ReLU → variance halves each layer → signal dies. Using He with Sigmoid → signals explode. |
+
+**Rule:** Match initialization to activation function. He for ReLU/GELU; Xavier for Sigmoid/Tanh.
+
+</details>
+
+---
+
+### Misconception 12: "Softmax and Sigmoid are interchangeable for binary classification."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| You can use either Sigmoid or Softmax for binary classification. | For **binary classification**, Sigmoid (one output, probability of class 1) and Softmax (two outputs, probabilities for both classes) are **mathematically equivalent**, but the loss functions differ:
+| | • **Sigmoid + BCE**: one output, single probability
+| | • **Softmax + CCE**: two outputs, probabilities sum to 1
+| | Sigmoid + BCE is more parameter-efficient (one output instead of two). |
+
+**Practical recommendation:** Use Sigmoid + BCE for binary classification; Softmax + CCE for multiclass.
+
+</details>
+
+---
+
+## 📊 QUICK REFERENCE: MISCONCEPTIONS vs REALITY
+
+| Misconception | Reality |
+|---------------|---------|
+| Deep learning = bigger neural networks | It's a paradigm shift (representation learning) |
+| ReLU is always best | Match activation to task and architecture |
+| CNN and Transformer are separate | Modern architectures merge both |
+| Low training loss = good model | Validation loss determines generalization |
+| Cross-Entropy is arbitrary | Cross-Entropy = MLE applied to classification |
+| More data always helps | Quality, balance, and relevance matter more |
+| Dropout is training-only | Test-time weight scaling is required |
+| CNNs ignore position | CNNs have equivariance → pooling creates invariance |
+| Loss landscapes are hopeless | Saddle points > local minima; most minima are "good enough" |
+| Single hidden layer is enough | Depth is crucial for parameter efficiency |
+| Xavier = He | Different init for different activations |
+| Softmax = Sigmoid for binary | Sigmoid is more parameter-efficient |
+
+---
+
+# 📚 WEEK 1 DL — COMPLETE STUDY GUIDE
+## All Exercises with Answers in Spoiler Format
+
+---
+
+# SECTION 1: WHY DEEP LEARNING & PARADIGM SHIFT
+
+---
+
+## Exercise W1-1: Traditional Code vs Deep Learning
+
+For each scenario, write **"Traditional Code"** or **"Deep Learning"** and **why**:
+
+| Scenario | Your Answer | Why? |
+|----------|-------------|------|
+| Sort 1 million numbers | | |
+| Detect fraud in credit card transactions | | |
+| Convert Celsius to Fahrenheit | | |
+| Identify objects in a photo | | |
+| Transcribe speech to text | | |
+| Predict stock prices from historical data | | |
+| Translate English to French | | |
+| Recognize faces in a security camera feed | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Scenario | Answer | Why? |
+|----------|--------|------|
+| Sort 1 million numbers | **Traditional Code** | Perfect deterministic algorithms exist (quicksort, mergesort). No ambiguity or pattern learning needed. |
+| Detect fraud in credit card transactions | **Deep Learning** | Fraud patterns are complex, constantly evolving, and subtle. Can't write explicit rules for all cases. |
+| Convert Celsius to Fahrenheit | **Traditional Code** | Exact mathematical formula: `°F = °C × 9/5 + 32`. Deterministic and perfect. |
+| Identify objects in a photo | **Deep Learning** | 150,000+ pixel values. Can't enumerate rules for all objects, lighting, angles, and variations. |
+| Transcribe speech to text | **Deep Learning** | Infinite variation in accent, tone, background noise. Can't write rules for all pronunciations. |
+| Predict stock prices from historical data | **Deep Learning** | Complex, non-linear patterns. No simple deterministic formula exists. |
+| Translate English to French | **Deep Learning** | Language is ambiguous, context-dependent. Can't write rules for all phrases and idioms. |
+| Recognize faces in a security camera feed | **Deep Learning** | Faces vary by angle, lighting, expression, occlusion. No simple rule-based system works. |
+
+</details>
+
+---
+
+## Exercise W1-2: The Paradigm Shift
+
+Complete the table comparing **Classical ML** vs **Deep Learning**:
+
+| Aspect | Classical Machine Learning | Deep Learning |
+|--------|---------------------------|---------------|
+| Feature approach | | |
+| Model complexity | | |
+| Data scaling behavior | | |
+| Interpretability | | |
+| Compute requirements | | |
+| Human effort focus | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Aspect | Classical Machine Learning | Deep Learning |
+|--------|---------------------------|---------------|
+| Feature approach | **Manual Feature Engineering** (domain experts design features) | **Representation Learning** (model learns features automatically) |
+| Model complexity | Limited capacity | Massive capacity (billions of parameters) |
+| Data scaling behavior | **Plateaus** with more data | **Continues improving** with more data |
+| Interpretability | High (e.g., decision trees, linear regression) | Low ("Black Box" problem) |
+| Compute requirements | Low to moderate | Massive (GPUs/TPUs required) |
+| Human effort focus | Feature design | Architecture design and data curation |
+
+</details>
+
+---
+
+## Exercise W1-3: The 3 Pillars
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What are the 3 pillars that enabled the deep learning boom? | |
+| 2. Why is each pillar necessary? | |
+| 3. What happens if one pillar is missing? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. The 3 pillars | **Data** (massive datasets available), **Compute** (GPUs/TPUs for parallel processing), **Algorithms** (backpropagation, attention, better optimizers). |
+| 2. Why each is necessary | **Data**: Deep models need large, diverse datasets to generalize. **Compute**: Training billion-parameter models requires massive parallel computation. **Algorithms**: New architectures (Transformers) and training techniques (Adam) make deep learning feasible. |
+| 3. Missing one pillar | **Missing Data**: Model underfits or overfits. **Missing Compute**: Training takes too long or is impossible. **Missing Algorithms**: Training is unstable or doesn't converge. |
+
+</details>
+
+---
+
+# SECTION 2: ARCHITECTURES
+
+---
+
+## Exercise W1-4: Architecture Matching
+
+Match each architecture to its **primary data type**, **key bias**, and **dependency**:
+
+| Architecture | Primary Data Type | Key Bias | Dependency |
+|--------------|-------------------|----------|------------|
+| MLP | | | |
+| CNN | | | |
+| RNN | | | |
+| Transformer | | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Architecture | Primary Data Type | Key Bias | Dependency |
+|--------------|-------------------|----------|------------|
+| **MLP** | Tabular | None (General) | Feature-independent |
+| **CNN** | Grid (Images) | Spatial Locality | Local correlation |
+| **RNN** | Sequence | Temporal Order | Sequential history |
+| **Transformer** | Sequence | Global Attention | Long-range global |
+
+</details>
+
+---
+
+## Exercise W1-5: Architecture Comparison
+
+| Aspect | MLP | CNN | RNN | Transformer |
+|--------|-----|-----|-----|-------------|
+| Translation invariance | | | | |
+| Parameter efficiency | | | | |
+| Long-range dependencies | | | | |
+| Parallelization | | | | |
+| Inductive bias | | | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Aspect | MLP | CNN | RNN | Transformer |
+|--------|-----|-----|-----|-------------|
+| Translation invariance | ❌ None | ✅ Built-in (shared weights) | ❌ None | ❌ Learned via position encodings |
+| Parameter efficiency | ❌ Poor (O(N²)) | ✅ Excellent (shared kernels) | Moderate | ❌ Lower (O(n²) attention) |
+| Long-range dependencies | ❌ None | ❌ Limited (needs many layers) | ❌ Poor (vanishing gradients) | ✅ Excellent (direct connections) |
+| Parallelization | ✅ High | ✅ High | ❌ Poor (sequential) | ✅ Excellent (processes all at once) |
+| Inductive bias | None | Spatial locality | Temporal order | Global attention |
+
+</details>
+
+---
+
+# SECTION 3: MLP FUNDAMENTALS & MLE
+
+---
+
+## Exercise W1-6: Forward Pass Math
+
+Given an MLP with:
+- Input: `x` (shape: 3)
+- Hidden layer 1: `W1` (shape: 4×3), `b1` (shape: 4), activation: ReLU
+- Hidden layer 2: `W2` (shape: 2×4), `b2` (shape: 2), activation: ReLU
+- Output layer: `W3` (shape: 1×2), `b3` (shape: 1), activation: Linear
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is the shape of the output after Layer 1? | |
+| 2. Write the mathematical expression for Layer 1: | |
+| 3. Write the mathematical expression for Layer 2: | |
+| 4. Write the mathematical expression for the final output: | |
+| 5. Why is non-linearity (ReLU) necessary between layers? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Shape after Layer 1 | **(4,)** — hidden layer 1 has 4 neurons |
+| 2. Layer 1 expression | `z1 = W1 · x + b1`, `a1 = ReLU(z1)` |
+| 3. Layer 2 expression | `z2 = W2 · a1 + b2`, `a2 = ReLU(z2)` |
+| 4. Final output | `y_hat = W3 · a2 + b3` (linear activation) |
+| 5. Why non-linearity is necessary | Without non-linear activations, the composition of multiple linear layers collapses into a single linear transformation — the network would be no more powerful than a linear model, regardless of depth. |
+
+</details>
+
+---
+
+## Exercise W1-7: MLE Loss Mapping
+
+| Scenario | Assumed Distribution | MLE-Derived Loss Function |
+|----------|---------------------|---------------------------|
+| Regression (continuous targets) | | |
+| Binary Classification | | |
+| Multiclass Classification | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Scenario | Assumed Distribution | MLE-Derived Loss Function |
+|----------|---------------------|---------------------------|
+| Regression (continuous targets) | **Gaussian (Normal)** | **Mean Squared Error (MSE)** |
+| Binary Classification | **Bernoulli** | **Binary Cross-Entropy (BCE)** |
+| Multiclass Classification | **Multinomial** | **Categorical Cross-Entropy (CCE)** |
+
+</details>
+
+---
+
+## Exercise W1-8: Softmax Calculation
+
+**Scenario:** You have a 3-class classification problem. Logits for one sample are: `[2.0, 1.0, 0.1]`
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. Apply Softmax. Show your work and give the final probabilities. | |
+| 2. If the true class is Class 0 (one-hot: [1, 0, 0]), what is the Cross-Entropy loss for this sample? | |
+| 3. If the true class is Class 2 (one-hot: [0, 0, 1]), what is the Cross-Entropy loss for this sample? | |
+| 4. Why does Softmax produce a valid probability distribution? | |
+| 5. What happens to the loss if the model predicts Class 0 with 0.99 probability (when it's actually Class 0)? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Apply Softmax | `exp(2.0)=7.39`, `exp(1.0)=2.72`, `exp(0.1)=1.11`. Sum = 11.22. Probabilities: [7.39/11.22=**0.659**, 2.72/11.22=**0.242**, 1.11/11.22=**0.099**] |
+| 2. Loss if true class = Class 0 | `Loss = -log(0.659) = **0.417**` |
+| 3. Loss if true class = Class 2 | `Loss = -log(0.099) = **2.313**` (much higher because the model was confident in the wrong class) |
+| 4. Why is it a valid probability distribution? | Softmax exponentiates (ensures non-negative) and normalizes by the sum (ensures all values sum to 1). |
+| 5. What happens to loss if model predicts Class 0 with 0.99? | `Loss = -log(0.99) ≈ **0.010**` — very low, indicating high confidence in the correct answer. |
+
+</details>
+
+---
+
+# SECTION 4: WEIGHT INITIALIZATION
+
+---
+
+## Exercise W1-9: Xavier vs He Initialization
+
+| Initialization Method | Best For | Why? | Scale |
+|----------------------|----------|------|-------|
+| Xavier (Glorot) | | | |
+| He (Kaiming) | | | |
+
+**Scenario:** You're training a 100-layer network with ReLU activations. Which initialization should you use and why?
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Initialization Method | Best For | Why? | Scale |
+|----------------------|----------|------|-------|
+| **Xavier (Glorot)** | Sigmoid / Tanh | Maintains variance across layers to prevent saturation | `Var(W) = 1/n_in` |
+| **He (Kaiming)** | ReLU / Leaky ReLU | Scales weights by factor of 2 to compensate for ReLU zeroing out half the input space | `Var(W) = 2/n_in` |
+
+**Scenario Answer:** Use **He Initialization**. ReLU activations zero out half the neurons, so variance is halved. He compensates by scaling weights by `√(2/n_in)` to maintain signal propagation through 100 layers.
+
+</details>
+
+---
+
+# SECTION 5: ACTIVATION FUNCTIONS
+
+---
+
+## Exercise W1-10: Activation Function Matching
+
+Match each activation function to its **formula**, **range**, **pros**, and **cons**:
+
+| Activation | Formula | Range | Pros | Cons |
+|------------|---------|-------|------|------|
+| Sigmoid | | | | |
+| Tanh | | | | |
+| ReLU | | | | |
+| Leaky ReLU | | | | |
+| ELU | | | | |
+| GELU | | | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Activation | Formula | Range | Pros | Cons |
+|------------|---------|-------|------|------|
+| **Sigmoid** | `1/(1+e^(-z))` | (0, 1) | Natural for binary probability | Vanishing gradients, not zero-centered |
+| **Tanh** | `(e^z-e^(-z))/(e^z+e^(-z))` | (-1, 1) | Zero-centered | Vanishing gradients |
+| **ReLU** | `max(0, z)` | [0, ∞) | Fast, sparse, no vanishing gradient | Dying ReLU |
+| **Leaky ReLU** | `max(αz, z)`, α≈0.01 | (-∞, ∞) | Prevents Dying ReLU | Not zero-centered |
+| **ELU** | `α(e^z-1)` for z<0 | (-α, ∞) | Smooth, zero-mean output | Computationally heavier |
+| **GELU** | `z·Φ(z)` | (-∞, ∞) | Smooth, state-of-the-art for Transformers | Expensive to compute |
+
+</details>
+
+---
+
+## Exercise W1-11: Vanishing Gradients
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is the vanishing gradient problem? | |
+| 2. Which activation functions suffer from it? | |
+| 3. Which activation functions do NOT suffer from it? | |
+| 4. Why does it prevent deep networks from learning? | |
+| 5. Name two mitigation strategies. | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. What is the vanishing gradient problem? | Gradients become exponentially small as they backpropagate through many layers, causing early layers to update extremely slowly or not at all. |
+| 2. Which activation functions suffer from it? | **Sigmoid** and **Tanh** — their derivatives are ≤ 0.25 and approach 0 at the tails. |
+| 3. Which activation functions do NOT suffer from it? | **ReLU** (derivative = 1 for z>0) and **GELU** (smooth, non-saturating). |
+| 4. Why does it prevent learning? | Lower layers receive tiny gradients and don't update their weights. The network fails to learn useful features in early layers, effectively training only the output layers. |
+| 5. Name two mitigation strategies. | **1. Use ReLU/GELU** activations (derivatives don't saturate). **2. Batch Normalization** — keeps activations in the active regime. **3. Residual Connections** — provide gradient "highways" (skip connections). |
+
+</details>
+
+---
+
+## Exercise W1-12: Dying ReLU
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is the Dying ReLU problem? | |
+| 2. What causes it? | |
+| 3. How can you detect it? | |
+| 4. What are the fixes? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Dying ReLU | When a neuron's input is consistently negative, it outputs 0 and its gradient is 0, making it permanently "dead" and unable to contribute to learning. |
+| 2. Causes | Poor weight initialization (weights too large negative), excessively high learning rate that pushes weights into negative regime, or data distribution shift. |
+| 3. How to detect | Monitor the fraction of zero-valued activations in ReLU-based networks. If >50-70% of neurons are dead, the network is struggling. |
+| 4. Fixes | Use **Leaky ReLU**, **ELU**, or **He initialization**. Lower learning rate. Monitor activation distributions. |
+
+</details>
+
+---
+
+# SECTION 6: LOSS LANDSCAPES & REGULARIZATION
+
+---
+
+## Exercise W1-13: The Geometry of Loss Landscapes
+
+| Shape | Spectrum | What You See | What Helps |
+|-------|----------|--------------|------------|
+| Bowl | | | |
+| Valley | | | |
+| Saddle | | | |
+| Plateau | | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Shape | Spectrum | What You See | What Helps |
+|-------|----------|--------------|------------|
+| **Bowl** | all λ > 0, small κ | Steady fast decrease | Nothing — you're fine |
+| **Valley** | all λ > 0, huge κ | Slow steady decrease, zigzag | Rescaling, normalization, momentum, adaptive steps |
+| **Saddle** | mixed signs | Loss stalls, gradient small but not tiny, then resumes | Patience + gradient noise (SGD beats full-batch GD) |
+| **Plateau** | λ ≈ 0 over a region | Loss flat, gradient ≈ 0, does NOT resume | First rule out cheap causes (drop LR by 10×). If not, structural issue — dead units, ill-conditioning |
+
+</details>
+
+---
+
+## Exercise W1-14: Regularization Techniques
+
+| Technique | What it does | Why it helps generalization |
+|-----------|--------------|----------------------------|
+| L2 Regularization (Weight Decay) | | |
+| Dropout | | |
+| Early Stopping | | |
+| Data Augmentation | | |
+| Batch Normalization | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Technique | What it does | Why it helps generalization |
+|-----------|--------------|----------------------------|
+| **L2 Regularization** | Adds `λ||W||²` to the loss, penalizing large weights | Keeps the function "smooth" — prevents over-reliance on any single feature. |
+| **Dropout** | Randomly sets a fraction of neurons to 0 during training | Forces the network to learn redundant, robust representations rather than relying on specific paths. |
+| **Early Stopping** | Monitors validation loss and stops training when it starts to increase | Prevents the model from fitting training noise (overfitting). |
+| **Data Augmentation** | Creates synthetic variations of existing data (rotation, scaling, cropping) | Increases effective dataset size, making the model invariant to irrelevant transformations. |
+| **Batch Normalization** | Dynamically rescales activations between layers to have zero mean and unit variance | Keeps activations in the high-gradient regime, stabilizes training, and has a slight regularization effect. |
+
+</details>
+
+---
+
+# SECTION 7: CHALLENGES & DIAGNOSTICS
+
+---
+
+## Exercise W1-15: The Black Box Problem
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is the "Black Box" problem in deep learning? | |
+| 2. Why does it matter in high-stakes applications? | |
+| 3. What are two current approaches to improve interpretability? | |
+| 4. Is there a fundamental trade-off between performance and interpretability? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. What is the "Black Box" problem? | Deep models have millions/billions of parameters. The internal decision-making logic is opaque to humans — we can't easily understand *why* a model made a specific prediction. |
+| 2. Why does it matter in high-stakes applications? | **Trust and Safety**: In healthcare, autonomous driving, or finance, understanding *why* is critical. **Bias Detection**: Opaque models may encode societal biases without us knowing. |
+| 3. Two current approaches to improve interpretability | **Saliency Maps** (visualize what part of the input the model attended to) and **Feature Visualization** (optimize inputs to activate specific neurons). |
+| 4. Is there a trade-off? | **Yes**, there's often a fundamental tension: complex models (deep networks) are less interpretable but perform better. Simpler models (linear regression, decision trees) are interpretable but may have lower performance. |
+
+</details>
+
+---
+
+## Exercise W1-16: Data Bottlenecks
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. Why do traditional ML algorithms plateau with more data? | |
+| 2. Why do deep learning models continue improving with more data? | |
+| 3. What is the "human annotation burden" in deep learning? | |
+| 4. How do semi-supervised and self-supervised learning help? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Why traditional ML plateaus? | Traditional ML algorithms have limited "capacity" — their performance saturates beyond a certain data volume because they can't exploit additional data complexity. |
+| 2. Why deep learning continues improving? | Deep models possess "capacity" that allows them to continue improving as they are exposed to more data — they can learn more nuanced patterns. |
+| 3. Human annotation burden | Manual feature engineering requires expert labor for every feature; labeling data is expensive and time-consuming. |
+| 4. How SSL helps | End-to-end learning requires labels, but SSL allows pre-training on unlabeled data, reducing the need for human annotations. |
+
+</details>
+
+---
+
+# SECTION 8: MASTERY & SYNTHESIS
+
+---
+
+## Exercise W1-17: CNN vs Transformer Comparison
+
+| Aspect | CNN | Transformer |
+|--------|-----|-------------|
+| Designed for | | |
+| Key mechanism | | |
+| Translation invariance | | |
+| Parameter efficiency | | |
+| Long-range dependencies | | |
+| Parallelization | | |
+| Inductive bias | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Aspect | CNN | Transformer |
+|--------|-----|-------------|
+| Designed for | **Grid-like data** (images) | **Sequence data** (text, audio, time-series) |
+| Key mechanism | **Convolutions** (sliding kernels) | **Self-Attention** (global pairwise relationships) |
+| Translation invariance | ✅ **Built-in** (shared weights, pooling) | ❌ **Learned** via positional encodings + attention |
+| Parameter efficiency | ✅ **High** (shared kernels) | ❌ **Lower** (attention has O(n²) complexity) |
+| Long-range dependencies | ❌ **Limited** (requires many layers for global context) | ✅ **Excellent** (direct connections between any tokens) |
+| Parallelization | ✅ **High** (convolutions can be batched) | ✅ **Excellent** (processes entire sequence at once) |
+| Inductive bias | **Spatial locality matters** (nearby pixels are correlated) | **Global context matters** (any token can attend to any other) |
+
+</details>
+
+---
+
+## Exercise W1-18: The Complete Cheat Sheet
+
+### Fill in all blanks:
+
+**Definition of Deep Learning:**
+Deep learning is a subset of ML that uses multiple layers of non-linear transformations to learn ___________ representations directly from raw data.
+
+**Key Paradigm Shift:**
+
+| Classical ML | Deep Learning |
+|--------------|---------------|
+| ___________ Engineering | ___________ Learning |
+
+**Architectures Overview:**
+
+| Architecture | Data Type | Key Mechanism |
+|--------------|-----------|---------------|
+| MLP | Tabular | ___________ layers |
+| CNN | ___________ | ___________ kernels |
+| RNN | Sequence | ___________ state |
+| Transformer | Sequence | ___________ attention |
+
+**Activation Functions Summary:**
+
+| Activation | Output Range | Key Advantage | Key Disadvantage |
+|------------|--------------|---------------|------------------|
+| Sigmoid | | | |
+| Tanh | | | |
+| ReLU | | | |
+| Leaky ReLU | | | |
+| GELU | | | |
+
+**Loss Functions (MLE):**
+
+| Task | Distribution | Loss |
+|------|-------------|------|
+| Regression | ___________ | ___________ |
+| Binary Classification | ___________ | ___________ |
+| Multiclass Classification | ___________ | ___________ |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+**Definition of Deep Learning:**
+Deep learning is a subset of ML that uses multiple layers of non-linear transformations to learn **hierarchical** representations directly from raw data.
+
+**Key Paradigm Shift:**
+
+| Classical ML | Deep Learning |
+|--------------|---------------|
+| **Feature** Engineering | **Representation** Learning |
+
+**Architectures Overview:**
+
+| Architecture | Data Type | Key Mechanism |
+|--------------|-----------|---------------|
+| MLP | Tabular | **Dense/Fully-connected** layers |
+| CNN | **Grid (Images)** | **Convolution** kernels |
+| RNN | Sequence | **Hidden** state |
+| Transformer | Sequence | **Self** attention |
+
+**Activation Functions Summary:**
+
+| Activation | Output Range | Key Advantage | Key Disadvantage |
+|------------|--------------|---------------|------------------|
+| Sigmoid | (0, 1) | Natural for binary prob. | Vanishing gradients, not zero-centered |
+| Tanh | (-1, 1) | Zero-centered | Vanishing gradients |
+| ReLU | [0, ∞) | No vanishing gradient, sparse | Dying ReLU |
+| Leaky ReLU | (-∞, ∞) | Prevents dying neurons | Not zero-centered |
+| GELU | (-∞, ∞) | Smooth, state-of-the-art | Computationally expensive |
+
+**Loss Functions (MLE):**
+
+| Task | Distribution | Loss |
+|------|-------------|------|
+| Regression | **Gaussian** | **Mean Squared Error (MSE)** |
+| Binary Classification | **Bernoulli** | **Binary Cross-Entropy (BCE)** |
+| Multiclass Classification | **Multinomial** | **Categorical Cross-Entropy (CCE)** |
+
+</details>
+
+---
+
+# 📊 COMPLETE COVERAGE SUMMARY
+
+| Category | Concepts | Status |
+|----------|----------|--------|
+| Why Deep Learning? | Paradigm shift, 3 pillars | ✅ 100% |
+| Architectures | MLP, CNN, RNN, Transformer | ✅ 100% |
+| MLP Fundamentals | Forward pass, layers, activations | ✅ 100% |
+| MLE Framework | Loss derivation, distributions | ✅ 100% |
+| Loss Functions | MSE, BCE, CCE | ✅ 100% |
+| Weight Initialization | Xavier, He | ✅ 100% |
+| Activation Functions | Sigmoid, Tanh, ReLU, Leaky, ELU, GELU | ✅ 100% |
+| Gradient Flow | Vanishing, exploding, Dying ReLU | ✅ 100% |
+| Loss Landscapes | Bowls, valleys, saddles, plateaus | ✅ 100% |
+| Regularization | L1, L2, Dropout, Early Stopping | ✅ 100% |
+| Challenges | Black box, data, compute | ✅ 100% |
+| **TOTAL** | **All Week 1 DL concepts** | ✅ **100%** |
+
+---
+
+## 📝 How to Use This Document
+
+1. **Read the question**, write your answer in the blank/box
+2. **Click the dropdown** to reveal the model answer
+3. **Compare** your answer to the model
+4. **Re-study** any sections where you got something wrong
+5. **Mark** your confidence level for each topic
+
+---
+
+**Good luck with your studies! 🎯**

@@ -1,0 +1,1874 @@
+# Week 7 DL — Complete Revision Materials
+
+Based on your Week 7 slides covering **Vision Transformers (ViT), CLIP, Masked Autoencoders (MAE), GANs, Diffusion Models, Latent Diffusion, ControlNet, and LLM Alignment (IFT, RLHF, DPO)**, here are comprehensive revision materials following the established format.
+
+---
+
+## 1. CONFIDENCE TRACKER — WEEK 7 DL
+
+| Confidence Level | Meaning |
+|------------------|---------|
+| 🟢 **Green** | I knew this cold — could explain it to someone else |
+| 🟡 **Yellow** | I got it right, but I wasn't 100% sure / guessed |
+| 🔴 **Red** | I had no idea — got it wrong or completely guessed |
+
+---
+
+| Exercise | Topic | 🟢 | 🟡 | 🔴 | Re-study? |
+|----------|-------|----|----|----|-----------|
+| Ex 1 | Discriminative vs Generative Models | | | | ☐ |
+| Ex 2 | GANs — Core Idea & Minimax Game | | | | ☐ |
+| Ex 3 | GAN Training Challenges — Mode Collapse | | | | ☐ |
+| Ex 4 | GAN Training Challenges — Instability | | | | ☐ |
+| Ex 5 | GAN Variants — DCGAN, StyleGAN, BigGAN, CycleGAN | | | | ☐ |
+| Ex 6 | Diffusion Models — Forward Process | | | | ☐ |
+| Ex 7 | Diffusion Models — Reverse Process & DDPM | | | | ☐ |
+| Ex 8 | DDPM Training Objective & Sampling | | | | ☐ |
+| Ex 9 | DDIM — Faster Sampling | | | | ☐ |
+| Ex 10 | Latent Diffusion Models — VAE + U-Net | | | | ☐ |
+| Ex 11 | Conditional Generation — Cross-Attention | | | | ☐ |
+| Ex 12 | Classifier-Free Guidance | | | | ☐ |
+| Ex 13 | ControlNet — Zero-Convolution & Locked Copy | | | | ☐ |
+| Ex 14 | Evaluating Generative Models — IS & FID | | | | ☐ |
+| Ex 15 | Vision Transformers (ViT) — Patch Embeddings | | | | ☐ |
+| Ex 16 | ViT vs CNN — Inductive Bias & Long-Range Reasoning | | | | ☐ |
+| Ex 17 | Masked Autoencoders (MAE) | | | | ☐ |
+| Ex 18 | CLIP — Contrastive Learning & Zero-Shot | | | | ☐ |
+| Ex 19 | Zero-Shot & Few-Shot In-Context Learning | | | | ☐ |
+| Ex 20 | Chain-of-Thought (CoT) Prompting | | | | ☐ |
+| Ex 21 | Instruction Finetuning (IFT) | | | | ☐ |
+| Ex 22 | RLHF — Reward Model & PPO | | | | ☐ |
+| Ex 23 | Direct Preference Optimization (DPO) | | | | ☐ |
+| Ex 24 | Complete Cheat Sheet | | | | ☐ |
+
+---
+
+## 2. 🎯 TEACH IT SUMMARY
+
+### The Big Picture — Week 7 DL
+
+Week 7 covers the **frontier of modern deep learning**: vision transformers, multimodal models, generative models, and LLM alignment. The week bridges the gap between understanding architectures (Weeks 1-6) and deploying them in real-world systems.
+
+**Part 1: Vision Transformers & Multimodal Models (L2).** The Transformer, originally designed for NLP (Week 6), was adapted to vision through **ViT** (Vision Transformer), which splits images into patches and treats them as a sequence — achieving state-of-the-art results without convolutions. **MAE** (Masked Autoencoders) extends this with self-supervised learning: mask 75% of patches and train the model to reconstruct them, forcing it to learn rich visual representations. **CLIP** connects vision and language through contrastive learning on 400M image-text pairs, enabling zero-shot classification by matching images to text prompts in a shared embedding space.
+
+**Part 2: Generative Models (L3).** Two architectures dominate image generation: **GANs** use an adversarial game between a generator and discriminator — sharp samples but notoriously unstable training (mode collapse, vanishing gradients). **Diffusion models** take a different approach: learn to reverse a fixed noising process via a simple regression objective — stable training but slow sampling. **Latent Diffusion** (Stable Diffusion) makes this practical by diffusing in a compressed VAE latent space rather than pixel space. **ControlNet** adds precise spatial control by freezing the base model and training a zero-initialized copy for new conditioning.
+
+**Part 3: LLM Alignment (L1).** Pre-trained language models don't naturally follow instructions. **Instruction Finetuning (IFT)** teaches them to respond to commands, but has limitations: expensive data collection, no "right answer" for creative tasks, and a mismatch between LM objective and human preferences. **RLHF** (Reinforcement Learning from Human Feedback) addresses this by training a reward model on human comparisons and optimizing the LM to maximize predicted reward. **DPO** (Direct Preference Optimization) simplifies this by directly optimizing the LM on preference data as a binary classification problem — no explicit reward model needed.
+
+**The Connecting Thread:** Week 7 shows how the same building blocks (attention, contrastive learning, frozen-plus-adapter fine-tuning) reappear across vision, language, and multimodal domains. Understanding these patterns, not just individual architectures, is what lets you read the next paper in this fast-moving field.
+
+---
+
+## 3. ⚠️ COMMON PITFALLS IN PRACTICE
+
+**How to use:** These are practical mistakes that happen in code and experiments. Read each pitfall and the fix before your next project.
+
+| Pitfall | Why It Happens | How to Avoid |
+|---------|----------------|--------------|
+| **1. Using GANs for everything** | GANs produce sharp samples, but training is unstable | Use **diffusion models** for stable training; GANs only when you need one-step sampling |
+| **2. Confusing DDPM and DDIM** | Both are diffusion models; DDIM is a faster sampler | DDPM = training recipe; **DDIM = deterministic, faster sampling** (20-50 steps vs 1000) |
+| **3. Diffusing in pixel space** | High-resolution images are memory-intensive | Use **Latent Diffusion** — diffuse in compressed VAE latent space |
+| **4. Forgetting classifier-free guidance** | Unconditional samples don't follow prompts well | Train with **random prompt dropout**; at sampling, extrapolate with guidance scale `w > 1` |
+| **5. Fine-tuning ControlNet's base model** | Fine-tuning the whole model overwrites generative knowledge | **Freeze the base model**; only train the zero-initialized copy |
+| **6. Using FID as the only metric** | FID depends on a pretrained classifier's biases | Combine **FID + human evaluation**; FID doesn't measure prompt faithfulness |
+| **7. Ignoring ViT's data requirements** | ViT has weak inductive bias; needs massive data | Pre-train on **large datasets** (JFT-300M) or use **hybrid Conv+Transformer** |
+| **8. Not using MAE for self-supervised pre-training** | Labeled data is expensive | **MAE** masks 75% of patches; forces the model to learn rich representations |
+| **9. Confusing CLIP's zero-shot with fine-tuning** | CLIP matches images to text prompts, not classes | Use **prompt engineering** (e.g., "a photo of a {class}") for zero-shot |
+| **10. Using RLHF when DPO suffices** | RLHF is computationally expensive and tricky | **DPO** is simpler, similar properties, no reward model needed |
+| **11. Assuming more IFT data fixes factual errors** | IFT optimizes for imitation, not truthfulness | IFT teaches **format and tone**, not factual accuracy; use RLHF/DPO for preferences |
+| **12. Ignoring human preference fallibility** | Annotators disagree; preferences are noisy | Use **pairwise comparisons** (more reliable than ratings); be aware of annotator bias |
+| **13. Misunderstanding "zero-shot"** | Zero-shot means no task-specific training | CLIP is zero-shot for classification but pre-trained on 400M pairs |
+| **14. Forgetting ViT's quadratic attention cost** | Self-attention is O(n²) in image size | Use **hybrid architectures** (Conv+Transformer) or **hierarchical ViTs** |
+| **15. Using DDPM's full 1000 steps** | Sampling is slow | Use **DDIM** (20-50 steps) with the same trained network |
+
+---
+
+## 4. ONE-SENTENCE SUMMARY — WEEK 7 DL
+
+**How to use:** For each concept, try to write your own one-sentence summary *before* clicking to reveal the model answer.
+
+---
+
+### Generative Models — GANs
+
+<details>
+<summary><b>Discriminative vs Generative Models</b> — Try your own first</summary>
+
+**Model Answer:** Discriminative models learn P(y|x) — a decision boundary or mapping from input to label; generative models learn P(x) — the underlying data distribution — and can sample new examples from it.
+
+</details>
+
+---
+
+<details>
+<summary><b>GAN (Generative Adversarial Network)</b> — Try your own first</summary>
+
+**Model Answer:** A generative model where a generator G maps random noise to synthetic images and a discriminator D tries to distinguish real from fake, trained simultaneously in a two-player minimax game.
+
+</details>
+
+---
+
+<details>
+<summary><b>GAN Minimax Game</b> — Try your own first</summary>
+
+**Model Answer:** GAN training is formulated as `min_G max_D E[log D(x)] + E[log(1 - D(G(z)))]` — D maximizes its ability to distinguish real from fake; G minimizes D's success by making D(G(z)) close to 1.
+
+</details>
+
+---
+
+<details>
+<summary><b>Mode Collapse</b> — Try your own first</summary>
+
+**Model Answer:** A GAN failure mode where the generator discovers a small set of outputs that reliably fool the discriminator and collapses to producing only those, ignoring the true diversity of the data distribution.
+
+</details>
+
+---
+
+<details>
+<summary><b>GAN Instability</b> — Try your own first</summary>
+
+**Model Answer:** GAN training is notoriously delicate — if D becomes too accurate too early, log(1 - D(G(z))) saturates and G receives no useful gradient; G and D can oscillate indefinitely instead of converging.
+
+</details>
+
+---
+
+<details>
+<summary><b>Wasserstein GAN (WGAN)</b> — Try your own first</summary>
+
+**Model Answer:** A GAN variant that reformulates the objective using Earth Mover's distance, providing a smoother, more informative gradient signal throughout training and improving stability.
+
+</details>
+
+---
+
+<details>
+<summary><b>DCGAN</b> — Try your own first</summary>
+
+**Model Answer:** The first architecture to make convolutional GANs reliably trainable, still the basis for most modern GAN designs.
+
+</details>
+
+---
+
+<details>
+<summary><b>StyleGAN</b> — Try your own first</summary>
+
+**Model Answer:** A GAN variant that introduces a learned, disentangled "style" space, enabling fine-grained control over generated image attributes.
+
+</details>
+
+---
+
+<details>
+<summary><b>CycleGAN</b> — Try your own first</summary>
+
+**Model Answer:** A GAN variant that learns image-to-image translation *without* paired training examples (e.g., horses ↔ zebras), using a cycle-consistency loss.
+
+</details>
+
+---
+
+### Diffusion Models
+
+<details>
+<summary><b>Diffusion Model (Core Idea)</b> — Try your own first</summary>
+
+**Model Answer:** Instead of an adversarial game, train a single network with a simple, stable regression objective: learn to reverse a process that gradually destroys an image with noise.
+
+</details>
+
+---
+
+<details>
+<summary><b>Forward Diffusion Process</b> — Try your own first</summary>
+
+**Model Answer:** Gradually add Gaussian noise to a real image over T steps (controlled by a noise schedule β_t) until it becomes pure noise — this process is fixed in advance with no trainable parameters.
+
+</details>
+
+---
+
+<details>
+<summary><b>Reverse Diffusion Process</b> — Try your own first</summary>
+
+**Model Answer:** Train a neural network ε_θ(x_t, t) to predict the noise that was added to produce x_t from x_{t-1}, typically using a U-Net architecture conditioned on the timestep t.
+
+</details>
+
+---
+
+<details>
+<summary><b>DDPM (Denoising Diffusion Probabilistic Models)</b> — Try your own first</summary>
+
+**Model Answer:** The paper (Ho et al., 2020) that made diffusion models practical, establishing the training recipe, architecture, and simplified MSE loss `L_simple = E[||ε - ε_θ(x_t, t)||²]` still used today.
+
+</details>
+
+---
+
+<details>
+<summary><b>DDPM Sampling</b> — Try your own first</summary>
+
+**Model Answer:** Start from pure noise x_T ~ N(0, I); repeatedly apply the trained network to estimate and partially remove noise, x_T → x_{T-1} → ... → x_0 — requires many sequential network evaluations (hundreds to thousands).
+
+</details>
+
+---
+
+<details>
+<summary><b>DDIM (Denoising Diffusion Implicit Models)</b> — Try your own first</summary>
+
+**Model Answer:** A reformulation of sampling as a deterministic, non-Markovian process that can skip steps, generating comparable-quality images in as few as 20-50 steps — a 20-50× speedup with the same trained network.
+
+</details>
+
+---
+
+<details>
+<summary><b>Why Diffusion Models Work So Well</b> — Try your own first</summary>
+
+**Model Answer:** Diffusion models trade GANs' unstable minimax game for a simple, stable regression objective, at the cost of slower (multi-step) sampling — this stability makes them far easier to train reliably at scale.
+
+</details>
+
+---
+
+<details>
+<summary><b>Latent Diffusion Models</b> — Try your own first</summary>
+
+**Model Answer:** Perform the entire diffusion process in a much smaller, compressed latent space (via a pretrained VAE) instead of pixel space — this is the architecture underlying Stable Diffusion.
+
+</details>
+
+---
+
+<details>
+<summary><b>VAE Encoder/Decoder in Latent Diffusion</b> — Try your own first</summary>
+
+**Model Answer:** Encoder maps a pixel image x to a compact latent z = E(x), shrinking spatial dimensions by 8× per side; decoder maps a denoised latent back to a full-resolution pixel image — trained separately and frozen before diffusion training.
+
+</details>
+
+---
+
+<details>
+<summary><b>U-Net Denoiser</b> — Try your own first</summary>
+
+**Model Answer:** The U-Net predicts noise ε_θ(z_t, t) in latent space, with conditioning (text, class labels, spatial maps) injected via cross-attention layers interleaved with convolutional blocks.
+
+</details>
+
+---
+
+<details>
+<summary><b>Conditional Generation</b> — Try your own first</summary>
+
+**Model Answer:** Instead of sampling from p(x), sample from p(x|c) for some condition c (text prompt, class label, image) — the condition is embedded and injected into every U-Net layer via cross-attention.
+
+</details>
+
+---
+
+<details>
+<summary><b>Text Conditioning via Cross-Attention</b> — Try your own first</summary>
+
+**Model Answer:** A text encoder (often CLIP's text tower) converts the prompt into embeddings; at every U-Net layer, image (latent) features act as queries and text embeddings act as keys and values.
+
+</details>
+
+---
+
+<details>
+<summary><b>Classifier-Free Guidance</b> — Try your own first</summary>
+
+**Model Answer:** Train the model to predict noise both with and without the conditioning text (randomly dropping the prompt during training); at sampling time, extrapolate away from the unconditional prediction: `ε̂ = ε_θ(x_t, t, ∅) + w · (ε_θ(x_t, t, c) - ε_θ(x_t, t, ∅))`.
+
+</details>
+
+---
+
+<details>
+<summary><b>Negative Prompts</b> — Try your own first</summary>
+
+**Model Answer:** Specifying what *not* to include works exactly like classifier-free guidance, but steering *away* from an unwanted condition instead of *toward* a wanted one.
+
+</details>
+
+---
+
+<details>
+<summary><b>ControlNet</b> — Try your own first</summary>
+
+**Model Answer:** Adds precise spatial conditioning to a pretrained, frozen text-to-image diffusion model by creating a trainable copy of the U-Net's encoder blocks, connected through zero-initialized convolutions.
+
+</details>
+
+---
+
+<details>
+<summary><b>Zero-Convolution (ControlNet)</b> — Try your own first</summary>
+
+**Model Answer:** Layers whose weights start at exactly zero; at the first training step, they contribute nothing, so the model behaves identically to the original checkpoint — the new conditioning pathway is learned gradually without destabilizing pretrained capabilities.
+
+</details>
+
+---
+
+<details>
+<summary><b>Control Weight (ControlNet)</b> — Try your own first</summary>
+
+**Model Answer:** A parameter that trades off fidelity to the spatial condition versus creative freedom — low weight (0.2) = loose adherence; high weight (1.0) = strict adherence.
+
+</details>
+
+---
+
+### Evaluating Generative Models
+
+<details>
+<summary><b>Inception Score (IS)</b> — Try your own first</summary>
+
+**Model Answer:** Rewards images that are both individually confident (a classifier is sure what's in them) and collectively diverse (many different classes represented).
+
+</details>
+
+---
+
+<details>
+<summary><b>Fréchet Inception Distance (FID)</b> — Try your own first</summary>
+
+**Model Answer:** Compares the statistics (mean, covariance) of real vs. generated image features in a pretrained network's embedding space; lower FID means the two distributions are more similar.
+
+</details>
+
+---
+
+<details>
+<summary><b>Human Evaluation</b> — Try your own first</summary>
+
+**Model Answer:** Ultimately still the gold standard for perceptual quality and prompt faithfulness; automatic metrics are useful proxies, not replacements.
+
+</details>
+
+---
+
+### Vision Transformers & Multimodal Models
+
+<details>
+<summary><b>Vision Transformer (ViT)</b> — Try your own first</summary>
+
+**Model Answer:** A pure Transformer applied directly to sequences of image patches (16×16), treating them like words in a sentence — achieves excellent results compared to state-of-the-art CNNs when pre-trained on large amounts of data.
+
+</details>
+
+---
+
+<details>
+<summary><b>ViT Patch Embeddings</b> — Try your own first</summary>
+
+**Model Answer:** Split the image into fixed-size patches (e.g., 16×16), flatten them, and linearly project each into an embedding — plus a learnable [CLS] token and positional embeddings.
+
+</details>
+
+---
+
+<details>
+<summary><b>ViT vs CNN — Inductive Bias</b> — Try your own first</summary>
+
+**Model Answer:** CNNs have strong spatial locality bias (nearby pixels are correlated); ViT has weak inductive bias and must learn spatial relationships from data — hence ViT needs massive pre-training datasets.
+
+</details>
+
+---
+
+<details>
+<summary><b>ViT Long-Range Reasoning</b> — Try your own first</summary>
+
+**Model Answer:** Self-attention provides O(1) path lengths between any two patches, enabling long-range reasoning; CNNs require O(n/k) layers (or O(log_k n) with dilations) to connect distant patches.
+
+</details>
+
+---
+
+<details>
+<summary><b>ViT Computational Cost</b> — Try your own first</summary>
+
+**Model Answer:** Self-attention is quadratic in image size — this is the main bottleneck for high-resolution images, motivating hybrid architectures and hierarchical ViTs.
+
+</details>
+
+---
+
+<details>
+<summary><b>Masked Autoencoders (MAE)</b> — Try your own first</summary>
+
+**Model Answer:** A self-supervised learning method that masks 75% of image patches and trains the model to reconstruct them — forces the model to learn rich visual representations, scaling efficiently like BERT for vision.
+
+</details>
+
+---
+
+<details>
+<summary><b>CLIP (Contrastive Language-Image Pre-training)</b> — Try your own first</summary>
+
+**Model Answer:** A dual-encoder architecture (image encoder + text encoder) trained with contrastive learning on 400M image-text pairs, enabling zero-shot transfer by matching images to text prompts in a shared embedding space.
+
+</details>
+
+---
+
+<details>
+<summary><b>CLIP Contrastive Loss</b> — Try your own first</summary>
+
+**Model Answer:** For a batch of N image-text pairs, maximize cosine similarity of correct pairs and minimize it for incorrect pairs — symmetric loss: `L = (L_image + L_text) / 2`.
+
+</details>
+
+---
+
+<details>
+<summary><b>CLIP Zero-Shot Classification</b> — Try your own first</summary>
+
+**Model Answer:** Create dataset classifier from label text (e.g., "a photo of a {class}"), encode all class prompts, encode the test image, and predict the class with highest cosine similarity — no task-specific training needed.
+
+</details>
+
+---
+
+<details>
+<summary><b>CLIP Robustness</b> — Try your own first</summary>
+
+**Model Answer:** CLIP handles distribution shifts better than traditional supervised models — e.g., ImageNet-R (+51.2%), ObjectNet (+39.7%), ImageNet-A (+74.4%) compared to ResNet101.
+
+</details>
+
+---
+
+### LLM Alignment — IFT, RLHF, DPO
+
+<details>
+<summary><b>Zero-Shot & Few-Shot In-Context Learning</b> — Try your own first</summary>
+
+**Model Answer:** No finetuning needed — the model learns from examples in the prompt; prompt engineering (e.g., CoT) can improve performance, but limits exist on what fits in context.
+
+</details>
+
+---
+
+<details>
+<summary><b>Chain-of-Thought (CoT) Prompting</b> — Try your own first</summary>
+
+**Model Answer:** A prompting technique that elicits step-by-step reasoning from LLMs — e.g., "Let's think step by step" — dramatically improves performance on multi-step reasoning tasks (e.g., GSM8K: 10.4% → 40.7% zero-shot CoT).
+
+</details>
+
+---
+
+<details>
+<summary><b>Instruction Finetuning (IFT)</b> — Try your own first</summary>
+
+**Model Answer:** Fine-tuning a pretrained LM on a dataset of (instruction, response) pairs to teach it to follow commands — simple and generalizes to unseen tasks, but collecting demonstrations is expensive and there's a mismatch between LM objective and human preferences.
+
+</details>
+
+---
+
+<details>
+<summary><b>Limitations of Instruction Finetuning</b> — Try your own first</summary>
+
+**Model Answer:** (1) Expensive to collect ground-truth data; (2) No "right answer" for creative tasks; (3) All token-level mistakes penalized equally; (4) Humans generate suboptimal answers; (5) Mismatch between LM objective and "satisfy human preferences."
+
+</details>
+
+---
+
+<details>
+<summary><b>RLHF (Reinforcement Learning from Human Feedback)</b> — Try your own first</summary>
+
+**Model Answer:** Train a reward model on human comparisons (pairwise rankings), then optimize the LM to maximize predicted reward using RL (PPO) under KL-constraint — effective but computationally expensive and tricky to get right.
+
+</details>
+
+---
+
+<details>
+<summary><b>Reward Model (RLHF)</b> — Try your own first</summary>
+
+**Model Answer:** A model trained on pairwise human comparisons to predict a scalar reward R(x, y) for a completion y given prompt x — higher is better; trained using a Bradley-Terry preference model.
+
+</details>
+
+---
+
+<details>
+<summary><b>PPO (Proximal Policy Optimization)</b> — Try your own first</summary>
+
+**Model Answer:** The RL algorithm used in RLHF to update the policy (LM) to maximize reward while staying close to the original supervised model (KL-constraint) — prevents the policy from diverging too far.
+
+</details>
+
+---
+
+<details>
+<summary><b>Pairwise Comparisons (RLHF)</b> — Try your own first</summary>
+
+**Model Answer:** Instead of asking for direct ratings (noisy and miscalibrated), ask annotators to rank outputs from best to worst — pairwise comparisons are more reliable for modeling human preferences.
+
+</details>
+
+---
+
+<details>
+<summary><b>DPO (Direct Preference Optimization)</b> — Try your own first</summary>
+
+**Model Answer:** Optimize LM parameters directly on preference data by solving a binary classification problem — no explicit reward model needed; simple and effective, similar properties to RLHF, but does not leverage online data.
+
+</details>
+
+---
+
+<details>
+<summary><b>DPO vs RLHF</b> — Try your own first</summary>
+
+**Model Answer:** RLHF: train reward model, then optimize policy with RL (PPO) — powerful but complex. DPO: directly optimize LM on preference data — simpler, no reward model, similar performance.
+
+</details>
+
+---
+
+<details>
+<summary><b>InstructGPT / ChatGPT</b> — Try your own first</summary>
+
+**Model Answer:** Models trained using RLHF with three steps: (1) supervised fine-tuning on demonstrations, (2) train reward model on comparisons, (3) optimize policy with PPO — ChatGPT added dialogue-specific data collection.
+
+</details>
+
+---
+
+<details>
+<summary><b>Open LLM Leaderboard</b> — Try your own first</summary>
+
+**Model Answer:** A leaderboard tracking, ranking, and evaluating open LLMs and chatbots on benchmarks (ARC, HellaSwag, MMLU, TruthfulQA, Winogrande, GSM8K) — many top models use DPO.
+
+</details>
+
+---
+
+## 5. QUICK REFERENCE CHEAT SHEET — WEEK 7 DL
+
+### Key Formulas
+
+<details>
+<summary><b>GAN Minimax Loss</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Formula** | `min_G max_D E_{x~p_data}[log D(x)] + E_{z~p_z}[log(1 - D(G(z)))]` |
+| **D's goal** | Maximize ability to distinguish real from fake |
+| **G's goal** | Minimize D's success (make D(G(z)) → 1) |
+
+</details>
+
+---
+
+<details>
+<summary><b>DDPM Training Loss</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Formula** | `L_simple = E_{t,x_0,ε}[||ε - ε_θ(x_t, t)||²]` |
+| **x_t** | `x_t = √(ᾱ_t) x_0 + √(1 - ᾱ_t) ε` |
+| **Task** | Predict the noise ε added to produce x_t |
+
+</details>
+
+---
+
+<details>
+<summary><b>Classifier-Free Guidance</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Formula** | `ε̂ = ε_θ(x_t, t, ∅) + w · (ε_θ(x_t, t, c) - ε_θ(x_t, t, ∅))` |
+| **w > 1** | Pushes generation to follow prompt more strongly |
+| **Trade-off** | Higher w = better prompt adherence, lower diversity |
+
+</details>
+
+---
+
+<details>
+<summary><b>CLIP Contrastive Loss</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Image-to-Text** | `L_image = -1/N Σ log(exp(S_ii) / Σ_j exp(S_ij))` |
+| **Text-to-Image** | `L_text = -1/N Σ log(exp(S_ii) / Σ_j exp(S_ji))` |
+| **Final Loss** | `L = (L_image + L_text) / 2` |
+| **S_ij** | Cosine similarity between image i and text j |
+
+</details>
+
+---
+
+<details>
+<summary><b>DPO Loss</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Formula** | `L_DPO(θ) = -E[log σ(RM_θ(x, y_w) - RM_θ(x, y_l))]` |
+| **y_w** | Winning (preferred) response |
+| **y_l** | Losing (rejected) response |
+| **Key insight** | RM can be written in terms of policy: `RM(x,y) = β log(p_θ(y|x) / p_ref(y|x)) + β log Z(x)` |
+
+</details>
+
+---
+
+### Architecture Comparison — Vision
+
+<details>
+<summary><b>ViT, CNN, Hybrid</b> — Try to recall first</summary>
+
+| Architecture | Data Type | Key Bias | Key Mechanism |
+|--------------|-----------|----------|---------------|
+| **CNN** | Grid (Images) | Spatial Locality | Convolution kernels |
+| **ViT** | Patches (Images) | Weak (learned) | Self-attention on patches |
+| **Hybrid** | Grid + Patches | Spatial + Global | Conv + Transformer |
+
+</details>
+
+---
+
+<details>
+<summary><b>ViT Model Variants</b> — Try to recall first</summary>
+
+| Model | Layers | Hidden Size | MLP Size | Heads | Params |
+|-------|--------|-------------|----------|-------|--------|
+| **ViT-Base** | 12 | 768 | 3072 | 12 | 86M |
+| **ViT-Large** | 24 | 1024 | 4096 | 16 | 307M |
+| **ViT-Huge** | 32 | 1280 | 5120 | 16 | 632M |
+
+</details>
+
+---
+
+### Architecture Comparison — Generative
+
+<details>
+<summary><b>GAN vs Diffusion</b> — Try to recall first</summary>
+
+| Aspect | GAN | Diffusion |
+|--------|-----|-----------|
+| **Training** | Adversarial minimax game | Simple regression (denoising) |
+| **Stability** | Unstable (mode collapse, vanishing gradients) | Stable |
+| **Sampling** | One forward pass (fast) | Many steps (slow, 20-1000) |
+| **Sample Quality** | Sharp, photorealistic | High quality, diverse |
+| **Conditioning** | Possible but tricky | Easy (cross-attention) |
+
+</details>
+
+---
+
+<details>
+<summary><b>Diffusion Model Variants</b> — Try to recall first</summary>
+
+| Model | Key Innovation | Sampling Steps |
+|-------|----------------|----------------|
+| **DDPM** | Original diffusion recipe | 1000 |
+| **DDIM** | Deterministic, skippable sampling | 20-50 |
+| **Latent Diffusion** | Diffuse in VAE latent space | 20-50 |
+| **Stable Diffusion** | Latent diffusion + text conditioning | 20-50 |
+| **ControlNet** | Spatial conditioning via frozen copy | 20-50 |
+
+</details>
+
+---
+
+### LLM Alignment Comparison
+
+<details>
+<summary><b>IFT vs RLHF vs DPO</b> — Try to recall first</summary>
+
+| Aspect | IFT | RLHF | DPO |
+|--------|-----|------|-----|
+| **Data** | (Instruction, response) pairs | Pairwise comparisons | Pairwise comparisons |
+| **Training** | Supervised fine-tuning | Train reward model + PPO | Direct binary classification |
+| **Complexity** | Simple | Complex (RL) | Simple |
+| **Reward Model** | No | Yes | No (implicit) |
+| **Online Data** | No | Yes | No |
+
+</details>
+
+---
+
+### Key Defaults
+
+<details>
+<summary><b>Key Defaults</b> — Try to recall first</summary>
+
+| Concept | Default |
+|---------|---------|
+| ViT patch size | 16×16 |
+| MAE masking ratio | 75% |
+| CLIP training pairs | 400M |
+| CLIP temperature | Learned |
+| Diffusion training steps | 1000 (DDPM) |
+| DDIM sampling steps | 20-50 |
+| Classifier-free guidance scale | 7.5 (common) |
+| ControlNet control weight | 1.0 (strict) |
+| RLHF KL penalty | β (tuned) |
+| DPO β | 0.1 (common) |
+
+</details>
+
+---
+
+## 6. CONNECTIONS MAP — WEEK 7 DL
+
+### 🌳 TEXT-BASED CONCEPT MAP
+
+```
+╔══════════════════════════════════════════════════════════════════════════╗
+║                                                                          ║
+║                    WEEK 7 DL: GENERATIVE & MULTIMODAL AI                ║
+║                                                                          ║
+║                    ┌─────────────────────────────────────┐              ║
+║                    │   FROM DISCRIMINATIVE TO GENERATIVE │              ║
+║                    └──────────────┬──────────────────────┘              ║
+║                                   │                                      ║
+║    ┌──────────────────────────────┼──────────────────────────────┐      ║
+║    │                              │                              │      ║
+║    ▼                              ▼                              ▼      ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │  GANs        │          │  DIFFUSION   │          │  VISION      │  ║
+║ │  Adversarial │          │  Denoising   │          │  TRANSFORMERS│  ║
+║ │  Game        │          │  Regression  │          │  ViT, MAE    │  ║
+║ └──────┬───────┘          └──────┬───────┘          └──────┬───────┘  ║
+║        │                         │                         │          ║
+║        │                         │                         │          ║
+║        ▼                         ▼                         ▼          ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │  Mode        │          │  Forward     │          │  CLIP        │  ║
+║ │  Collapse    │          │  Process     │          │  Contrastive │  ║
+║ │  Instability │          │  (fixed)     │          │  Learning    │  ║
+║ └──────┬───────┘          └──────┬───────┘          └──────┬───────┘  ║
+║        │                         │                         │          ║
+║        │                         │                         │          ║
+║        ▼                         ▼                         ▼          ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │  WGAN        │          │  Reverse     │          │  Zero-Shot   │  ║
+║ │  StyleGAN    │          │  Process     │          │  Transfer    │  ║
+║ │  BigGAN      │          │  (learned)   │          │  Robustness  │  ║
+║ │  CycleGAN    │          │  DDPM, DDIM  │          │              │  ║
+║ └──────────────┘          └──────┬───────┘          └──────────────┘  ║
+║                                  │                                     ║
+║                                  ▼                                     ║
+║                    ┌─────────────────────────────────────┐             ║
+║                    │   LATENT DIFFUSION                   │             ║
+║                    │   VAE + U-Net + Cross-Attention      │             ║
+║                    │   Stable Diffusion                   │             ║
+║                    └──────────────┬──────────────────────┘             ║
+║                                   │                                     ║
+║                                   ▼                                     ║
+║                    ┌─────────────────────────────────────┐             ║
+║                    │   CONDITIONAL GENERATION              │             ║
+║                    │   Text-to-Image, Classifier-Free     │             ║
+║                    │   Guidance, ControlNet               │             ║║                    └──────────────┬──────────────────────┘             ║
+║                                   │                                     ║
+║                                   ▼                                     ║
+║                    ┌─────────────────────────────────────┐             ║
+║                    │   EVALUATION                         │             ║
+║                    │   IS, FID, Human Evaluation          │             ║
+║                    └──────────────┬──────────────────────┘             ║
+║                                   │                                     ║
+║                                   ▼                                     ║
+║                    ┌─────────────────────────────────────┐             ║
+║                    │   LLM ALIGNMENT                      │             ║
+║                    │   IFT → RLHF → DPO                   │             ║
+║                    │   Human Preferences, Reward Models   │             ║
+║                    └─────────────────────────────────────┘             ║
+║                                                                         ║
+╚══════════════════════════════════════════════════════════════════════════╝
+```
+
+---
+
+### 🔗 KEY CONNECTION EXPLANATIONS
+
+<details>
+<summary><b>Connection 1: How does attention connect vision and language?</b></summary>
+
+```
+Attention (Week 6) → ViT (Vision Transformer) → CLIP (Multimodal)
+                              ↓                        ↓
+                    Patches as tokens          Image + Text encoders
+                              ↓                        ↓
+                    Self-attention on patches    Contrastive learning
+                              ↓                        ↓
+                    Long-range reasoning        Shared embedding space
+                              ↓                        ↓
+                    MAE: Masked patches         Zero-shot classification
+
+The same attention mechanism that powers LLMs (Week 6) is applied to image patches in ViT, and to both modalities in CLIP. This is the core insight: attention is a general-purpose sequence processing tool.
+```
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 2: How do GANs and Diffusion Models differ fundamentally?</b></summary>
+
+```
+GANs: Adversarial Game                    Diffusion: Regression
+─────────────────────────────────────────────────────────────
+Two networks (G, D)                     One network (ε_θ)
+    ↓                                        ↓
+Minimax game                            Denoising objective
+    ↓                                        ↓
+Unstable training                       Stable training
+    ↓                                        ↓
+Mode collapse                           Diverse samples
+    ↓                                        ↓
+One-step sampling                       Multi-step sampling
+    ↓                                        ↓
+Sharp but limited                       High quality, slow
+
+The trade-off: GANs are fast but unstable; diffusion is stable but slow.
+Latent Diffusion makes diffusion practical by working in compressed space.
+```
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 3: How does conditional generation connect to Week 6?</b></summary>
+
+```
+Week 6: Transformer Decoder Cross-Attention
+    ↓
+Text (keys/values) + Image (queries)
+    ↓
+Week 7: Diffusion U-Net Cross-Attention
+    ↓
+Text embeddings (keys/values) + Latent image (queries)
+    ↓
+Every spatial location attends to relevant words
+    ↓
+Text-to-Image Generation
+
+The cross-attention mechanism from the Transformer decoder is reused in diffusion models for text conditioning — same Q/K/V framework, different domain.
+```
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 4: How does ControlNet relate to LoRA (Week 6)?</b></summary>
+
+```
+LoRA (Week 6)                          ControlNet (Week 7)
+─────────────────────────────────────────────────────────────
+Freeze base model                      Freeze base diffusion model
+    ↓                                        ↓
+Add small trainable adapter            Add trainable copy of encoder
+    ↓                                        ↓
+Low-rank matrices                      Zero-initialized convolutions
+    ↓                                        ↓
+Fine-tune for new task                 Add spatial conditioning
+    ↓                                        ↓
+Preserves base knowledge               Preserves generative knowledge
+
+The pattern is identical: freeze the base model, add a small trainable component, preserve pre-trained knowledge. LoRA does it for language; ControlNet does it for spatial control in vision.
+```
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 5: The LLM Alignment Pipeline</b></summary>
+
+```
+Pretrained LM (Week 6)
+    ↓
+Zero-Shot / Few-Shot Prompting
+    ↓ (limits: context, complex reasoning)
+Instruction Finetuning (IFT)
+    ↓ (limits: expensive data, no right answer for creative tasks)
+RLHF: Reward Model + PPO
+    ↓ (complex, expensive, tricky)
+DPO: Direct Preference Optimization
+    ↓ (simpler, no reward model)
+Aligned Assistant (ChatGPT, Llama 3, etc.)
+
+Each step addresses limitations of the previous:
+- Prompting is cheap but limited
+- IFT teaches format but not preferences
+- RLHF optimizes preferences but is complex
+- DPO simplifies preference optimization
+```
+
+</details>
+
+---
+
+### 📊 CONNECTION MATRIX
+
+| Concept A | Connects To | Why |
+|-----------|-------------|-----|
+| **Attention (W6)** | ViT | Patches as tokens, self-attention |
+| **Attention (W6)** | CLIP | Cross-modal attention |
+| **Attention (W6)** | Diffusion Conditioning | Cross-attention to text |
+| **CNN Inductive Bias (W1)** | ViT | ViT has weak bias, needs more data |
+| **CLIP** | Text-to-Image | Text encoder for conditioning |
+| **GANs** | Diffusion | Both generative, different objectives |
+| **VAE (W1)** | Latent Diffusion | Compresses images to latent space |
+| **LoRA (W6)** | ControlNet | Freeze base + trainable adapter |
+| **IFT** | RLHF | IFT teaches format, RLHF teaches preferences |
+| **RLHF** | DPO | DPO simplifies RLHF's reward modeling |
+| **Human Preferences** | RLHF/DPO | Pairwise comparisons for training |
+| **FID** | Evaluation | Measures distribution similarity |
+
+---
+
+## 7. COMMON MISCONCEPTIONS — WEEK 7 DL
+
+**How to use:** Read each misconception first. Try to identify what's wrong. Then click to reveal the reality.
+
+---
+
+### Misconception 1: "GANs are outdated — diffusion models are strictly better."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Diffusion models have replaced GANs entirely. | **GANs still have advantages:** |
+| | • **One-step sampling** — GANs generate in a single forward pass; diffusion needs 20-1000 steps |
+| | • **Real-time applications** — GANs are faster for interactive use |
+| | • **Specific domains** — StyleGAN still produces state-of-the-art face generation |
+| | **Diffusion advantages:** stable training, diverse samples, easy conditioning |
+| | **The reality:** Both are useful; the choice depends on the application. |
+
+**Key insight:** The field hasn't replaced GANs — it has added diffusion as another tool. Some modern systems use both.
+
+</details>
+
+---
+
+### Misconception 2: "The forward diffusion process is learned."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| The forward process (adding noise) is trained. | **The forward process has NO trainable parameters!** It's a fixed, predetermined schedule of adding Gaussian noise. |
+| | • `x_t = √(ᾱ_t) x_0 + √(1 - ᾱ_t) ε` |
+| | • `β_t` (noise schedule) is fixed in advance |
+| | • Only the **reverse process** (denoising) is learned |
+| | **Why?** The forward process's job is simply to destroy information in a known, controlled way — there's nothing to learn. All learning capacity is spent on reconstruction. |
+
+**Key insight:** The forward process is the "problem definition"; the reverse process is the "solution."
+
+</details>
+
+---
+
+### Misconception 3: "Diffusion models are just GANs with extra steps."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Diffusion is a variant of GANs. | **They are fundamentally different:** |
+| | • **GANs:** Two networks (G, D) in an adversarial game — minimax optimization |
+| | • **Diffusion:** One network (ε_θ) trained with a simple regression objective — denoising |
+| | • **GANs:** One-step generation (fast) but unstable training |
+| | • **Diffusion:** Multi-step generation (slow) but stable training |
+| | • **GANs:** Mode collapse is a risk |
+| | • **Diffusion:** Naturally covers the full distribution |
+
+**Key insight:** Diffusion replaces the adversarial game with a regression problem — this is why training is so much more stable.
+
+</details>
+
+---
+
+### Misconception 4: "Latent diffusion is just diffusion on smaller images."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Latent diffusion is diffusion applied to downscaled images. | **Latent diffusion operates in a learned latent space, not downscaled pixels:** |
+| | • **VAE encoder** compresses images to a latent representation (e.g., 64×64×4 instead of 512×512×3) |
+| | • The diffusion U-Net operates entirely in **this latent space** |
+| | • The **VAE decoder** maps denoised latents back to pixels |
+| | • The VAE is trained **separately** and **frozen** before diffusion training |
+| | • This separates **perceptual compression** (VAE) from **semantic generation** (diffusion) |
+
+**Key insight:** The latent space is not just smaller — it's a learned, perceptually meaningful representation where diffusion is more efficient.
+
+</details>
+
+---
+
+### Misconception 5: "Classifier-free guidance requires a separate classifier."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Classifier-free guidance uses an external classifier to guide generation. | **Despite the name, there's NO classifier involved!** |
+| | • **Training:** Randomly drop the conditioning text (e.g., 10% of the time), so the model learns both conditional and unconditional denoising |
+| | • **Sampling:** Run the model twice — once with text, once without — and extrapolate: `ε̂ = ε_uncond + w · (ε_cond - ε_uncond)` |
+| | • **w > 1** pushes generation to follow the prompt more strongly |
+| | The "classifier-free" refers to not needing a separate classifier network (unlike earlier "classifier guidance" methods). |
+
+**Key insight:** One model learns both conditional and unconditional distributions; guidance is a sampling-time trick.
+
+</details>
+
+---
+
+### Misconception 6: "ControlNet fine-tunes the entire diffusion model."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| ControlNet retrains the base diffusion model on new conditioning. | **ControlNet FREEZES the base model completely:** |
+| | • **Original (locked) weights** — keep all learned generative knowledge |
+| | • **Trainable copy** of the U-Net encoder — learns to process the new spatial condition |
+| | • Connected through **zero-initialized convolutions** — start at zero, contribute nothing initially |
+| | • The new conditioning pathway is learned **gradually**, without destabilizing the pretrained model |
+| | **Why not just fine-tune?** Fine-tuning the whole model risks catastrophic forgetting — overwriting the broad generative knowledge learned from billions of images. |
+
+**Key insight:** Same pattern as LoRA — freeze the base, add a small trainable adapter.
+
+</details>
+
+---
+
+### Misconception 7: "ViT is just a Transformer applied to images — nothing special."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| ViT is a straightforward application of the Transformer to images. | **The key challenge is the inductive bias mismatch:** |
+| | • **CNNs** have strong spatial locality bias — nearby pixels are correlated |
+| | • **Transformers** have no such bias — they treat all positions equally |
+| | • **ViT must learn spatial relationships from data** — this requires massive pre-training (JFT-300M, 300M images) |
+| | • With enough data, ViT matches or exceeds CNN performance |
+| | • Without enough data, ViT underperforms CNNs |
+| | **The paper's insight:** "An image is worth 16×16 words" — patches as tokens. |
+
+**Key insight:** ViT's success is not just architecture — it's architecture + massive scale. The Transformer's flexibility comes at the cost of needing more data.
+
+</details>
+
+---
+
+### Misconception 8: "CLIP is a generative model."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| CLIP generates images from text. | **CLIP is a contrastive model, not generative:** |
+| | • **CLIP** learns a shared embedding space for images and text |
+| | • It can **match** images to text (zero-shot classification) |
+| | • It can **rank** images by text similarity |
+| | • It **cannot generate** images |
+| | • For generation, you need a generative model (GAN, diffusion) that uses CLIP's embeddings as conditioning |
+| | • **Stable Diffusion** uses CLIP's text encoder to condition image generation |
+
+**Key insight:** CLIP is the "bridge" between vision and language — it enables matching, not generation. Generation comes from diffusion/GANs.
+
+</details>
+
+---
+
+### Misconception 9: "Instruction finetuning is enough to align LLMs."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| If you finetune on enough instructions, the model will be aligned. | **IFT has fundamental limitations:** |
+| | • **Expensive** — collecting ground-truth data for every task |
+| | • **No right answer** — creative tasks (write a story) have no single correct response |
+| | • **All errors equal** — language modeling penalizes all token-level mistakes equally, but some errors are worse |
+| | • **Humans are suboptimal** — human-generated answers aren't always best |
+| | • **Objective mismatch** — LM objective (predict next token) ≠ human preference (helpful, harmless, honest) |
+| | **Solution:** RLHF or DPO — explicitly optimize for human preferences. |
+
+**Key insight:** IFT teaches the model *what to say*; RLHF/DPO teaches it *what humans prefer*.
+
+</details>
+
+---
+
+### Misconception 10: "RLHF is always better than DPO."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| RLHF is the gold standard; DPO is a cheap approximation. | **DPO has advantages:** |
+| | • **Simpler** — no reward model, no RL, just binary classification |
+| | • **Stable** — supervised learning, not RL |
+| | • **Effective** — similar or better performance in many cases |
+| | • **Efficient** — less compute, less engineering |
+| | **RLHF advantages:** |
+| | • **Online data** — can explore new responses |
+| | • **Explicit reward model** — can be reused for other tasks |
+| | • **Fine-grained control** — KL penalty, PPO clipping |
+| | **The reality:** DPO is often the better choice for most teams; RLHF is for when you need online exploration or have significant resources. |
+
+**Key insight:** DPO is not "RLHF lite" — it's a different approach with its own strengths. Llama 3 uses both.
+
+</details>
+
+---
+
+### Misconception 11: "Human preferences are objective ground truth."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Human preferences are the gold standard for alignment. | **Human preferences are noisy, fallible, and biased:** |
+| | • **Annotator disagreement** — senior engineers and juniors disagree constantly |
+| | • **Temporal inconsistency** — the same person rates differently on Monday vs. Friday |
+| | • **Cultural bias** — preferences vary across cultures and demographics |
+| | • **Annotator working conditions** — low-paid workers in "digital sweatshops" |
+| | • **What "average preference" means** — whose taste does the model learn? |
+| | **The reality:** Human preferences are the best signal we have, but they're not objective truth. The field is actively researching better methods. |
+
+**Key insight:** Alignment is not a solved problem — it's an active area with deep ethical questions.
+
+</details>
+
+---
+
+### Misconception 12: "MMLU is the best measure of LLM quality."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Higher MMLU = better model. | **Benchmarks measure narrow capabilities:** |
+| | • **MMLU** measures knowledge across 57 subjects — not helpfulness, safety, or reasoning |
+| | • **Users may prefer** a model with lower MMLU but better conversational ability |
+| | • **Goodhart's Law** — when a measure becomes a target, it ceases to be a good measure |
+| | • **Benchmark contamination** — test data may leak into training data |
+| | • **Real-world performance** — what matters is how the model performs on actual tasks |
+| | **The reality:** Benchmarks are useful proxies, but they don't capture the full picture. Human evaluation and task-specific metrics are essential. |
+
+**Key insight:** A model that scores higher on MMLU but is less helpful in practice is not "better" — it's just better at MMLU.
+
+</details>
+
+---
+
+## 📊 QUICK REFERENCE: MISCONCEPTIONS vs REALITY
+
+| Misconception | Reality |
+|---------------|---------|
+| GANs are outdated | Both GANs and diffusion have strengths; choice depends on application |
+| Forward diffusion is learned | Forward process is fixed; only reverse process is trained |
+| Diffusion = GAN with extra steps | Fundamentally different: regression vs. adversarial game |
+| Latent diffusion = smaller images | Operates in learned latent space, not downscaled pixels |
+| Classifier-free guidance needs a classifier | No classifier — model learns both conditional and unconditional |
+| ControlNet fine-tunes the model | Freezes base model; trains zero-initialized copy |
+| ViT is just Transformer on images | Needs massive data due to weak inductive bias |
+| CLIP generates images | CLIP matches/ranks; generation needs GAN/diffusion |
+| IFT is enough for alignment | IFT has limitations; RLHF/DPO for preferences |
+| RLHF > DPO always | DPO is simpler, stable, effective; Llama 3 uses both |
+| Human preferences are objective | Noisy, biased, inconsistent — active research area |
+| MMLU = model quality | Narrow benchmark; real-world performance matters |
+
+---
+
+# 📚 WEEK 7 DL — COMPLETE STUDY GUIDE
+## All Exercises with Answers in Spoiler Format
+
+---
+
+# SECTION 1: GENERATIVE MODELS — GANS
+
+---
+
+## Exercise W7-1: GAN Core Idea
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What are the two networks in a GAN? | |
+| 2. What is the generator's goal? | |
+| 3. What is the discriminator's goal? | |
+| 4. Write the minimax game formula. | |
+| 5. What is the equilibrium condition? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Two networks | **Generator (G)** and **Discriminator (D)** |
+| 2. Generator's goal | Map random noise z to synthetic images G(z) that **fool the discriminator** (make D(G(z)) → 1) |
+| 3. Discriminator's goal | **Distinguish real images from fake** (maximize D(x) for real, minimize D(G(z)) for fake) |
+| 4. Minimax formula | `min_G max_D E_{x~p_data}[log D(x)] + E_{z~p_z}[log(1 - D(G(z)))]` |
+| 5. Equilibrium | When G produces samples indistinguishable from real data, D(x) = 0.5 everywhere — D can no longer do better than random guessing |
+
+</details>
+
+---
+
+## Exercise W7-2: GAN Training Challenges
+
+| Challenge | What is it? | Why does it happen? | Fix |
+|-----------|-------------|---------------------|-----|
+| Mode Collapse | | | |
+| Vanishing Gradients | | | |
+| Non-Convergence | | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Challenge | What is it? | Why does it happen? | Fix |
+|-----------|-------------|---------------------|-----|
+| **Mode Collapse** | Generator produces only a small set of outputs, ignoring data diversity | Generator discovers a few outputs that reliably fool D and collapses to those | Minibatch discrimination, feature matching, unrolled GANs |
+| **Vanishing Gradients** | Generator receives no useful gradient signal | If D becomes too accurate too early, log(1 - D(G(z))) saturates | WGAN (Earth Mover's distance), better architecture |
+| **Non-Convergence** | Training oscillates indefinitely instead of settling | G and D are optimized against each other — no stable equilibrium | WGAN, careful hyperparameter tuning, two-timescale update rule |
+
+</details>
+
+---
+
+## Exercise W7-3: GAN Variants
+
+| Variant | Key Innovation | Why it matters |
+|---------|----------------|----------------|
+| DCGAN | | |
+| StyleGAN | | |
+| BigGAN | | |
+| CycleGAN | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Variant | Key Innovation | Why it matters |
+|---------|----------------|----------------|
+| **DCGAN** | First architecture to make convolutional GANs reliably trainable | Basis for most modern GAN designs |
+| **StyleGAN** | Learned, disentangled "style" space | Fine-grained control over generated image attributes |
+| **BigGAN** | Scales GAN training to very large batch sizes and model capacity | High-fidelity, high-resolution synthesis |
+| **CycleGAN** | Image-to-image translation *without* paired training examples | Horses ↔ zebras, using cycle-consistency loss |
+
+</details>
+
+---
+
+# SECTION 2: DIFFUSION MODELS
+
+---
+
+## Exercise W7-4: Forward vs Reverse Diffusion
+
+| Aspect | Forward Process | Reverse Process |
+|--------|-----------------|-----------------|
+| What happens? | | |
+| Is it learned? | | |
+| What is the goal? | | |
+| What is the end state? | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Aspect | Forward Process | Reverse Process |
+|--------|-----------------|-----------------|
+| **What happens?** | Gradually add Gaussian noise to a real image over T steps | Train a neural network to undo the noising, one denoising step at a time |
+| **Is it learned?** | **No** — fixed noise schedule β_t, no trainable parameters | **Yes** — train ε_θ(x_t, t) to predict the noise |
+| **What is the goal?** | Destroy information in a controlled way | Reconstruct structure from corruption |
+| **What is the end state?** | Pure Gaussian noise (x_T ~ N(0, I)) | Clean image (x_0) |
+
+</details>
+
+---
+
+## Exercise W7-5: DDPM Training Objective
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. Write the DDPM simplified loss. | |
+| 2. What does x_t represent? | |
+| 3. What is the training procedure? | |
+| 4. Why predict noise instead of the image? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. DDPM loss | `L_simple = E_{t,x_0,ε}[||ε - ε_θ(x_t, t)||²]` |
+| 2. x_t | `x_t = √(ᾱ_t) x_0 + √(1 - ᾱ_t) ε` — the noisy image at timestep t |
+| 3. Training procedure | Sample real image x_0, random timestep t, noise ε ~ N(0, I); construct x_t; train ε_θ to predict ε from x_t and t |
+| 4. Why predict noise? | Empirically gives a simpler, better-behaved training target than predicting the denoised image directly |
+
+</details>
+
+---
+
+## Exercise W7-6: DDPM vs DDIM
+
+| Aspect | DDPM | DDIM |
+|--------|------|------|
+| Sampling process | | |
+| Number of steps | | |
+| Speed | | |
+| Quality | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Aspect | DDPM | DDIM |
+|--------|------|------|
+| **Sampling process** | Markovian, stochastic | Deterministic, non-Markovian |
+| **Number of steps** | 1000 (same as training) | 20-50 |
+| **Speed** | Slow | 20-50× faster |
+| **Quality** | High | Comparable |
+
+</details>
+
+---
+
+## Exercise W7-7: Latent Diffusion
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. Why is pixel-space diffusion expensive? | |
+| 2. What is the key insight of latent diffusion? | |
+| 3. What is the role of the VAE? | |
+| 4. What is the U-Net's role? | |
+| 5. What is Stable Diffusion? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Why pixel-space diffusion is expensive | Running dozens of U-Net forward passes on high-resolution images (1024×1024×3) is extremely memory- and compute-intensive |
+| 2. Key insight | Most information in raw images is perceptually redundant — diffuse in a compressed latent space instead |
+| 3. VAE's role | Encoder compresses images to latent space (e.g., 64×64×4); decoder maps denoised latents back to pixels — trained separately and frozen |
+| 4. U-Net's role | Predicts noise ε_θ(z_t, t) in latent space, with conditioning via cross-attention |
+| 5. Stable Diffusion | The popular open-source text-to-image model based on latent diffusion |
+
+</details>
+
+---
+
+# SECTION 3: CONDITIONAL GENERATION & CONTROLNET
+
+---
+
+## Exercise W7-8: Text Conditioning
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. How does text conditioning enter the U-Net? | |
+| 2. What acts as queries in cross-attention? | |
+| 3. What acts as keys and values? | |
+| 4. What does this allow? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. How text conditioning enters | Via cross-attention layers interleaved with convolutional blocks in the U-Net |
+| 2. Queries | Image (latent) features |
+| 3. Keys and values | Text embeddings (from CLIP's text tower or a language model) |
+| 4. What this allows | Every spatial location in the latent image can selectively "attend to" the most relevant words in the prompt while being denoised |
+
+</details>
+
+---
+
+## Exercise W7-9: Classifier-Free Guidance
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is the formula for classifier-free guidance? | |
+| 2. What does w > 1 do? | |
+| 3. What is the trade-off? | |
+| 4. How is the model trained for this? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Formula | `ε̂ = ε_θ(x_t, t, ∅) + w · (ε_θ(x_t, t, c) - ε_θ(x_t, t, ∅))` |
+| 2. w > 1 | Pushes generation to follow the prompt more strongly than the model would unprompted |
+| 3. Trade-off | Better prompt adherence at some cost to sample diversity |
+| 4. Training | Randomly drop the conditioning text (e.g., 10% of the time) so the model learns both conditional and unconditional denoising |
+
+</details>
+
+---
+
+## Exercise W7-10: ControlNet
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is ControlNet's goal? | |
+| 2. What is frozen? | |
+| 3. What is trained? | |
+| 4. What are zero-initialized convolutions? | |
+| 5. What is the control weight? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Goal | Add precise spatial conditioning (edges, depth, pose) to a pretrained, frozen text-to-image diffusion model |
+| 2. Frozen | The original (locked) U-Net weights — keep all learned generative knowledge |
+| 3. Trained | A trainable copy of the U-Net's encoder blocks — learns to process the new spatial condition |
+| 4. Zero-initialized convolutions | Layers whose weights start at exactly zero; contribute nothing initially, so the model behaves identically to the original checkpoint; the new conditioning pathway is learned gradually |
+| 5. Control weight | Trades off fidelity to spatial condition vs. creative freedom — low (0.2) = loose; high (1.0) = strict |
+
+</details>
+
+---
+
+# SECTION 4: EVALUATING GENERATIVE MODELS
+
+---
+
+## Exercise W7-11: Evaluation Metrics
+
+| Metric | What it measures | How it works | Limitations |
+|--------|------------------|--------------|-------------|
+| Inception Score (IS) | | | |
+| FID | | | |
+| Human Evaluation | | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Metric | What it measures | How it works | Limitations |
+|--------|------------------|--------------|-------------|
+| **Inception Score (IS)** | Image quality and diversity | Rewards images that are individually confident (classifier sure) and collectively diverse (many classes) | Depends on pretrained classifier's biases; doesn't measure prompt faithfulness |
+| **FID** | Distribution similarity | Compares mean and covariance of real vs. generated features in a pretrained network's embedding space; lower = more similar | Inherits classifier's biases; low FID doesn't guarantee faithfulness or lack of artifacts |
+| **Human Evaluation** | Perceptual quality and prompt faithfulness | Humans rate generated images | Expensive, slow, subjective; still the gold standard |
+
+</details>
+
+---
+
+# SECTION 5: VISION TRANSFORMERS & MULTIMODAL MODELS
+
+---
+
+## Exercise W7-12: ViT Architecture
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. How does ViT process an image? | |
+| 2. What is the [CLS] token? | |
+| 3. What are positional embeddings for? | |
+| 4. How does ViT compare to CNNs on large datasets? | |
+| 5. What is ViT's main computational cost? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. How ViT processes an image | Splits into fixed-size patches (16×16), flattens them, linearly projects each into an embedding — treats patches as tokens |
+| 2. [CLS] token | Extra learnable token prepended to the sequence; its final representation is used for classification |
+| 3. Positional embeddings | Added to patch embeddings to retain spatial information (since self-attention is permutation-invariant) |
+| 4. ViT vs CNNs on large datasets | ViT matches or exceeds CNN performance when pre-trained on large amounts of data (JFT-300M); underperforms on smaller datasets |
+| 5. Main computational cost | Self-attention is quadratic in image size (number of patches) |
+
+</details>
+
+---
+
+## Exercise W7-13: ViT vs CNN
+
+| Aspect | CNN | ViT |
+|--------|-----|-----|
+| Inductive bias | | |
+| Long-range reasoning | | |
+| Data requirements | | |
+| Computational cost | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Aspect | CNN | ViT |
+|--------|-----|-----|
+| **Inductive bias** | Strong spatial locality (nearby pixels correlated) | Weak — must learn spatial relationships from data |
+| **Long-range reasoning** | Limited — requires O(n/k) layers to connect distant patches | Excellent — O(1) path lengths via self-attention |
+| **Data requirements** | Moderate — inductive bias helps with less data | Massive — needs large pre-training datasets |
+| **Computational cost** | Linear in image size | Quadratic in image size (self-attention) |
+
+</details>
+
+---
+
+## Exercise W7-14: Masked Autoencoders (MAE)
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is MAE's core idea? | |
+| 2. What is the masking ratio? | |
+| 3. What is the encoder's role? | |
+| 4. What is the decoder's role? | |
+| 5. Why is MAE effective? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Core idea | Mask a large portion of image patches and train the model to reconstruct them — BERT-like self-supervised learning for vision |
+| 2. Masking ratio | 75% |
+| 3. Encoder's role | Processes only visible patches (efficient); learns rich visual representations |
+| 4. Decoder's role | Reconstructs masked patches from encoded visible patches + mask tokens |
+| 5. Why effective | Forces the model to learn semantic representations, not just local interpolation; scales efficiently; better than contrastive methods for some tasks |
+
+</details>
+
+---
+
+## Exercise W7-15: CLIP
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is CLIP's architecture? | |
+| 2. What is the training data? | |
+| 3. What is the contrastive loss? | |
+| 4. How does zero-shot classification work? | |
+| 5. What are CLIP's key advances? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Architecture | Dual encoder — image encoder (ResNet or ViT) + text encoder (Transformer) |
+| 2. Training data | 400 million (image, text) pairs collected from the web |
+| 3. Contrastive loss | For a batch of N pairs, maximize cosine similarity of correct pairs, minimize for incorrect; symmetric loss `L = (L_image + L_text) / 2` |
+| 4. Zero-shot classification | Create classifier from label text (e.g., "a photo of a {class}"), encode all prompts, encode test image, predict class with highest cosine similarity |
+| 5. Key advances | Scalability (400M pairs), flexibility (zero-shot transfer), robustness (better handling of distribution shifts) |
+
+</details>
+
+---
+
+## Exercise W7-16: CLIP Robustness
+
+| Dataset | ResNet101 | CLIP Zero-Shot | Difference |
+|---------|-----------|----------------|------------|
+| ImageNet | 76.2 | 76.2 | 0% |
+| ImageNetV2 | 64.3 | 70.1 | +5.8% |
+| ImageNet-R | 37.7 | 88.9 | +51.2% |
+| ObjectNet | 32.6 | 72.3 | +39.7% |
+| ImageNet Sketch | 25.2 | 60.2 | +35.0% |
+| ImageNet-A | 2.7 | 77.1 | +74.4% |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+The table shows CLIP's zero-shot performance compared to ResNet101 across distribution-shifted datasets. CLIP's contrastive pre-training on diverse web data gives it much better robustness to distribution shifts — especially on ImageNet-A (+74.4%) and ImageNet-R (+51.2%). This is because CLIP learns general visual concepts from natural language supervision, not just ImageNet-specific features.
+
+</details>
+
+---
+
+# SECTION 6: LLM ALIGNMENT — IFT, RLHF, DPO
+
+---
+
+## Exercise W7-17: Zero-Shot vs Few-Shot
+
+| Aspect | Zero-Shot | Few-Shot |
+|--------|-----------|----------|
+| Definition | | |
+| Example | | |
+| Advantages | | |
+| Limitations | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Aspect | Zero-Shot | Few-Shot |
+|--------|-----------|----------|
+| **Definition** | No examples provided — model must infer the task from the prompt | A few examples (2-8) provided in the prompt |
+| **Example** | "Translate English to French: sea otter =>" | "Translate English to French: sea otter => loutre de mer, peppermint => menthe poivrée, ..." |
+| **Advantages** | No finetuning needed; works for many tasks | Better performance on complex tasks; still no finetuning |
+| **Limitations** | Limited by context; complex tasks need gradient steps | Limited by context length; doesn't work for very complex tasks |
+
+</details>
+
+---
+
+## Exercise W7-18: Chain-of-Thought (CoT) Prompting
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is CoT prompting? | |
+| 2. What is the trigger phrase? | |
+| 3. How much does it improve GSM8K? | |
+| 4. Why does it work? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. CoT prompting | Eliciting step-by-step reasoning from LLMs by showing examples with reasoning chains or adding "Let's think step by step" |
+| 2. Trigger phrase | "Let's think step by step" (or similar) |
+| 3. GSM8K improvement | Zero-shot: 10.4% → 40.7%; Few-shot (8 samples): 15.6% → 48.7% |
+| 4. Why it works | Forces the model to generate intermediate reasoning steps, which helps with multi-step arithmetic and logical tasks |
+
+</details>
+
+---
+
+## Exercise W7-19: Instruction Finetuning (IFT)
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is IFT? | |
+| 2. What data is needed? | |
+| 3. What are the limitations? | |
+| 4. What problem does it solve? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. IFT | Fine-tuning a pretrained LM on a dataset of (instruction, response) pairs to teach it to follow commands |
+| 2. Data needed | Demonstrations of desired behavior — (instruction, response) pairs |
+| 3. Limitations | Expensive to collect data; no right answer for creative tasks; all token-level mistakes penalized equally; humans generate suboptimal answers; mismatch between LM objective and human preferences |
+| 4. Problem solved | Pre-trained LMs don't naturally follow instructions — IFT teaches them to respond to commands |
+
+</details>
+
+---
+
+## Exercise W7-20: RLHF
+
+| Step | What happens? | Why? |
+|------|---------------|------|
+| 1 | | |
+| 2 | | |
+| 3 | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Step | What happens? | Why? |
+|------|---------------|------|
+| **1** | Collect demonstration data and train a supervised policy (SFT) | Teach the model basic instruction-following |
+| **2** | Collect comparison data (pairwise rankings) and train a reward model | Model human preferences as a scalar reward |
+| **3** | Optimize policy against reward model using RL (PPO) | Maximize expected reward while staying close to original model (KL-constraint) |
+
+</details>
+
+---
+
+## Exercise W7-21: DPO vs RLHF
+
+| Aspect | RLHF | DPO |
+|--------|------|-----|
+| Reward model | | |
+| Training algorithm | | |
+| Complexity | | |
+| Online data | | |
+| Performance | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Aspect | RLHF | DPO |
+|--------|------|-----|
+| **Reward model** | Yes — explicit reward model trained on comparisons | No — implicit reward from policy itself |
+| **Training algorithm** | RL (PPO) | Supervised binary classification |
+| **Complexity** | High — RL is tricky to get right | Low — simple and stable |
+| **Online data** | Yes — can explore new responses | No — fixed preference dataset |
+| **Performance** | Effective when tuned well | Similar or better in many cases |
+
+</details>
+
+---
+
+# SECTION 7: MASTERY & SYNTHESIS
+
+---
+
+## Exercise W7-22: GAN vs Diffusion Comparison
+
+| Aspect | GAN | Diffusion |
+|--------|-----|-----------|
+| Training objective | | |
+| Stability | | |
+| Sampling speed | | |
+| Sample quality | | |
+| Conditioning | | |
+| Mode collapse | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Aspect | GAN | Diffusion |
+|--------|-----|-----------|
+| **Training objective** | Adversarial minimax game | Simple regression (denoising) |
+| **Stability** | Unstable (mode collapse, vanishing gradients) | Stable |
+| **Sampling speed** | One forward pass (fast) | Many steps (slow, 20-1000) |
+| **Sample quality** | Sharp, photorealistic | High quality, diverse |
+| **Conditioning** | Possible but tricky | Easy (cross-attention) |
+| **Mode collapse** | Major risk | Not a problem |
+
+</details>
+
+---
+
+## Exercise W7-23: The Complete Cheat Sheet
+
+### Fill in all blanks:
+
+**GANs:**
+- Two networks: ___________ and ___________
+- Minimax game: ___________
+- Key challenges: ___________ and ___________
+
+**Diffusion Models:**
+- Forward process: ___________
+- Reverse process: ___________
+- DDPM loss: ___________
+- DDIM: ___________
+
+**Latent Diffusion:**
+- Diffuse in ___________ space, not ___________ space
+- VAE role: ___________
+- Stable Diffusion: ___________
+
+**Conditioning:**
+- Text conditioning via ___________
+- Classifier-free guidance formula: ___________
+- ControlNet: ___________
+
+**ViT:**
+- Splits image into ___________
+- Treats patches as ___________
+- Needs ___________ to outperform CNNs
+
+**CLIP:**
+- Trained on ___________ image-text pairs
+- Uses ___________ loss
+- Enables ___________ classification
+
+**LLM Alignment:**
+- IFT: ___________
+- RLHF: ___________
+- DPO: ___________
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+**GANs:**
+- Two networks: **Generator (G)** and **Discriminator (D)**
+- Minimax game: `min_G max_D E[log D(x)] + E[log(1 - D(G(z)))]`
+- Key challenges: **Mode collapse** and **instability**
+
+**Diffusion Models:**
+- Forward process: **Gradually add Gaussian noise (fixed, no learning)**
+- Reverse process: **Learn to denoise (predict noise ε_θ)**
+- DDPM loss: `L_simple = E[||ε - ε_θ(x_t, t)||²]`
+- DDIM: **Deterministic, faster sampling (20-50 steps vs 1000)**
+
+**Latent Diffusion:**
+- Diffuse in **latent** space, not **pixel** space
+- VAE role: **Compress images to latent / decode back to pixels**
+- Stable Diffusion: **Latent diffusion + text conditioning**
+
+**Conditioning:**
+- Text conditioning via **cross-attention**
+- Classifier-free guidance formula: `ε̂ = ε_uncond + w · (ε_cond - ε_uncond)`
+- ControlNet: **Freeze base model, train zero-initialized copy**
+
+**ViT:**
+- Splits image into **patches (16×16)**
+- Treats patches as **tokens**
+- Needs **large pre-training datasets** to outperform CNNs
+
+**CLIP:**
+- Trained on **400M** image-text pairs
+- Uses **contrastive** loss
+- Enables **zero-shot** classification
+
+**LLM Alignment:**
+- IFT: **Supervised fine-tuning on (instruction, response) pairs**
+- RLHF: **Train reward model on comparisons + PPO**
+- DPO: **Direct preference optimization (binary classification)**
+
+</details>
+
+---
+
+# 📊 COMPLETE COVERAGE SUMMARY
+
+| Category | Concepts | Status |
+|----------|----------|--------|
+| Generative Models | Discriminative vs generative, GANs, diffusion | ✅ 100% |
+| GANs | Minimax game, mode collapse, instability, variants | ✅ 100% |
+| Diffusion | Forward/reverse, DDPM, DDIM, latent diffusion | ✅ 100% |
+| Conditional Generation | Cross-attention, classifier-free guidance | ✅ 100% |
+| ControlNet | Zero-convolution, locked copy, control weight | ✅ 100% |
+| Evaluation | IS, FID, human evaluation | ✅ 100% |
+| ViT | Patch embeddings, inductive bias, long-range reasoning | ✅ 100% |
+| MAE | Masked autoencoders, 75% masking ratio | ✅ 100% |
+| CLIP | Contrastive learning, zero-shot, robustness | ✅ 100% |
+| LLM Alignment | Zero-shot/few-shot, CoT, IFT, RLHF, DPO | ✅ 100% |
+| **TOTAL** | **All Week 7 DL concepts** | ✅ **100%** |
+
+---
+
+## 📝 How to Use This Document
+
+1. **Read the question**, write your answer in the blank/box
+2. **Click the dropdown** to reveal the model answer
+3. **Compare** your answer to the model
+4. **Re-study** any sections where you got something wrong
+5. **Mark** your confidence level for each topic
+
+---
+
+**Good luck with your studies! 🎯**

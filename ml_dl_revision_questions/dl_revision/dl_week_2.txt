@@ -1,0 +1,1899 @@
+# Week 2 DL — Complete Revision Materials
+
+Based on your Week 2 slides covering **Backpropagation, Optimization, and Regularization**, here are comprehensive revision materials following the established format.
+
+---
+
+## 1. CONFIDENCE TRACKER — WEEK 2 DL
+
+| Confidence Level | Meaning |
+|------------------|---------|
+| 🟢 **Green** | I knew this cold — could explain it to someone else |
+| 🟡 **Yellow** | I got it right, but I wasn't 100% sure / guessed |
+| 🔴 **Red** | I had no idea — got it wrong or completely guessed |
+
+---
+
+| Exercise | Topic | 🟢 | 🟡 | 🔴 | Re-study? |
+|----------|-------|----|----|----|-----------|
+| Ex 1 | Backpropagation Lifecycle | | | | ☐ |
+| Ex 2 | The Chain Rule in Action | | | | ☐ |
+| Ex 3 | Computational Graphs — Local Gradients | | | | ☐ |
+| Ex 4 | Branching Paths — Gradient Aggregation | | | | ☐ |
+| Ex 5 | Update Formulas — MSE Gradient | | | | ☐ |
+| Ex 6 | Update Formulas — BCE with Sigmoid | | | | ☐ |
+| Ex 7 | Optimizer Matching — SGD, Momentum, RMSProp, Adam | | | | ☐ |
+| Ex 8 | Learning Rate Schedules | | | | ☐ |
+| Ex 9 | Batch Size Effects | | | | ☐ |
+| Ex 10 | Second-Order Methods — Newton & BFGS | | | | ☐ |
+| Ex 11 | The Condition Number κ | | | | ☐ |
+| Ex 12 | Gradient Clipping | | | | ☐ |
+| Ex 13 | Batch Normalization vs Layer Normalization | | | | ☐ |
+| Ex 14 | Regularization Techniques Matching | | | | ☐ |
+| Ex 15 | L1 vs L2 Regularization | | | | ☐ |
+| Ex 16 | Dropout in Detail | | | | ☐ |
+| Ex 17 | Early Stopping | | | | ☐ |
+| Ex 18 | Sharp vs Flat Minima | | | | ☐ |
+| Ex 19 | The Optimizer Zoo — One Template | | | | ☐ |
+| Ex 20 | Complete Cheat Sheet | | | | ☐ |
+
+---
+
+## 2. 🎯 TEACH IT SUMMARY
+
+### The Big Picture — Week 2 DL
+
+Week 2 covers the **engine of deep learning**: how neural networks actually learn through backpropagation, the optimizers that drive training, and the regularization techniques that prevent overfitting.
+
+**Part 1: Backpropagation.** The core algorithm that makes deep learning possible. Backpropagation efficiently computes gradients of the loss with respect to every weight using the **chain rule**. The process has three phases: **Forward pass** (compute predictions and store intermediate values), **Backward pass** (propagate error signals backward using the chain rule), and **Weight update** (use gradients to adjust weights). The key insight is **dynamic programming** — by caching local gradients during the forward pass, we reduce complexity from exponential to linear in the number of weights. Computational graphs make this systematic: each node defines its own local gradient, and the graph traversal handles the rest.
+
+**Part 2: Optimization.** Once we have gradients, we need to use them effectively. **Gradient descent** (`w ← w - η·∂L/∂w`) is the foundation, but it struggles with ill-conditioned problems. **Momentum** (`v ← βv + g`, `w ← w - η·v`) accelerates in consistent directions and dampens oscillations — it replaces the condition number κ with √κ. **Adam** combines momentum and adaptive per-coordinate learning rates (`m` for momentum, `v` for squared gradients, bias correction for early steps), making it the default optimizer for most tasks. The **learning rate** must be tuned carefully — too high causes divergence, too low means slow progress. **Schedules** (cosine annealing, step decay) dynamically adjust the learning rate during training. **Batch size** controls the trade-off between gradient noise (helps escape sharp minima) and computational efficiency.
+
+**Part 3: Regularization.** Deep networks have massive capacity and will memorize training data without constraints. **L2 regularization (weight decay)** penalizes large weights, keeping the function smooth. **L1 regularization** promotes sparsity (exact zeros) via the subgradient at zero. **Dropout** randomly drops neurons during training, forcing the network to learn redundant, robust representations. **Batch Normalization** stabilizes training by normalizing activations, enabling higher learning rates and acting as a mild regularizer. **Early stopping** halts training when validation performance degrades, capturing the sweet spot before overfitting. The goal is to steer the optimizer toward **flat minima** (robust, generalizable solutions) rather than sharp minima (overfitted, sensitive to small changes).
+
+**The Connecting Thread:** Backpropagation computes gradients efficiently; optimizers use gradients to update weights; regularization prevents overfitting. Together, they enable training of deep networks that generalize well to unseen data.
+
+---
+
+## 3. ⚠️ COMMON PITFALLS IN PRACTICE
+
+| Pitfall | Why It Happens | How to Avoid |
+|---------|----------------|--------------|
+| **1. Using too high a learning rate** | Exceeds `2/L` stability threshold → gradients explode | Use learning rate finder; start small, increase until divergence |
+| **2. Using too low a learning rate** | Far below `1/L` → training crawls | Multiply by 3-10×; use learning rate finder |
+| **3. Forgetting bias correction in Adam** | `m` and `v` start at 0 → first steps are too small | Always use `adam` (not a custom implementation) or apply `1/(1-β^k)` |
+| **4. Confusing Adam and AdamW** | L2 penalty in Adam gets rescaled per coordinate | Use **AdamW** for proper weight decay |
+| **5. Not decaying the learning rate** | Constant step → noise floor; iterates bounce | Use cosine annealing, step decay, or inverse-√k |
+| **6. Using SGD when gradients are ill-conditioned** | Single LR for all coordinates → slow on flat directions | Use **Adam** or normalize inputs first |
+| **7. Applying regularization to biases/norm params** | Biases don't need regularization; norm params have different scale | Exclude biases and BatchNorm parameters from weight decay |
+| **8. Misdiagnosing loss plateaus** | Could be noise floor, saddle, or dead units | Drop LR by 10× — if loss falls, it was noise floor |
+| **9. Not clipping gradients in RNNs/Transformers** | Long sequences → exploding gradients | Use global norm clipping at ~1.0 |
+| **10. Using dropout at inference without scaling** | Test-time has more active neurons → outputs too large | Scale activations by `(1-p)` at test time |
+
+---
+
+## 4. ONE-SENTENCE SUMMARY — WEEK 2 DL
+
+**How to use:** For each concept, try to write your own one-sentence summary *before* clicking to reveal the model answer.
+
+---
+
+### Backpropagation
+
+<details>
+<summary><b>Backpropagation</b> — Try your own first</summary>
+
+**Model Answer:** The core algorithm that efficiently computes gradients of the loss with respect to every weight using the chain rule, enabling neural network training by reducing complexity from exponential to linear.
+
+</details>
+
+---
+
+<details>
+<summary><b>Chain Rule</b> — Try your own first</summary>
+
+**Model Answer:** The mathematical foundation that decomposes complex nested functions into a sequence of simple, local derivatives, allowing gradients to flow backward through the network.
+
+</details>
+
+---
+
+<details>
+<summary><b>Computational Graph</b> — Try your own first</summary>
+
+**Model Answer:** A directed acyclic graph where nodes represent operations (addition, multiplication, activation) and edges represent tensor flow, enabling automatic differentiation by traversing the graph in reverse.
+
+</details>
+
+---
+
+<details>
+<summary><b>Local Gradient</b> — Try your own first</summary>
+
+**Model Answer:** The derivative of a primitive operation's output with respect to its input, pre-defined for each node type (add, multiply, max, etc.) to enable modular backpropagation.
+
+</details>
+
+---
+
+<details>
+<summary><b>Gradient Aggregation (Branching)</b> — Try your own first</summary>
+
+**Model Answer:** When a variable feeds into multiple downstream operations, the total gradient is the sum of gradients from each branch (multivariate chain rule).
+
+</details>
+
+---
+
+<details>
+<summary><b>Jacobian Matrix</b> — Try your own first</summary>
+
+**Model Answer:** A matrix of all first-order partial derivatives for vector-valued functions, forming the foundation for gradient propagation through layers.
+
+</details>
+
+---
+
+<details>
+<summary><b>Automatic Differentiation (AD)</b> — Try your own first</summary>
+
+**Model Answer:** The automated process of computing gradients by recording operations in a computational graph and applying the chain rule in reverse (backpropagation).
+
+</details>
+
+---
+
+<details>
+<summary><b>Reverse Mode AD</b> — Try your own first</summary>
+
+**Model Answer:** Propagates derivatives backward after a forward pass; extremely efficient for scalar outputs (loss) with many inputs (weights) — this is backpropagation.
+
+</details>
+
+---
+
+### Optimization
+
+<details>
+<summary><b>Gradient Descent</b> — Try your own first</summary>
+
+**Model Answer:** The simplest optimizer that updates weights using the negative gradient of the loss on a mini-batch: `w ← w - η·∂L/∂w`.
+
+</details>
+
+---
+
+<details>
+<summary><b>Momentum</b> — Try your own first</summary>
+
+**Model Answer:** Accumulates a moving average of past gradients to dampen oscillations in steep directions and accelerate progress in consistent directions; replaces κ by √κ.
+
+</details>
+
+---
+
+<details>
+<summary><b>RMSProp</b> — Try your own first</summary>
+
+**Model Answer:** Adaptive learning rate optimizer that normalizes gradients by a moving average of their squared magnitudes, making large updates for infrequent gradients and small updates for frequent ones.
+
+</details>
+
+---
+
+<details>
+<summary><b>Adam</b> — Try your own first</summary>
+
+**Model Answer:** The default optimizer that combines Momentum (moving average of gradients) and RMSProp (moving average of squared gradients) with bias correction for robust per-parameter scaling.
+
+</details>
+
+---
+
+<details>
+<summary><b>Bias Correction in Adam</b> — Try your own first</summary>
+
+**Model Answer:** Divides the moment estimates by `1-β^k` to correct for initialization at zero, critical in early training steps when estimates are otherwise too small.
+
+</details>
+
+---
+
+<details>
+<summary><b>AdamW</b> — Try your own first</summary>
+
+**Model Answer:** A version of Adam that decouples weight decay from the gradient update, preventing the decay from being disproportionately dampened by adaptive scaling.
+
+</details>
+
+---
+
+<details>
+<summary><b>Learning Rate Schedule</b> — Try your own first</summary>
+
+**Model Answer:** A dynamic strategy that varies the learning rate during training, starting high to explore and decreasing to fine-tune near the minimum.
+
+</details>
+
+---
+
+<details>
+<summary><b>Cosine Annealing</b> — Try your own first</summary>
+
+**Model Answer:** A smooth learning rate schedule that reduces the rate from maximum to minimum following a cosine curve; average step over the run is exactly `t/2`.
+
+</details>
+
+---
+
+<details>
+<summary><b>Warm-up</b> — Try your own first</summary>
+
+**Model Answer:** Gradually increasing the learning rate from a very small value to the target rate over the first iterations, preventing early instability in adaptive optimizers.
+
+</details>
+
+---
+
+<details>
+<summary><b>Batch Size Effects</b> — Try your own first</summary>
+
+**Model Answer:** Small batches add stochastic noise that helps escape sharp minima (better generalization), while large batches provide accurate gradients but converge to sharp minima (worse generalization).
+
+</details>
+
+---
+
+<details>
+<summary><b>Critical Batch Size (B_crit)</b> — Try your own first</summary>
+
+**Model Answer:** The batch size below which noise is what limits you; doubling B buys steps almost for free; above it you buy throughput but stop buying progress.
+
+</details>
+
+---
+
+<details>
+<summary><b>Linear Scaling Rule</b> — Try your own first</summary>
+
+**Model Answer:** When increasing batch size by `k`, multiply the learning rate by `k` to maintain consistent gradient variance.
+
+</details>
+
+---
+
+<details>
+<summary><b>Condition Number (κ)</b> — Try your own first</summary>
+
+**Model Answer:** The ratio of the largest to smallest Hessian eigenvalue (`κ = λ_max/λ_min`); high values indicate "narrow valleys" where gradient descent struggles.
+
+</details>
+
+---
+
+<details>
+<summary><b>Newton's Method</b> — Try your own first</summary>
+
+**Model Answer:** A second-order optimization method that uses the Hessian to move directly toward the minimum of the local quadratic approximation (`w ← w - H⁻¹·g`), eliminating the need for a learning rate.
+
+</details>
+
+---
+
+<details>
+<summary><b>BFGS</b> — Try your own first</summary>
+
+**Model Answer:** A quasi-Newton method that estimates curvature from gradient differences (secant equation), avoiding explicit Hessian computation while preserving superlinear convergence.
+
+</details>
+
+---
+
+<details>
+<summary><b>L-BFGS</b> — Try your own first</summary>
+
+**Model Answer:** A memory-efficient version of BFGS that stores only the last `m` gradient pairs (m≈5-20), computing curvature products in `O(mn)` time.
+
+</details>
+
+---
+
+<details>
+<summary><b>Gradient Clipping</b> — Try your own first</summary>
+
+**Model Answer:** A stability technique that rescales gradients when their norm exceeds a threshold (norm clipping) or caps individual values, preventing exploding gradients.
+
+</details>
+
+---
+
+### Regularization
+
+<details>
+<summary><b>Regularization</b> — Try your own first</summary>
+
+**Model Answer:** Techniques that constrain the model's capacity to prevent overfitting, slightly increasing bias to significantly reduce variance.
+
+</details>
+
+---
+
+<details>
+<summary><b>L2 Regularization (Weight Decay)</b> — Try your own first</summary>
+
+**Model Answer:** Adds a penalty proportional to the squared magnitude of weights to the loss (`λ·Σw²`), encouraging smaller, smoother weights that generalize better.
+
+</details>
+
+---
+
+<details>
+<summary><b>L1 Regularization (Lasso)</b> — Try your own first</summary>
+
+**Model Answer:** Adds a penalty proportional to the absolute sum of weights (`λ·Σ|w|`), pushing weights exactly to zero for automatic feature selection.
+
+</details>
+
+---
+
+<details>
+<summary><b>Dropout</b> — Try your own first</summary>
+
+**Model Answer:** Randomly setting a fraction of neurons to zero during training to prevent co-adaptation, approximating an ensemble of subnetworks.
+
+</details>
+
+---
+
+<details>
+<summary><b>Batch Normalization</b> — Try your own first</summary>
+
+**Model Answer:** Normalizes layer inputs across the batch dimension to zero mean and unit variance, smoothing the loss landscape and enabling higher learning rates.
+
+</details>
+
+---
+
+<details>
+<summary><b>Layer Normalization</b> — Try your own first</summary>
+
+**Model Answer:** Normalizes across the feature dimension per sample instead of the batch, making it ideal for sequences and Transformers.
+
+</details>
+
+---
+
+<details>
+<summary><b>Early Stopping</b> — Try your own first</summary>
+
+**Model Answer:** Monitors validation loss and halts training when it stops improving, capturing the "sweet spot" before overfitting begins.
+
+</details>
+
+---
+
+<details>
+<summary><b>Sharp Minimum</b> — Try your own first</summary>
+
+**Model Answer:** A loss minimum where small parameter changes cause large loss increases, indicating overfitting to training noise.
+
+</details>
+
+---
+
+<details>
+<summary><b>Flat Minimum</b> — Try your own first</summary>
+
+**Model Answer:** A loss minimum where loss remains low across a wide parameter range, indicating a robust, generalizable model.
+
+</details>
+
+---
+
+## 5. QUICK REFERENCE CHEAT SHEET — WEEK 2 DL
+
+### Backpropagation Formulas
+
+<details>
+<summary><b>MSE Gradient</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Loss** | `L = (1/N) Σ (ŷ - y)²` |
+| **Gradient** | `∂L/∂w = (ŷ - y)·x` |
+| **Key Insight** | Large errors = large updates; slows near target |
+
+</details>
+
+---
+
+<details>
+<summary><b>BCE with Sigmoid Gradient</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Loss** | `L = -[y·log(ŷ) + (1-y)·log(1-ŷ)]` |
+| **Gradient** | `∂L/∂z = (ŷ - y)` (identical to MSE linear) |
+| **Key Insight** | Avoids saturation; faster learning in classification |
+
+</details>
+
+---
+
+<details>
+<summary><b>Chain Rule for Weight Gradient</b> — Try to recall first</summary>
+
+**Formula:** `∂L/∂w_ij^(l) = δ_i^(l) · a_j^(l-1)`
+
+**Where:** `δ_i^(l)` is the local error of neuron `i` in layer `l`
+
+</details>
+
+---
+
+<details>
+<summary><b>Backpropagation Error Propagation</b> — Try to recall first</summary>
+
+**Formula:** `δ^(l) = ((W^(l+1))ᵀ · δ^(l+1)) ⊙ f'(z^(l))`
+
+**Explanation:** Error propagates backward through the weight matrix and is element-wise multiplied by the activation derivative.
+
+</details>
+
+---
+
+### Optimizer Update Rules
+
+<details>
+<summary><b>SGD</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Update** | `w ← w - η·∂L/∂w` |
+| **Key Hyperparameter** | Learning rate `η` |
+
+</details>
+
+---
+
+<details>
+<summary><b>SGD with Momentum</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Velocity Update** | `v ← γv + η·∂L/∂w` |
+| **Weight Update** | `w ← w - v` |
+| **Key Hyperparameter** | Momentum `γ` (default: 0.9) |
+
+</details>
+
+---
+
+<details>
+<summary><b>RMSProp</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Cache Update** | `E[g²] ← βE[g²] + (1-β)g²` |
+| **Weight Update** | `w ← w - η·g / √(E[g²] + ε)` |
+| **Key Hyperparameters** | `β ≈ 0.9`, `ε ≈ 1e-8` |
+
+</details>
+
+---
+
+<details>
+<summary><b>Adam</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **First Moment** | `m ← β₁m + (1-β₁)g` |
+| **Second Moment** | `v ← β₂v + (1-β₂)g²` |
+| **Bias Correction** | `m̂ ← m/(1-β₁ᵗ)`, `v̂ ← v/(1-β₂ᵗ)` |
+| **Weight Update** | `w ← w - η·m̂/(√v̂ + ε)` |
+| **Key Hyperparameters** | `β₁=0.9`, `β₂=0.999`, `ε=1e-8` |
+
+</details>
+
+---
+
+### Regularization Techniques
+
+<details>
+<summary><b>L2 Regularization (Weight Decay)</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Penalty** | `λ · Σ w²` |
+| **Gradient Update** | `w ← w - η·(∂L/∂w + 2λ·w)` |
+| **Effect** | Shrinks weights but rarely to zero |
+| **Geometric Shape** | Circle/Sphere (L2 ball) |
+
+</details>
+
+---
+
+<details>
+<summary><b>L1 Regularization (Lasso)</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Penalty** | `λ · Σ |w|` |
+| **Gradient Update** | `w ← w - η·(∂L/∂w + λ·sign(w))` |
+| **Effect** | Pushes weights **exactly to zero** |
+| **Geometric Shape** | Diamond (L1 ball) |
+| **Feature Selection** | ✅ Yes |
+
+</details>
+
+---
+
+<details>
+<summary><b>Dropout</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Training** | Randomly set fraction `p` of neurons to 0 |
+| **Inference** | All neurons active; scale outputs by `(1-p)` |
+| **Ensemble** | Approximates `2^N` subnetworks with shared weights |
+| **Default Rate** | `p = 0.5` (hidden layers) |
+
+</details>
+
+---
+
+<details>
+<summary><b>Batch Normalization</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Normalization** | `x̂ = (x - μ_B) / √(σ_B² + ε)` |
+| **Learnable Parameters** | Scale `γ`, Shift `β` |
+| **Output** | `y = γ·x̂ + β` |
+| **Regularization** | Mini-batch noise acts as mild regularizer |
+
+</details>
+
+---
+
+<details>
+<summary><b>Layer Normalization</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Normalization** | Across features per sample (not batch) |
+| **Best For** | RNNs, Transformers, variable-length sequences |
+| **Regularization** | Enforces structural stability |
+
+</details>
+
+---
+
+### Normalization Comparison
+
+<details>
+<summary><b>Batch Norm vs Layer Norm</b> — Try to recall first</summary>
+
+| Aspect | Batch Norm | Layer Norm |
+|--------|------------|------------|
+| **Normalizes Across** | Batch dimension (samples) | Feature dimension (per sample) |
+| **Best For** | CNNs, large batches | RNNs, Transformers |
+| **Batch Size Dependent?** | ✅ Yes | ❌ No |
+| **Regularization Effect** | Stochastic noise | Structural stability |
+
+</details>
+
+---
+
+### Key Hyperparameter Defaults
+
+<details>
+<summary><b>Default Hyperparameters</b> — Try to recall first</summary>
+
+| Hyperparameter | Default Value |
+|----------------|---------------|
+| Dropout (hidden) | 0.5 |
+| Momentum | 0.9 |
+| Adam β₁ | 0.9 |
+| Adam β₂ | 0.999 |
+| Adam ε | 1e-8 |
+| RMSProp β | 0.9 |
+| RMSProp ε | 1e-8 |
+| AdamW learning rate | 3e-4 |
+| Warmup | 1-5% of steps |
+
+</details>
+
+---
+
+### Gradient Flow Diagnostics
+
+<details>
+<summary><b>Vanishing Gradients</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Symptoms** | Gradients near 0 in early layers |
+| **Causes** | Sigmoid/Tanh saturation, poor initialization |
+| **Fixes** | ReLU/GELU, Batch Norm, Residual Connections |
+
+</details>
+
+---
+
+<details>
+<summary><b>Exploding Gradients</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Symptoms** | Gradients become NaN |
+| **Causes** | Poor initialization, deep networks, long sequences |
+| **Fixes** | Gradient Clipping, Lower LR, Better Initialization |
+
+</details>
+
+---
+
+<details>
+<summary><b>Dying ReLU</b> — Try to recall first</summary>
+
+| Aspect | Detail |
+|--------|--------|
+| **Symptoms** | Many ReLU neurons output 0 consistently |
+| **Causes** | Poor initialization, high learning rate |
+| **Fixes** | Leaky ReLU, ELU, He Initialization |
+
+</details>
+
+---
+
+### Bias-Variance with Regularization
+
+<details>
+<summary><b>Regularization Effects</b> — Try to recall first</summary>
+
+| Technique | Effect on Bias | Effect on Variance |
+|-----------|----------------|-------------------|
+| L2 Regularization | ↑ Increases | ↓ Decreases |
+| Dropout | ↑ Increases slightly | ↓ Decreases |
+| Early Stopping | ↑ Increases | ↓ Decreases |
+
+</details>
+
+---
+
+### Sharp vs Flat Minima
+
+<details>
+<summary><b>Sharp vs Flat Minima</b> — Try to recall first</summary>
+
+| Aspect | Sharp Minimum | Flat Minimum |
+|--------|---------------|--------------|
+| **Generalization** | ❌ Poor | ✅ Good |
+| **Parameter Sensitivity** | High (small changes → high loss) | Low (small changes → low loss) |
+| **Indicates** | Overfitting | Robust model |
+| **Regularization** | Discourages sharp minima | Encourages flat minima |
+
+</details>
+
+---
+
+### The Optimizer Template
+
+<details>
+<summary><b>One Template for All Optimizers</b> — Try to recall first</summary>
+
+**Template:** `x_{k+1} = x_k - t_k B_k^{-1} ∇f(x_k)`
+
+| B_k | Method |
+|-----|--------|
+| I | Gradient Descent |
+| I (with EMA gradient) | Momentum |
+| diag(√Σg²) | AdaGrad |
+| diag(√EMA(g²)) | RMSProp |
+| diag(√EMA(g²)) + EMA(g) | Adam |
+| Adam + decay outside | AdamW |
+| Hessian | Newton |
+| Estimated Hessian | BFGS / L-BFGS |
+
+</details>
+
+---
+
+## 6. CONNECTIONS MAP — WEEK 2 DL
+
+### 🌳 TEXT-BASED CONCEPT MAP
+
+```
+╔══════════════════════════════════════════════════════════════════════════╗
+║                                                                          ║
+║                    WEEK 2 DL: BACKPROP, OPTIMIZATION, REGULARIZATION   ║
+║                                                                          ║
+║                    ┌─────────────────────────────────────┐              ║
+║                    │   BACKPROPAGATION                   │              ║
+║                    │   (Chain Rule + Dynamic Programming)│              ║
+║                    └──────────────┬──────────────────────┘              ║
+║                                   │                                      ║
+║    ┌──────────────────────────────┼──────────────────────────────┐      ║
+║    │                              │                              │      ║
+║    ▼                              ▼                              ▼      ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │ COMPUTATIONAL│          │  LOCAL       │          │  JACOBIAN    │  ║
+║ │  GRAPHS      │          │  GRADIENTS   │          │  MATRIX      │  ║
+║ └──────┬───────┘          └──────┬───────┘          └──────┬───────┘  ║
+║        │                         │                         │          ║
+║        └─────────────────────────┼─────────────────────────┘          ║
+║                                  │                                     ║
+║                                  ▼                                     ║
+║                    ┌─────────────────────────────────────┐             ║
+║                    │   GRADIENT FLOW                     │             ║
+║                    └──────────────┬──────────────────────┘             ║
+║                                   │                                     ║
+║    ┌──────────────────────────────┼──────────────────────────────┐     ║
+║    │                              │                              │     ║
+║    ▼                              ▼                              ▼     ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │ VANISHING    │          │ EXPLODING    │          │  DYING       │  ║
+║ │ GRADIENTS    │          │ GRADIENTS    │          │  ReLU        │  ║
+║ └──────┬───────┘          └──────┬───────┘          └──────┬───────┘  ║
+║        │                         │                         │          ║
+║        └─────────────────────────┼─────────────────────────┘          ║
+║                                  │                                     ║
+║                                  ▼                                     ║
+║                    ┌─────────────────────────────────────┐             ║
+║                    │   OPTIMIZATION                      │             ║
+║                    └──────────────┬──────────────────────┘             ║
+║                                   │                                     ║
+║    ┌──────────────────────────────┼──────────────────────────────┐     ║
+║    │                              │                              │     ║
+║    ▼                              ▼                              ▼     ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │ FIRST-ORDER  │          │ SECOND-ORDER │          │ ADAPTIVE     │  ║
+║ │ METHODS      │          │ METHODS      │          │ METHODS      │  ║
+║ └──────┬───────┘          └──────┬───────┘          └──────┬───────┘  ║
+║        │                         │                         │          ║
+║        ▼                         ▼                         ▼          ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │• SGD         │          │• Newton      │          │• AdaGrad     │  ║
+║ │• Momentum    │          │• BFGS        │          │• RMSProp     │  ║
+║ │• Line Search │          │• L-BFGS      │          │• Adam/AdamW  │  ║
+║ └──────┬───────┘          └──────────────┘          └──────┬───────┘  ║
+║        │                                                  │          ║
+║        └──────────────────────────┬───────────────────────┘          ║
+║                                   │                                     ║
+║                                   ▼                                     ║
+║                    ┌─────────────────────────────────────┐             ║
+║                    │   REGULARIZATION                    │             ║
+║                    │  (Prevent Overfitting)              │             ║
+║                    └──────────────┬──────────────────────┘             ║
+║                                   │                                     ║
+║    ┌──────────────────────────────┼──────────────────────────────┐     ║
+║    │                              │                              │     ║
+║    ▼                              ▼                              ▼     ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │ WEIGHT       │          │ STRUCTURAL   │          │ TEMPORAL     │  ║
+║ │ PENALTIES    │          │ REGULARIZERS │          │ REGULARIZERS │  ║
+║ └──────┬───────┘          └──────┬───────┘          └──────┬───────┘  ║
+║        │                         │                         │          ║
+║        ▼                         ▼                         ▼          ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │• L1 (Lasso)  │          │• Dropout     │          │• Early       │  ║
+║ │• L2 (Weight  │          │• Batch Norm  │          │  Stopping    │  ║
+║ │  Decay)      │          │• Layer Norm  │          │              │  ║
+║ └──────────────┘          └──────────────┘          └──────────────┘  ║
+║                                                                         ║
+║                    ┌─────────────────────────────────────┐             ║
+║                    │   THE CONDITION NUMBER κ            │             ║
+║                    │   λ_max / λ_min                     │             ║
+║                    │   The "tax" on convergence          │             ║
+║                    └─────────────────────────────────────┘             ║
+║                                                                         ║
+╚══════════════════════════════════════════════════════════════════════════╝
+```
+
+---
+
+### 🔗 KEY CONNECTION EXPLANATIONS
+
+<details>
+<summary><b>Connection 1: How does backpropagation relate to computational graphs?</b></summary>
+
+```
+Computational Graph
+    │
+    ├── Forward Pass: compute values, cache intermediates
+    │       │
+    │       └── Each node stores: z (weighted sum), a (activation)
+    │
+    ├── Backward Pass: traverse in reverse
+    │       │
+    │       ├── Each node has a pre-defined local gradient
+    │       ├── Multiply local gradients along the path
+    │       └── Sum gradients at branch points
+    │
+    └── Complexity: O(N) for N weights (not exponential!)
+
+Key insight: Caching intermediates is dynamic programming —
+without it, recomputing gradients would be exponential.
+```
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 2: How does optimizer choice relate to gradient flow problems?</b></summary>
+
+```
+Gradient Problem → Optimizer Feature → Mitigation
+
+┌─────────────────────────────────────────────────────────────────┐
+│ Vanishing Gradients                                           │
+│   → Gradients become tiny through deep layers                │
+│   → Optimizer: Adam (adaptive LRs help)                      │
+│   → Better fix: ReLU/GELU + Batch Norm + Residual connections│
+├─────────────────────────────────────────────────────────────────┤
+│ Exploding Gradients                                           │
+│   → Gradients become enormous, cause NaN                     │
+│   → Optimizer: Gradient Clipping (norm clipping)             │
+│   → Better fix: Proper initialization + lower LR             │
+├─────────────────────────────────────────────────────────────────┤
+│ Saddle Points / Plateaus                                      │
+│   → Gradients near zero, but not at minimum                  │
+│   → Optimizer: Momentum (gains speed through flat regions)   │
+│   → Optimizer: Adam (adaptive scaling helps escape)          │
+├─────────────────────────────────────────────────────────────────┤
+│ Ill-Conditioned (high κ)                                      │
+│   → One step size for all coordinates → slow                 │
+│   → Optimizer: Adam (per-coordinate LRs)                    │
+│   → Optimizer: Momentum (√κ rate)                           │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 3: How does the condition number κ connect to everything?</b></summary>
+
+```
+κ = λ_max / λ_min
+    │
+    ├── GD steps per decade: 2.3κ
+    ├── Momentum steps per decade: 2.3√κ
+    ├── Newton: blind to κ (affine invariant)
+    ├── Adam: diagonal preconditioning → reduces κ
+    ├── Batch Norm: reduces κ (stabilizes scales)
+    └── Feature scaling: reduces κ (cheapest intervention)
+
+The whole art of optimization is either reducing κ or becoming blind to it.
+```
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 4: How does regularization relate to optimization and generalization?</b></summary>
+
+```
+Regularization → Effect on Loss Landscape → Optimization Behavior
+
+┌─────────────────────────────────────────────────────────────────┐
+│ L2 Weight Decay                                                │
+│   → Adds λ·||w||² to loss                                     ││   → Penalizes large weights                                    │
+│   → Smooths the loss surface → encourages FLAT MINIMA         │
+│   → Optimizer update: w ← w - η·(∂L/∂w + 2λ·w)              │
+├─────────────────────────────────────────────────────────────────┤
+│ Dropout                                                        │
+│   → Randomly drops neurons during training                    │
+│   → Effectively "blurs" the loss surface                      │
+│   → Sharp minima become unstable → FLAT MINIMA favored       │
+│   → Approximates ensemble of 2^N subnetworks                  │
+├─────────────────────────────────────────────────────────────────┤
+│ Batch Normalization                                            │
+│   → Normalizes activations during forward pass                │
+│   → Smooths the loss landscape                                │
+│   → Enables HIGHER learning rates                             │
+│   → Stochastic noise from batch stats = regularization        │
+├─────────────────────────────────────────────────────────────────┤
+│ Early Stopping                                                 │
+│   → Constrains optimization TIME                              │
+│   → Stops before overfitting begins                           │
+│   → Simple but effective regularization                       │
+└─────────────────────────────────────────────────────────────────┘
+
+Regularization + Optimization work together to find flat, generalizable minima.
+```
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 5: The Adam family chain</b></summary>
+
+```
+SGD (treats every coordinate identically)
+    ↓ Defect: one step size for wildly different curvatures
+AdaGrad (divides by √accumulated g²)
+    ↓ Defect: accumulator only grows → step decays to zero
+RMSProp (running average instead of sum)
+    ↓ Defect: no momentum → noisy step to step
+Adam (adds momentum + bias correction)
+    ↓ Defect: L2 penalty gets rescaled per coordinate
+AdamW (decay applied OUTSIDE rescaling)
+
+Each method fixes a named defect of its predecessor.
+```
+
+</details>
+
+---
+
+### 📊 CONNECTION MATRIX
+
+| Concept A | Connects To | Why |
+|-----------|-------------|-----|
+| **Backpropagation** | Chain Rule | Efficient gradient computation via dynamic programming |
+| **Computational Graphs** | Automatic Differentiation | Nodes + edges enable systematic gradient flow |
+| **Local Gradients** | Branching | Sum at branches (multivariate chain rule) |
+| **Momentum** | Condition Number κ | Replaces κ by √κ |
+| **Adam** | RMSProp + Momentum | Combines adaptive LRs with momentum |
+| **AdamW** | Adam | Decouples weight decay from rescaling |
+| **Learning Rate** | Descent Lemma | Safe step: `t < 2/L` |
+| **Batch Size** | SGD Variance | `Var = σ²/B` — larger B = less noise |
+| **L2 Regularization** | Flat Minima | Penalizes large weights → smooth surface |
+| **Dropout** | Ensemble Learning | Approximates 2^N subnetworks |
+| **Batch Norm** | Optimization | Smooths landscape → higher LR |
+| **BN vs LN** | Architecture | BN for CNNs, LN for Transformers |
+| **Sharp Minima** | Overfitting | Sensitive to changes → poor generalization |
+| **Flat Minima** | Regularization | Robust → good generalization |
+
+---
+
+## 7. COMMON MISCONCEPTIONS — WEEK 2 DL
+
+**How to use:** Read each misconception first. Try to identify what's wrong. Then click to reveal the reality.
+
+---
+
+### Misconception 1: "Backpropagation is just the chain rule."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Backpropagation is just the chain rule applied to neural networks. | Backpropagation is **more than just derivatives**: |
+| | • It's an **application of dynamic programming** (caching intermediate values) |
+| | • Without caching, complexity would be **exponential** in depth |
+| | • With caching, complexity is **O(N)** for N weights |
+| | • It's about **efficient computation**, not just correct computation |
+
+**Key insight:** The chain rule gives you the math. Backpropagation gives you the efficient algorithm to compute it!
+
+</details>
+
+---
+
+### Misconception 2: "Adam always beats SGD."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Adam is the best optimizer for every problem. | Adam is the **default**, but NOT always best: |
+| | • **SGD with Momentum** often generalizes better (especially with cosine annealing) |
+| | • Adam can converge to **sharper minima** (worse generalization) |
+| | • For smaller models, **SGD + Momentum** may outperform Adam |
+| | • For Transformers, **AdamW** (weight decay decoupled) is preferred |
+
+**Rule of thumb:**
+```
+Start with Adam/AdamW
+If generalization is poor → Try SGD + Momentum + Cosine Annealing
+Always tune the learning rate — it matters more than optimizer choice!
+```
+
+</details>
+
+---
+
+### Misconception 3: "More regularization is always better."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Adding more regularization (dropout, L2, etc.) always improves the model. | **Too much regularization = underfitting!** |
+| | • Aggressive dropout (p > 0.5) → model can't learn complex features |
+| | • Heavy L2 → weights too small → model too simple |
+| | • Too much augmentation → data is corrupted |
+
+**The sweet spot:**
+```
+If train loss ≫ validation loss → Too much regularization (underfitting)
+If train loss ≪ validation loss → Too little regularization (overfitting)
+Need: train loss slightly > validation loss (healthy gap)
+```
+
+</details>
+
+---
+
+### Misconception 4: "Batch Normalization and Layer Normalization are interchangeable."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| BN and LN are just different ways to normalize — use either. | **They are fundamentally different and NOT interchangeable:** |
+
+| Aspect | Batch Norm | Layer Norm |
+|--------|------------|------------|
+| Normalizes Across | **Batch dimension** (samples) | **Feature dimension** (per sample) |
+| Batch Size Dependent? | ✅ Yes (fails for small batches) | ❌ No (works with any batch) |
+| Works for Transformers? | ❌ No (problematic) | ✅ Yes (standard) |
+| Works for RNNs? | ❌ No (sequences vary) | ✅ Yes (standard) |
+| Regularization Effect | Stochastic noise | Structural stability |
+
+**Rule:** CNNs → BN; Transformers/RNNs → LN. Don't mix them up!
+
+</details>
+
+---
+
+### Misconception 5: "Gradient clipping is a hack."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Gradient clipping artificially modifies gradients — it's a hack. | **Norm clipping preserves the direction** while limiting magnitude: |
+| | • `g ← g · min(1, T/||g||)` |
+| | • The direction (critical information) is **preserved** |
+| | • Only the magnitude is capped |
+| | • It's a **necessary stability technique** for RNNs and deep networks |
+
+**Value clipping** does distort gradients (bad). **Norm clipping** preserves direction (good).
+
+**Analogy:** Slowing down a car to take a corner safely — you're not changing direction, just the speed.
+
+</details>
+
+---
+
+### Misconception 6: "SGD with momentum is the same as Adam."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Momentum and Adam are similar — Adam is just momentum plus something. | **They are different in a critical way:** |
+
+| Feature | Momentum | Adam |
+|---------|----------|------|
+| Moving average of gradients | ✅ Yes (v) | ✅ Yes (m) |
+| Moving average of squared gradients | ❌ No | ✅ Yes (v) |
+| Adaptive per-parameter LRs | ❌ No | ✅ Yes |
+| Bias correction | ❌ No | ✅ Yes |
+
+**The key difference:** Adam has **separate per-parameter learning rates** (via second moment). Momentum has a **single global learning rate**.
+
+</details>
+
+---
+
+### Misconception 7: "A flat minimum is always better than a sharp minimum."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Flat minima always generalize better than sharp minima. | **Generally true, but with caveats:** |
+| | • A flat minimum with high loss ≠ good |
+| | • Sharp minima can be fine if they're not too sharp |
+| | • Some models have sharp minima but still generalize well |
+| | • Recent research suggests **width** matters too |
+
+**Nuanced view:**
+- Flat minima are **generally more robust**
+- But don't sacrifice accuracy just for flatness
+- The combination of **low loss + flatness** is ideal
+
+</details>
+
+---
+
+### Misconception 8: "L2 regularization and weight decay are the same thing."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| L2 regularization and weight decay are identical. | **They are equivalent for SGD, but NOT for adaptive optimizers!** |
+
+| Optimizer | L2 vs Weight Decay |
+|-----------|-------------------|
+| **SGD** | They are equivalent ✅ |
+| **Adam** | They are DIFFERENT ❌ |
+
+**Why Adam breaks the equivalence:**
+```
+SGD L2: w ← w - η·∂L/∂w - η·2λ·w
+SGD Weight Decay: w ← w - η·∂L/∂w - η·λ_decay·w
+
+For Adam: L2 gets dampened by adaptive scaling
+→ Weight decay should be decoupled → AdamW!
+```
+
+**Rule:** Use **AdamW** for weight decay with Adam, not vanilla Adam.
+
+</details>
+
+---
+
+### Misconception 9: "Learning rate schedulers are optional."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| You can just tune a fixed learning rate and be done. | **Learning rate schedules are essential for best performance:** |
+| | • Fixed LR → may converge slowly or not at all |
+| | • **High LR early** = explore quickly |
+| | • **Low LR late** = fine-tune precisely |
+| | • **Cosine Annealing** with warm-up is standard for large models |
+
+**Analogy:** Driving a car — you don't go the same speed the whole trip. You accelerate on the highway (high LR) and slow down in the city (low LR).
+
+</details>
+
+---
+
+### Misconception 10: "Dropout is only used to prevent overfitting."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Dropout is just a regularization technique for overfitting. | **Dropout does more than regularize:** |
+| | • **Robustness**: Forces the model to learn redundant features |
+| | • **Ensemble approximation**: Efficiently simulates training 2^N subnetworks |
+| | • **Improved generalization**: Even without overfitting, dropout often helps |
+| | • **Uncertainty estimation**: Monte Carlo Dropout can estimate model uncertainty |
+
+**Modern view:** Dropout is a fundamental architectural technique that improves robustness, not just a fix for overfitting.
+
+</details>
+
+---
+
+### Misconception 11: "Vanishing gradients only happen with Sigmoid/Tanh."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Vanishing gradients are a problem of old activation functions. | Vanishing gradients can happen with **any activation** in deep networks: |
+| | • **ReLU** can still have gradients vanish if neurons die (Dying ReLU) |
+| | • Even with ReLU, very deep networks (100+ layers) need **skip connections** |
+| | • **Weight initialization** (He/Xavier) is critical even with ReLU |
+| | • **Batch Normalization** helps keep activations in the active regime |
+
+**The real solution:** Combination of ReLU/GELU + He initialization + Batch Norm + Residual connections.
+
+</details>
+
+---
+
+### Misconception 12: "Large batch sizes are always better."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Bigger batches = faster training = always better. | **Large batches often lead to worse generalization:** |
+| | • Larger batches reduce stochastic noise |
+| | • Less noise = less help escaping sharp minima |
+| | • Converge to **sharp minima** = poor test performance |
+| | • Need careful **LR scaling** (Linear Scaling Rule) |
+| | • Often require **warm-up** to compensate |
+
+**Trade-off:**
+```
+Small batches: slower per epoch, better generalization
+Large batches: faster per epoch, worse generalization
+```
+
+**Rule:** Use the largest batch size that still gives good validation performance.
+
+</details>
+
+---
+
+### Misconception 13: "Early stopping is just about saving compute."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Early stopping is mainly used to save time/compute. | **Early stopping is primarily about generalization!** |
+| | • It prevents the model from **memorizing training noise** |
+| | • Stops at the "sweet spot" before overfitting begins |
+| | • Equivalent to a **regularization technique** |
+| | • Often combined with **model checkpointing** (save best weights) |
+
+**Analogy:** Stopping a student from studying too long — after a point, they're just memorizing the practice questions instead of learning the concepts.
+
+</details>
+
+---
+
+### Misconception 14: "Second-order methods are too slow — they'll never work."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Second-order methods (Newton, L-BFGS) are hopeless for deep learning. | **They are impractical for huge models, but useful in some contexts:** |
+| | • **L-BFGS** works well for smaller models (e.g., MLPs with < 1M params) |
+| | • **Research** into approximated second-order methods is ongoing |
+| | • **Preconditioning** (which Adam approximates) is a second-order idea |
+| | • They can converge in **fewer steps** (useful when gradient evaluation is expensive) |
+
+**The real barrier:** Storing/inverting Hessian for billions of parameters. But for medium-sized models, second-order methods can be viable!
+
+</details>
+
+---
+
+### Misconception 15: "Regularization and optimization are separate."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| First you optimize (find minimum), then you regularize (prevent overfitting). | **They are deeply intertwined:** |
+| | • Regularization **changes the loss landscape** the optimizer navigates |
+| | • L2 adds a term to the loss — optimizer sees this |
+| | • Dropout "blurs" the landscape — optimizer behaves differently |
+| | • Batch Norm enables **higher learning rates** (optimization benefit!) |
+| | • Weight decay affects **gradient updates** (optimization mechanics) |
+
+**Analogy:** Regularization doesn't just put a guardrail at the end — it changes the entire terrain the optimizer walks through!
+
+</details>
+
+---
+
+## 📊 QUICK REFERENCE: MISCONCEPTIONS vs REALITY
+
+| Misconception | Reality |
+|---------------|---------|
+| Backpropagation = just derivatives | Backpropagation = efficient computation via caching |
+| Adam always beats SGD | SGD + Momentum often generalizes better |
+| More regularization is always better | Too much = underfitting |
+| BN and LN are interchangeable | BN for CNNs, LN for Transformers/RNNs |
+| Gradient clipping distorts gradients | Norm clipping preserves direction |
+| Momentum = Adam | Adam = Momentum + RMSProp + bias correction |
+| Flat minima always better | Generally yes, but check loss too |
+| L2 = weight decay (always) | Only for SGD — use AdamW for Adam |
+| LR schedules are optional | Essential for optimal convergence |
+| Dropout only prevents overfitting | Also improves robustness and uncertainty |
+| Vanishing gradients only with Sigmoid | Can happen with any activation in deep nets |
+| Large batches = always better | Often worse generalization (sharp minima) |
+| Early stopping = save compute | Primarily about generalization |
+| Second-order methods are useless | Useful for smaller models; research ongoing |
+| Optimization and regularization are separate | Deeply intertwined |
+
+---
+
+# 📚 WEEK 2 DL — COMPLETE STUDY GUIDE
+## All Exercises with Answers in Spoiler Format
+
+---
+
+# SECTION 1: BACKPROPAGATION
+
+---
+
+## Exercise BP-1: Backpropagation Lifecycle
+
+Place the following steps in the correct order:
+
+| Step | Description | Order (1-4) |
+|------|-------------|-------------|
+| A | Compute gradients using the chain rule (Backward Pass) | |
+| B | Update weights using Gradient Descent | |
+| C | Compute the loss value | |
+| D | Forward pass: compute activations through the network | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Step | Description | Order |
+|------|-------------|-------|
+| D | Forward pass: compute activations through the network | **1** |
+| C | Compute the loss value | **2** |
+| A | Compute gradients using the chain rule (Backward Pass) | **3** |
+| B | Update weights using Gradient Descent | **4** |
+
+</details>
+
+---
+
+## Exercise BP-2: The Chain Rule in Action
+
+**Scenario:** You have a simple network: `z = w · x + b`, `a = σ(z)`, `L = (a - y)²` (MSE).
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. Write the chain rule expression for `∂L/∂w` | |
+| 2. Write the chain rule expression for `∂L/∂b` | |
+| 3. If `x=2`, `y=0`, `w=0.5`, `b=0.1`, and `σ` is Sigmoid, what is `∂L/∂w`? (Show work) | |
+| 4. Why do we store intermediate values during the forward pass? | |
+| 5. What is the computational complexity of backpropagation in terms of the number of weights (`N`)? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. ∂L/∂w | `∂L/∂w = ∂L/∂a · ∂a/∂z · ∂z/∂w = 2(a-y) · σ'(z) · x` |
+| 2. ∂L/∂b | `∂L/∂b = ∂L/∂a · ∂a/∂z · ∂z/∂b = 2(a-y) · σ'(z) · 1` |
+| 3. Calculate ∂L/∂w | `z = 0.5×2 + 0.1 = 1.1`; `a = sigmoid(1.1) ≈ 0.75`; `∂L/∂a = 2(0.75-0) = 1.5`; `σ'(z) = a(1-a) = 0.75×0.25 = 0.1875`; `∂z/∂w = x = 2`; **∂L/∂w = 1.5 × 0.1875 × 2 = 0.5625** |
+| 4. Why store intermediate values? | Storing activations (`a`) and weighted sums (`z`) during the forward pass prevents recomputation during the backward pass, reducing complexity from exponential to **O(N)** . |
+| 5. Computational complexity | **O(N)** — linear with respect to the number of weights. |
+
+</details>
+
+---
+
+## Exercise BP-3: Local Gradients
+
+For each primitive operation, write the **local gradient**:
+
+| Operation | Forward: `z = f(x,y)` | `∂L/∂x` | `∂L/∂y` |
+|-----------|----------------------|---------|---------|
+| Addition | `z = x + y` | | |
+| Multiplication | `z = x · y` | | |
+| Max | `z = max(x, y)` | | |
+| Sigmoid | `z = σ(x) = 1/(1+e^(-x))` | | |
+| ReLU | `z = max(0, x)` | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Operation | Forward: `z = f(x,y)` | `∂L/∂x` | `∂L/∂y` |
+|-----------|----------------------|---------|---------|
+| Addition | `z = x + y` | `∂L/∂z · 1` | `∂L/∂z · 1` |
+| Multiplication | `z = x · y` | `∂L/∂z · y` | `∂L/∂z · x` |
+| Max | `z = max(x, y)` | `∂L/∂z` if x > y, else 0 | `∂L/∂z` if y > x, else 0 |
+| Sigmoid | `z = σ(x)` | `∂L/∂z · σ(x)·(1-σ(x))` | N/A |
+| ReLU | `z = max(0, x)` | `∂L/∂z` if x > 0, else 0 | N/A |
+
+</details>
+
+---
+
+## Exercise BP-4: Branching Paths — Gradient Aggregation
+
+**Scenario:** A variable `x` feeds into two separate operations: `f(x) = 2x` and `g(x) = x²`. The loss is `L = f(x) + g(x)`.
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is `∂L/∂x`? | |
+| 2. In a neural network, when do branching paths occur? | |
+| 3. In ResNet, if `y = F(x) + x` (skip connection), what is `∂L/∂x`? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. ∂L/∂x | `∂L/∂x = ∂f/∂x + ∂g/∂x = 2 + 2x` |
+| 2. When do branching paths occur? | Branching occurs when a tensor is used in multiple operations: **Residual connections**, **Multi-Head Attention** (Q, K, V projections), and **shared weights** in RNNs. |
+| 3. ∂L/∂x for ResNet | `∂L/∂x = ∂L/∂y · (∂F/∂x + 1)` — the gradient flows through **both** the transformation path and the shortcut path, mitigating vanishing gradients. |
+
+</details>
+
+---
+
+# SECTION 2: OPTIMIZATION
+
+---
+
+## Exercise OP-1: Update Rules Comparison
+
+| Optimizer | Update Rule(s) | Key Hyperparameter(s) |
+|-----------|---------------|----------------------|
+| Standard SGD | | |
+| SGD + Momentum | | |
+| RMSProp | | |
+| Adam | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Optimizer | Update Rule(s) | Key Hyperparameter(s) |
+|-----------|---------------|----------------------|
+| **Standard SGD** | `w ← w - η · ∂L/∂w` | Learning rate `η` |
+| **SGD + Momentum** | `v ← γv + η·∂L/∂w`<br>`w ← w - v` | Learning rate `η`, Momentum `γ` (≈0.9) |
+| **RMSProp** | `E[g²] ← βE[g²] + (1-β)g²`<br>`w ← w - η·g / √(E[g²] + ε)` | LR `η`, Decay `β` (≈0.9), `ε` (≈1e-8) |
+| **Adam** | `m ← β₁m + (1-β₁)g`<br>`v ← β₂v + (1-β₂)g²`<br>`m̂ ← m/(1-β₁ᵗ)`<br>`v̂ ← v/(1-β₂ᵗ)`<br>`w ← w - η·m̂/(√v̂ + ε)` | LR `η`, `β₁` (≈0.9), `β₂` (≈0.999), `ε` (≈1e-8) |
+
+</details>
+
+---
+
+## Exercise OP-2: Momentum vs RMSProp vs Adam
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What problem does Momentum solve in standard SGD? | |
+| 2. What problem does RMSProp solve? | |
+| 3. What does Adam combine from both? | |
+| 4. Why does Adam require bias correction early in training? | |
+| 5. Which optimizer is the current default for most deep learning tasks? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. What problem does Momentum solve? | Standard SGD oscillates in steep directions and makes slow progress in shallow directions. Momentum accumulates past gradients to dampen oscillations and accelerate in consistent directions. |
+| 2. What problem does RMSProp solve? | RMSProp normalizes gradients by a running average of their magnitudes — adaptive per-parameter learning rates. Makes large updates for infrequent gradients, dampens updates for large gradients. |
+| 3. What does Adam combine? | **Momentum** (moving average of gradients) + **RMSProp** (moving average of squared gradients). |
+| 4. Why does Adam require bias correction? | At the start of training, momentum (`m`) and velocity (`v`) estimates are initialized at 0, causing biased estimates. Bias correction divides by `(1 - βᵗ)` to compensate. |
+| 5. Current default optimizer? | **Adam** (or **AdamW**) is the default for most tasks. |
+
+</details>
+
+---
+
+## Exercise OP-3: Learning Rate Schedules
+
+| Schedule | Description | When to Use |
+|----------|-------------|-------------|
+| Step Decay | | |
+| Cosine Annealing | | |
+| ReduceLROnPlateau | | |
+| Linear Warm-up | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Schedule | Description | When to Use |
+|----------|-------------|-------------|
+| **Step Decay** | Drop learning rate by a factor (e.g., 0.1) at specific epochs | When you know when to reduce (e.g., after 30, 60 epochs) |
+| **Cosine Annealing** | Smoothly reduces LR from max to min following a cosine curve | When you want smooth, continuous decay; works well with SGD |
+| **ReduceLROnPlateau** | Monitors validation loss; drops LR when metric stops improving | When you don't know when to reduce — automatic adaptation |
+| **Linear Warm-up** | Gradually increases LR from small value to target over N iterations | At the start of training to prevent instability, especially with Adam |
+
+</details>
+
+---
+
+## Exercise OP-4: Batch Size Effects
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What are the pros of **small batches**? | |
+| 2. What are the cons of **small batches**? | |
+| 3. What are the pros of **large batches**? | |
+| 4. What are the cons of **large batches**? | |
+| 5. Why do large batches often generalize worse? | |
+| 6. What is the Linear Scaling Rule? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Pros of small batches | **Stochastic noise** helps escape sharp local minima; faster iterations; better generalization. |
+| 2. Cons of small batches | Lower hardware utilization; noisier gradients require lower learning rates. |
+| 3. Pros of large batches | Accurate gradient estimates; better parallelization (GPUs); higher throughput. |
+| 4. Cons of large batches | Converge to **sharp minima** that generalize poorly; require careful LR scaling. |
+| 5. Why do large batches generalize worse? | Large batches reduce the stochastic noise that helps the optimizer escape sharp minima and find flatter, more generalizable minima. |
+| 6. Linear Scaling Rule | When increasing batch size by `k`, multiply learning rate by `k`. Keeps gradient variance consistent. |
+
+</details>
+
+---
+
+## Exercise OP-5: Second-Order Methods
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is the Hessian matrix? | |
+| 2. What is Newton's Method? | |
+| 3. Why are second-order methods rarely used in deep learning? | |
+| 4. What are Quasi-Newton methods (e.g., L-BFGS)? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. What is the Hessian matrix? | A square matrix of second-order partial derivatives: `H_ij = ∂²L/∂w_i∂w_j`. Captures curvature of the loss surface. |
+| 2. What is Newton's Method? | Uses the Hessian to move directly toward the minimum of the local quadratic approximation: `w ← w - H⁻¹·∂L/∂w` (no learning rate needed). |
+| 3. Why are second-order methods rarely used? | For a model with `N` parameters, the Hessian has `N²` elements. Storing and inverting it is infeasible for billions of parameters. |
+| 4. What are Quasi-Newton methods? | Approximate the Hessian inverse without explicitly computing the full matrix (e.g., **L-BFGS**). More memory efficient but still limited to smaller models. |
+
+</details>
+
+---
+
+## Exercise OP-6: The Condition Number κ
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is the condition number of the Hessian? | |
+| 2. Why does a high condition number make optimization difficult? | |
+| 3. How do adaptive optimizers like Adam help with ill-conditioned problems? | |
+| 4. What does "preconditioning" mean? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. What is the condition number? | The ratio of the largest to smallest eigenvalue of the Hessian matrix. |
+| 2. Why does high condition number make optimization difficult? | High condition number indicates "narrow valleys" — steep in one direction, flat in another. Gradient descent oscillates in steep directions and crawls in flat ones. |
+| 3. How do adaptive optimizers help? | Adam performs approximate **preconditioning** — scales updates by the inverse of the moving average of squared gradients, making the surface appear more spherical. |
+| 4. What does "preconditioning" mean? | A transformation that "stretches" flat directions and "compresses" steep ones, normalizing the geometry of the loss landscape for faster convergence. |
+
+</details>
+
+---
+
+## Exercise OP-7: Gradient Clipping
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What causes exploding gradients? | |
+| 2. What is **value clipping**? | |
+| 3. What is **norm clipping**? | |
+| 4. Why is norm clipping preferred over value clipping? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. What causes exploding gradients? | Exponential growth of gradients during the backward pass due to poor initialization, long sequences, or deep networks. Common in RNNs. |
+| 2. What is value clipping? | Forces each element `g_i` into the range `[-c, c]`. Simple but may distort the gradient direction. |
+| 3. What is norm clipping? | Rescales the entire gradient vector if its norm exceeds a threshold `T`: `g ← g · min(1, T/||g||)`. Preserves direction while capping magnitude. |
+| 4. Why is norm clipping preferred? | Maintains the gradient **direction** while limiting magnitude — preserves the critical information from the gradient's orientation. |
+
+</details>
+
+---
+
+# SECTION 3: REGULARIZATION
+
+---
+
+## Exercise REG-1: Regularization Technique Matching
+
+| Technique | Primary Mechanism | Best Used For |
+|-----------|-------------------|---------------|
+| Dropout | | |
+| L2 Regularization (Weight Decay) | | |
+| Early Stopping | | |
+| Batch Normalization | | |
+| Layer Normalization | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Technique | Primary Mechanism | Best Used For |
+|-----------|-------------------|---------------|
+| **Dropout** | Randomly sets neurons to 0 during training; prevents co-adaptation | Preventing overfitting, ensemble approximation |
+| **L2 Regularization** | Adds penalty to large weights; favors simpler models | Most models (standard) |
+| **Early Stopping** | Halts training when validation loss stops improving | All models (prevent over-training) |
+| **Batch Normalization** | Normalizes layer inputs; adds noise and stabilizes training | CNNs, large batches |
+| **Layer Normalization** | Normalizes across features per sample | RNNs, Transformers, sequences |
+
+</details>
+
+---
+
+## Exercise REG-2: L1 vs L2 Regularization
+
+| Aspect | L1 (Lasso) | L2 (Weight Decay) |
+|--------|------------|-------------------|
+| Penalty term | | |
+| Effect on weights | | |
+| Gradient update | | |
+| Feature selection? | | |
+| Geometric shape | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Aspect | L1 (Lasso) | L2 (Weight Decay) |
+|--------|------------|-------------------|
+| Penalty term | `λ · Σ|w|` | `λ · Σw²` |
+| Effect on weights | Pushes weights **exactly to zero** | Shrinks weights but rarely to zero |
+| Gradient update | `w ← w - η·(∂L/∂w + λ·sign(w))` | `w ← w - η·(∂L/∂w + 2λ·w)` |
+| Feature selection? | **Yes** — automatic feature selection | **No** — keeps all features but smooths them |
+| Geometric shape | **Diamond** (L1 ball) | **Circle/Sphere** (L2 ball) |
+
+</details>
+
+---
+
+## Exercise REG-3: Dropout in Detail
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What does Dropout do during training? | |
+| 2. What does Dropout do during inference? | |
+| 3. Why do we scale activations at inference? | |
+| 4. How does Dropout prevent co-adaptation? | |
+| 5. What ensemble does Dropout approximate? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. What does Dropout do during training? | Randomly sets a fraction `p` of neurons to 0 for each mini-batch. Prevents co-adaptation. |
+| 2. What does Dropout do during inference? | All neurons are active. Output activations are scaled by `(1-p)` to compensate for training-time dropout. |
+| 3. Why scale at inference? | During training, expected output = `(1-p)·activation`. Scaling at inference ensures consistent magnitude. |
+| 4. How does Dropout prevent co-adaptation? | Forces each neuron to work independently — if one path is blocked, the model must find alternative representations. |
+| 5. What ensemble does Dropout approximate? | Efficiently approximates training an ensemble of **2^N** different network architectures with shared weights. |
+
+</details>
+
+---
+
+## Exercise REG-4: Early Stopping
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is Early Stopping? | |
+| 2. What is the "patience" parameter? | |
+| 3. Why does Early Stopping prevent overfitting? | |
+| 4. Should you save the final weights or the best weights? | |
+| 5. What's the trade-off between patience and performance? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. What is Early Stopping? | Monitoring validation loss during training and halting when it stops improving (even if training loss is still decreasing). |
+| 2. What is the "patience" parameter? | Number of epochs to wait for an improvement before terminating. Prevents stopping due to random noise. |
+| 3. Why does Early Stopping prevent overfitting? | Stops training at the "sweet spot" before the model begins to memorize training noise. |
+| 4. Should you save final or best weights? | **Save the best weights** observed during training, not the final weights at termination. |
+| 5. Trade-off between patience and performance? | Too little patience → stops prematurely (underfitting). Too much patience → may overfit. Typically patience = 5-20 epochs. |
+
+</details>
+
+---
+
+## Exercise REG-5: Batch Normalization vs Layer Normalization
+
+| Aspect | Batch Normalization | Layer Normalization |
+|--------|---------------------|---------------------|
+| Normalizes across | | |
+| Best for | | |
+| Batch size dependent? | | |
+| Regularization effect | | |
+| Learnable parameters | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Aspect | Batch Normalization | Layer Normalization |
+|--------|---------------------|---------------------|
+| Normalizes across | **Batch dimension** (samples) | **Feature dimension** (per sample) |
+| Best for | **CNNs**, large batches | **RNNs**, **Transformers**, sequences |
+| Batch size dependent? | ✅ Yes (fails for small batches) | ❌ No (works with any batch) |
+| Regularization effect | Stochastic noise (mild regularizer) | Structural stability |
+| Learnable parameters | Scale `γ`, Shift `β` | Scale `γ`, Shift `β` |
+
+</details>
+
+---
+
+## Exercise REG-6: Sharp vs Flat Minima
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is a **sharp minimum**? | |
+| 2. What is a **flat minimum**? | |
+| 3. Which generalizes better? Why? | |
+| 4. How does regularization promote flat minima? | |
+| 5. Why do flat minima indicate a robust model? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. What is a sharp minimum? | Small shifts in parameter values or input data lead to large increases in loss. Indicates overfitting to training noise. |
+| 2. What is a flat minimum? | The loss remains low across a wider range of parameter values. Indicates a robust, generalizable model. |
+| 3. Which generalizes better? | **Flat minima** generalize better because they are less sensitive to perturbations and distribution shifts. |
+| 4. How does regularization promote flatness? | L2 penalizes large weights; Dropout "blurs" the loss surface; both push the optimizer toward wider, flatter regions. |
+| 5. Why do flat minima indicate robustness? | A flat minimum means the model is invariant to minor parameter changes — it's learned stable patterns, not fragile memorized details. |
+
+</details>
+
+---
+
+## Exercise REG-7: The Optimizer Template
+
+| Method | B_k (Metric) | What it does |
+|--------|--------------|--------------|
+| SGD | | |
+| Momentum | | |
+| AdaGrad | | |
+| RMSProp | | |
+| Adam | | |
+| Newton | | |
+| BFGS | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+**Template:** `x_{k+1} = x_k - t_k B_k^{-1} ∇f(x_k)`
+
+| Method | B_k (Metric) | What it does |
+|--------|--------------|--------------|
+| **SGD** | I | Simple gradient descent |
+| **Momentum** | I (on smoothed gradient) | Dampens oscillations, accelerates |
+| **AdaGrad** | diag(√Σg²) | Per-coordinate scaling from total history |
+| **RMSProp** | diag(√EMA(g²)) | Per-coordinate scaling from recent history |
+| **Adam** | diag(√EMA(g²)) + EMA(g) | Momentum + adaptive scaling + bias correction |
+| **Newton** | Hessian | Second-order curvature, no LR needed |
+| **BFGS** | Estimated Hessian | Curvature from gradient differences |
+
+</details>
+
+---
+
+## Exercise REG-8: The Complete Cheat Sheet
+
+### Fill in all blanks:
+
+**Definition of Backpropagation:**
+Backpropagation efficiently computes the gradient of the ___________ with respect to every ___________ in the network using the ___________.
+
+**Backpropagation Lifecycle:**
+
+| Phase | What happens |
+|-------|--------------|
+| Phase 1: ___________ | Compute activations and store intermediates |
+| Phase 2: ___________ | Traverse graph in reverse; apply ___________ |
+| Phase 3: ___________ | Use gradients to update weights |
+
+**Optimizer Comparison:**
+
+| Optimizer | Core Idea | Best For |
+|-----------|-----------|----------|
+| SGD | | |
+| Momentum | | |
+| RMSProp | | |
+| Adam | | |
+
+**Regularization Techniques Summary:**
+
+| Technique | Mechanism | Best Used For |
+|-----------|-----------|---------------|
+| L2 (Weight Decay) | | |
+| L1 (Lasso) | | |
+| Dropout | | |
+| Batch Normalization | | |
+| Layer Normalization | | |
+| Early Stopping | | |
+
+**Bias-Variance Tradeoff with Regularization:**
+- Regularization increases ___________ and decreases ___________
+- The goal is to find the ___________ that minimizes total error
+
+**Gradient Flow Diagnostics:**
+
+| Problem | Symptoms | Fixes |
+|---------|----------|-------|
+| Vanishing Gradients | | |
+| Exploding Gradients | | |
+| Dying ReLU | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+**Definition of Backpropagation:**
+Backpropagation efficiently computes the gradient of the **loss function** with respect to every **weight** in the network using the **chain rule**.
+
+**Backpropagation Lifecycle:**
+
+| Phase | What happens |
+|-------|--------------|
+| Phase 1: **Forward Pass** | Compute activations and store intermediates |
+| Phase 2: **Backward Pass** | Traverse graph in reverse; apply **chain rule** |
+| Phase 3: **Weight Update** | Use gradients to update weights |
+
+**Optimizer Comparison:**
+
+| Optimizer | Core Idea | Best For |
+|-----------|-----------|----------|
+| **SGD** | Raw gradient descent | Simple problems, small models |
+| **Momentum** | Moving average of gradients | Dampening oscillations |
+| **RMSProp** | Adaptive per-parameter LRs | Uneven gradient magnitudes |
+| **Adam** | Momentum + RMSProp | Most modern tasks (default) |
+
+**Regularization Techniques Summary:**
+
+| Technique | Mechanism | Best Used For |
+|-----------|-----------|---------------|
+| **L2 (Weight Decay)** | Penalizes squared weights | Most models (standard) |
+| **L1 (Lasso)** | Penalizes absolute weights | Feature selection / sparsity |
+| **Dropout** | Randomly drops neurons | Preventing co-adaptation |
+| **Batch Normalization** | Normalizes across batch | CNNs, large batches |
+| **Layer Normalization** | Normalizes across features | Transformers, RNNs, sequences |
+| **Early Stopping** | Halts when val loss stalls | All models (prevent over-training) |
+
+**Bias-Variance Tradeoff with Regularization:**
+- Regularization increases **bias** and decreases **variance**
+- The goal is to find the **sweet spot (optimal complexity)** that minimizes total error
+
+**Gradient Flow Diagnostics:**
+
+| Problem | Symptoms | Fixes |
+|---------|----------|-------|
+| Vanishing Gradients | Gradients near 0 in early layers | ReLU/GELU, Batch Norm, Residual Connections |
+| Exploding Gradients | Gradients become NaN | Gradient Clipping, Lower LR, Better Initialization |
+| Dying ReLU | Many ReLU neurons output 0 | Leaky ReLU, ELU, He Initialization |
+
+</details>
+
+---
+
+# 📊 COMPLETE COVERAGE SUMMARY
+
+| Category | Concepts | Status |
+|----------|----------|--------|
+| Backpropagation | Chain rule, graphs, local gradients, Jacobian | ✅ 100% |
+| Optimization | SGD, Momentum, RMSProp, Adam, AdamW | ✅ 100% |
+| Learning Rates | Schedules, warmup, finder | ✅ 100% |
+| Batch Size | Effects, scaling, B_crit | ✅ 100% |
+| Second-Order | Newton, BFGS, L-BFGS | ✅ 100% |
+| Condition Number | κ, ill-conditioning, preconditioning | ✅ 100% |
+| Regularization | L1, L2, Dropout, Early Stopping | ✅ 100% |
+| Normalization | Batch Norm, Layer Norm | ✅ 100% |
+| Gradient Flow | Vanishing, exploding, Dying ReLU | ✅ 100% |
+| **TOTAL** | **All Week 2 DL concepts** | ✅ **100%** |
+
+---
+
+## 📝 How to Use This Document
+
+1. **Read the question**, write your answer in the blank/box
+2. **Click the dropdown** to reveal the model answer
+3. **Compare** your answer to the model
+4. **Re-study** any sections where you got something wrong
+5. **Mark** your confidence level for each topic
+
+---
+
+**Good luck with your studies! 🎯**

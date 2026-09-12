@@ -1,0 +1,1826 @@
+Here is the complete **Week 5 DL** revision text — the same material we already created, but in a single, self-contained block for you to copy/paste.
+
+---
+
+# Week 5 DL — Complete Revision Materials
+
+Based on your Week 5 slides covering **Sequence Models (RNN, LSTM, GRU, BiLSTM), Seq2Seq with Attention, and the Transformer Architecture** , here are comprehensive revision materials following the established format.
+
+---
+
+## 1. CONFIDENCE TRACKER — WEEK 5 DL
+
+| Confidence Level | Meaning |
+|------------------|---------|
+| 🟢 **Green** | I knew this cold — could explain it to someone else |
+| 🟡 **Yellow** | I got it right, but I wasn't 100% sure / guessed |
+| 🔴 **Red** | I had no idea — got it wrong or completely guessed |
+
+---
+
+| Exercise | Topic | 🟢 | 🟡 | 🔴 | Re-study? |
+|----------|-------|----|----|----|-----------|
+| Ex 1 | Why Sequence Models? | | | | ☐ |
+| Ex 2 | Vanilla RNN — Hidden State & Unrolling | | | | ☐ |
+| Ex 3 | Backpropagation Through Time (BPTT) | | | | ☐ |
+| Ex 4 | Vanishing & Exploding Gradients | | | | ☐ |
+| Ex 5 | Gradient Clipping | | | | ☐ |
+| Ex 6 | LSTM Architecture & Gates | | | | ☐ |
+| Ex 7 | The Cell State as Constant Error Carousel | | | | ☐ |
+| Ex 8 | GRU — Simplified Gating | | | | ☐ |
+| Ex 9 | LSTM vs GRU Comparison | | | | ☐ |
+| Ex 10 | BiLSTM — Bidirectional Context | | | | ☐ |
+| Ex 11 | Encoder-Decoder Architecture | | | | ☐ |
+| Ex 12 | The Bottleneck Problem | | | | ☐ |
+| Ex 13 | Greedy Decoding vs Beam Search | | | | ☐ |
+| Ex 14 | Attention — Motivation & Bahdanau | | | | ☐ |
+| Ex 15 | Scaled Dot-Product Attention | | | | ☐ |
+| Ex 16 | Multi-Head Attention | | | | ☐ |
+| Ex 17 | Self-Attention vs Cross-Attention | | | | ☐ |
+| Ex 18 | The Transformer Architecture | | | | ☐ |
+| Ex 19 | Positional Encoding | | | | ☐ |
+| Ex 20 | Transformer Complexity & Trade-offs | | | | ☐ |
+| Ex 21 | Complete Cheat Sheet | | | | ☐ |
+
+---
+
+## 2. 🎯 TEACH IT SUMMARY
+
+### The Big Picture — Week 5 DL
+
+Week 5 covers **sequence models** — architectures designed to handle data where order matters (text, speech, time series). The progression is from simple recurrent networks through gated architectures to attention-based models that removed recurrence entirely.
+
+**Part 1: Vanilla RNNs & Gated Architectures.** The vanilla RNN introduces the core idea: a **hidden state** that carries information from step to step via `h_t = tanh(W_hh·h_{t-1} + W_xh·x_t + b_h)`. Parameter sharing across time makes RNNs length-agnostic. However, **Backpropagation Through Time (BPTT)** reveals the fatal flaw: gradients are products of Jacobians across time steps, causing **vanishing gradients** (early steps get no updates) or **exploding gradients** (numerical instability). **Gradient clipping** fixes exploding gradients but not vanishing ones. **LSTM** introduces a separate **cell state** with **additive updates** (`c_t = f_t⊙c_{t-1} + i_t⊙c̃_t`) and three gates (forget, input, output), creating a "constant error carousel" that preserves gradient flow. **GRU** simplifies to two gates (update, reset) and one hidden state, with ~25% fewer parameters. **BiLSTM** runs forward and backward passes, giving each token full sequence context.
+
+**Part 2: Seq2Seq, Beam Search, and Attention.** The **encoder-decoder** architecture splits sequence tasks: an encoder RNN compresses the input into a **context vector** (final hidden state), and a decoder RNN generates the output from it. The bottleneck is that one fixed vector must carry everything. **Beam search** improves decoding by tracking the `k` most probable partial sequences instead of greedy (local) choices; length normalization prevents bias toward short outputs. **Attention** replaces the fixed context vector with a dynamic, per-step weighted sum of all encoder states. **Bahdanau (additive) attention** uses a small network to score query-key pairs. **Scaled dot-product attention** uses a dot product with `√d_k` scaling, enabling efficient matrix multiplication. **Multi-head attention** runs several attention heads in parallel, each specializing in different relationships.
+
+**Part 3: The Transformer.** The Transformer removes recurrence entirely, building everything from **self-attention** and feedforward layers. Since self-attention is **permutation-invariant**, **positional encoding** (sinusoidal or learned) injects order. The **Transformer block** alternates: multi-head self-attention (mixes information across positions) and a position-wise feedforward network (processes each position independently), both wrapped in **LayerNorm + residual connections**. **Masked self-attention** prevents the decoder from "cheating" by seeing future tokens. The key trade-off: `O(n²·d)` computation per layer vs `O(1)` sequential steps and `O(1)` path length between positions — a quadratic cost in sequence length in exchange for parallelism and short gradient paths. This architecture, scaled on next-token prediction, is the foundation of modern LLMs.
+
+**The Connecting Thread:** RNNs introduced memory via recurrence but suffered from gradient issues. Gating fixed those issues but kept sequential processing. Attention gave models direct access to all positions. The Transformer removed recurrence entirely, embracing parallelism at the cost of quadratic memory. Each step was a response to a limitation of what came before.
+
+---
+
+## 3. ⚠️ COMMON PITFALLS IN PRACTICE
+
+| Pitfall | Why It Happens | How to Avoid |
+|---------|----------------|--------------|
+| **1. Using vanilla RNNs for long sequences** | Vanishing gradients → model forgets early context | Use **LSTM/GRU** or **Transformer** for sequences > 20 steps |
+| **2. Not using gradient clipping with RNNs** | Exploding gradients → NaN loss | Clip global norm at ~1.0-5.0 |
+| **3. Forgetting to initialize forget gate bias** | LSTM starts with forgetting → poor early gradients | Set forget gate bias to **1.0** (positive) |
+| **4. Applying dropout to recurrent connections** | Disrupts memory pathway | Apply dropout to **input/output** connections, not recurrent |
+| **5. Using BiLSTM for online/streaming tasks** | Needs full sequence upfront | Use **unidirectional** for streaming, **BiLSTM** for offline |
+| **6. Greedy decoding without beam search** | Local choices → suboptimal sequences | Use **beam search** (k=3-5) for generation |
+| **7. Forgetting length normalization in beam search** | Longer sequences penalized → short outputs | Normalize by sequence length (or `len^α`) |
+| **8. Confusing Bahdanau and dot-product attention** | Different scoring mechanisms | Bahdanau = learned scoring network; Dot-product = scaled dot product |
+| **9. Using Transformer without positional encoding** | Self-attention is permutation-invariant → order lost | Always add positional encodings (sinusoidal or learned) |
+| **10. Forgetting masking in decoder self-attention** | Decoder sees future tokens → cheating | Apply **causal masking** (`-∞` for future positions) |
+| **11. Using Transformer for very long sequences** | Quadratic `O(n²·d)` memory | Use **efficient attention** variants or limit sequence length |
+| **12. Confusing self-attention and cross-attention** | Different Q/K/V sources | Self-attention = Q,K,V from same sequence; Cross-attention = Q from decoder, K/V from encoder |
+
+---
+
+## 4. ONE-SENTENCE SUMMARY — WEEK 5 DL
+
+**How to use:** For each concept, try to write your own one-sentence summary *before* clicking to reveal the model answer.
+
+---
+
+### Vanilla RNN
+
+<details>
+<summary><b>Recurrent Neural Network (RNN)</b> — Try your own first</summary>
+
+**Model Answer:** A neural network that maintains a hidden state updated at each time step via `h_t = tanh(W_hh·h_{t-1} + W_xh·x_t + b_h)`, allowing it to process sequences of arbitrary length with shared weights across time.
+
+</details>
+
+---
+
+<details>
+<summary><b>Hidden State (RNN)</b> — Try your own first</summary>
+
+**Model Answer:** The network's "memory" — a fixed-size vector that compresses the entire history of the sequence into a summary used to predict the next element.
+
+</details>
+
+---
+
+<details>
+<summary><b>Parameter Sharing (RNN)</b> — Try your own first</summary>
+
+**Model Answer:** The same weight matrices `W_hh`, `W_xh`, `W_hy` are reused at every time step, allowing a single RNN to process sequences of arbitrary length with a fixed number of parameters.
+
+</details>
+
+---
+
+<details>
+<summary><b>Backpropagation Through Time (BPTT)</b> — Try your own first</summary>
+
+**Model Answer:** Training an RNN by unrolling the recurrence into a deep computation graph and applying standard backpropagation, with gradients summed across all time steps for shared weights.
+
+</details>
+
+---
+
+<details>
+<summary><b>Vanishing Gradients (RNN)</b> — Try your own first</summary>
+
+**Model Answer:** Gradients become exponentially small as they propagate backward through many time steps because each step multiplies by `W_hh·tanh'(·)`, preventing early layers from learning long-range dependencies.
+
+</details>
+
+---
+
+<details>
+<summary><b>Exploding Gradients (RNN)</b> — Try your own first</summary>
+
+**Model Answer:** Gradients grow exponentially when the largest singular value of `W_hh` exceeds 1, causing numerical instability and NaN loss during training.
+
+</details>
+
+---
+
+<details>
+<summary><b>Gradient Clipping</b> — Try your own first</summary>
+
+**Model Answer:** Rescales the gradient vector when its norm exceeds a threshold (`g ← g·min(1, θ_max/||g||)`), preventing catastrophic updates from exploding gradients while preserving direction.
+
+</details>
+
+---
+
+### LSTM & GRU
+
+<details>
+<summary><b>LSTM (Long Short-Term Memory)</b> — Try your own first</summary>
+
+**Model Answer:** A gated RNN with a separate cell state (long-term memory) and hidden state (short-term output), using three gates (forget, input, output) to control information flow and preserve gradients through additive updates.
+
+</details>
+
+---
+
+<details>
+<summary><b>Cell State (LSTM)</b> — Try your own first</summary>
+
+**Model Answer:** The "conveyor belt" of the LSTM — a dedicated channel for information to persist across many steps with only minor, gated modifications, enabling long-range memory.
+
+</details>
+
+---
+
+<details>
+<summary><b>Constant Error Carousel (CEC)</b> — Try your own first</summary>
+
+**Model Answer:** The additive cell state update (`c_t = f_t⊙c_{t-1} + i_t⊙c̃_t`) that allows gradients to flow backward with minimal attenuation when the forget gate is near 1, directly preventing vanishing gradients.
+
+</details>
+
+---
+
+<details>
+<summary><b>Forget Gate (LSTM)</b> — Try your own first</summary>
+
+**Model Answer:** `f_t = σ(W_f·[h_{t-1}, x_t] + b_f)` — decides what fraction of the old cell state to keep (1 = remember all, 0 = forget all).
+
+</details>
+
+---
+
+<details>
+<summary><b>Input Gate (LSTM)</b> — Try your own first</summary>
+
+**Model Answer:** `i_t = σ(W_i·[h_{t-1}, x_t] + b_i)` — decides what new information to write into the cell state, paired with a candidate update `c̃_t = tanh(W_c·[h_{t-1}, x_t] + b_c)`.
+
+</details>
+
+---
+
+<details>
+<summary><b>Output Gate (LSTM)</b> — Try your own first</summary>
+
+**Model Answer:** `o_t = σ(W_o·[h_{t-1}, x_t] + b_o)` — decides what part of the cell state to expose as the hidden state: `h_t = o_t⊙tanh(c_t)`.
+
+</details>
+
+---
+
+<details>
+<summary><b>GRU (Gated Recurrent Unit)</b> — Try your own first</summary>
+
+**Model Answer:** A simplified gated RNN with two gates (update, reset) and one hidden state, merging the forget/input decision and achieving comparable performance to LSTM with ~25% fewer parameters.
+
+</details>
+
+---
+
+<details>
+<summary><b>Update Gate (GRU)</b> — Try your own first</summary>
+
+**Model Answer:** `z_t = σ(W_z·[h_{t-1}, x_t])` — controls how much of the previous hidden state to keep vs. overwrite, merging the roles of LSTM's forget and input gates.
+
+</details>
+
+---
+
+<details>
+<summary><b>Reset Gate (GRU)</b> — Try your own first</summary>
+
+**Model Answer:** `r_t = σ(W_r·[h_{t-1}, x_t])` — controls how much of the previous hidden state contributes to the new candidate state.
+
+</details>
+
+---
+
+<details>
+<summary><b>BiLSTM (Bidirectional LSTM)</b> — Try your own first</summary>
+
+**Model Answer:** Runs two independent LSTMs — one forward (1→T), one backward (T→1) — and concatenates their hidden states, giving each token access to full sequence context.
+
+</details>
+
+---
+
+### Seq2Seq, Beam Search & Attention
+
+<details>
+<summary><b>Encoder-Decoder Architecture</b> — Try your own first</summary>
+
+**Model Answer:** Splits sequence tasks into an encoder RNN that compresses the input into a context vector (final hidden state) and a decoder RNN that generates the output one token at a time from that summary.
+
+</details>
+
+---
+
+<details>
+<summary><b>Context Vector</b> — Try your own first</summary>
+
+**Model Answer:** The final hidden state of the encoder, treated as a fixed-size summary of the entire input sequence that the decoder uses to generate output.
+
+</details>
+
+---
+
+<details>
+<summary><b>Teacher Forcing</b> — Try your own first</summary>
+
+**Model Answer:** During training, feeding the true previous token into the decoder instead of its own prediction, speeding convergence and stabilizing training.
+
+</details>
+
+---
+
+<details>
+<summary><b>The Bottleneck Problem (Seq2Seq)</b> — Try your own first</summary>
+
+**Model Answer:** A single fixed-size context vector must carry all information about the input, regardless of length — early tokens are diluted or lost, degrading quality on long sequences.
+
+</details>
+
+---
+
+<details>
+<summary><b>Greedy Decoding</b> — Try your own first</summary>
+
+**Model Answer:** At each step, pick the single highest-probability token given what's been generated so far — cheap but locally greedy, potentially missing better global sequences.
+
+</details>
+
+---
+
+<details>
+<summary><b>Beam Search</b> — Try your own first</summary>
+
+**Model Answer:** Tracks the `k` most probable partial sequences at each step, expanding each with all possible next tokens and keeping the top `k` candidates — a middle ground between greedy and exhaustive search.
+
+</details>
+
+---
+
+<details>
+<summary><b>Length Normalization (Beam Search)</b> — Try your own first</summary>
+
+**Model Answer:** Divides the cumulative log-probability by sequence length (or `len^α`) before comparing candidates, preventing bias toward shorter outputs.
+
+</details>
+
+---
+
+<details>
+<summary><b>Attention (Seq2Seq)</b> — Try your own first</summary>
+
+**Model Answer:** Keeps all encoder hidden states and lets the decoder build a dynamic, per-step weighted summary of the input by attending to relevant positions, replacing the fixed context vector.
+
+</details>
+
+---
+
+<details>
+<summary><b>Bahdanau (Additive) Attention</b> — Try your own first</summary>
+
+**Model Answer:** Scores each query-key pair using a small feedforward network (`e_{t,i} = v^T tanh(W_1·h_i + W_2·s_{t-1})`), then normalizes with softmax and computes a weighted sum of encoder states.
+
+</details>
+
+---
+
+<details>
+<summary><b>Scaled Dot-Product Attention</b> — Try your own first</summary>
+
+**Model Answer:** Computes attention as `softmax(QK^T/√d_k)·V` — a single matrix multiplication with scaling to prevent saturating the softmax, highly parallelizable.
+
+</details>
+
+---
+
+<details>
+<summary><b>Query, Key, Value (Attention)</b> — Try your own first</summary>
+
+**Model Answer:** The query asks "what am I looking for?", the key says "what do I advertise?", and the value says "what do I contribute?" — this separation enables flexible reuse of the attention mechanism.
+
+</details>
+
+---
+
+<details>
+<summary><b>Multi-Head Attention</b> — Try your own first</summary>
+
+**Model Answer:** Projects `Q, K, V` into `h` separate subspaces, runs attention independently in each, concatenates outputs, and projects back — allowing different heads to specialize in different relationships.
+
+</details>
+
+---
+
+<details>
+<summary><b>Self-Attention</b> — Try your own first</summary>
+
+**Model Answer:** Queries, keys, and values all come from the same sequence — every position attends to every other position (including itself), building context-aware representations directly.
+
+</details>
+
+---
+
+<details>
+<summary><b>Cross-Attention</b> — Try your own first</summary>
+
+**Model Answer:** Queries come from one sequence (e.g., decoder), keys and values from another (e.g., encoder) — connects two different sequences, used in encoder-decoder attention.
+
+</details>
+
+---
+
+### Transformer
+
+<details>
+<summary><b>Transformer</b> — Try your own first</summary>
+
+**Model Answer:** An architecture built entirely from self-attention and feedforward layers with no recurrence — processes entire sequences in parallel with `O(1)` sequential steps, at the cost of quadratic `O(n²·d)` computation.
+
+</details>
+
+---
+
+<details>
+<summary><b>Positional Encoding</b> — Try your own first</summary>
+
+**Model Answer:** Injects order into the permutation-invariant self-attention by adding position-specific vectors to token embeddings, either as fixed sinusoidal waves or learned embeddings.
+
+</details>
+
+---
+
+<details>
+<summary><b>Sinusoidal Positional Encoding</b> — Try your own first</summary>
+
+**Model Answer:** Uses sine and cosine functions of different frequencies (`PE(pos,2i) = sin(pos/10000^(2i/d))`, `PE(pos,2i+1) = cos(...)`) — unique per position, no learned parameters, and relative offsets are linearly representable.
+
+</details>
+
+---
+
+<details>
+<summary><b>Transformer Block</b> — Try your own first</summary>
+
+**Model Answer:** Two sublayers — multi-head self-attention (mixes information across positions) and a position-wise feedforward network (processes each position independently) — each wrapped in `LayerNorm(x + Sublayer(x))`.
+
+</details>
+
+---
+
+<details>
+<summary><b>Position-Wise Feedforward Network</b> — Try your own first</summary>
+
+**Model Answer:** Two linear layers with a ReLU/GELU nonlinearity in between (`FFN(x) = W_2·σ(W_1·x + b_1) + b_2`), applied identically and independently to every position — no mixing across positions.
+
+</details>
+
+---
+
+<details>
+<summary><b>Masked Self-Attention (Decoder)</b> — Try your own first</summary>
+
+**Model Answer:** Sets attention scores from position `t` to positions after `t` to `-∞` before softmax — prevents the decoder from "seeing" future tokens during training, matching left-to-right generation.
+
+</details>
+
+---
+
+<details>
+<summary><b>Residual Connection (Transformer)</b> — Try your own first</summary>
+
+**Model Answer:** Adds the input back to the output of each sublayer (`x + Sublayer(x)`), providing a direct gradient path through deep stacks and enabling training of dozens of blocks.
+
+</details>
+
+---
+
+<details>
+<summary><b>Layer Normalization (Transformer)</b> — Try your own first</summary>
+
+**Model Answer:** Normalizes activations across the feature dimension for each position independently (`(x - μ)/σ`), stabilizing training regardless of batch composition.
+
+</details>
+
+---
+
+<details>
+<summary><b>Encoder-Only vs Decoder-Only</b> — Try your own first</summary>
+
+**Model Answer:** The Transformer is a template — encoder-only (BERT) uses only understanding, decoder-only (GPT) uses only generation, and full encoder-decoder (original) uses both for translation.
+
+</details>
+
+---
+
+<details>
+<summary><b>Transformer Complexity Trade-off</b> — Try your own first</summary>
+
+**Model Answer:** Self-attention gives `O(1)` sequential steps and `O(1)` maximum path length between positions, but costs `O(n²·d)` computation and memory — quadratic in sequence length in exchange for parallelism.
+
+</details>
+
+---
+
+## 5. QUICK REFERENCE CHEAT SHEET — WEEK 5 DL
+
+### Vanilla RNN Formulas
+
+<details>
+<summary><b>RNN Core Equations</b> — Try to recall first</summary>
+
+| Equation | Description |
+|----------|-------------|
+| `h_t = tanh(W_hh·h_{t-1} + W_xh·x_t + b_h)` | Hidden state update |
+| `ŷ_t = W_hy·h_t + b_y` | Output (if needed) |
+| `∂h_T/∂h_t = Π_{k=t+1}^T W_hh·diag(tanh'(·))` | Gradient product (vanishing/exploding) |
+
+</details>
+
+---
+
+### LSTM Formulas
+
+<details>
+<summary><b>LSTM Equations</b> — Try to recall first</summary>
+
+| Gate | Equation |
+|------|----------|
+| **Forget Gate** | `f_t = σ(W_f·[h_{t-1}, x_t] + b_f)` |
+| **Input Gate** | `i_t = σ(W_i·[h_{t-1}, x_t] + b_i)` |
+| **Candidate Cell** | `c̃_t = tanh(W_c·[h_{t-1}, x_t] + b_c)` |
+| **Cell Update** | `c_t = f_t⊙c_{t-1} + i_t⊙c̃_t` |
+| **Output Gate** | `o_t = σ(W_o·[h_{t-1}, x_t] + b_o)` |
+| **Hidden State** | `h_t = o_t⊙tanh(c_t)` |
+
+**Key insight:** The additive cell update (`c_t = f_t⊙c_{t-1} + i_t⊙c̃_t`) preserves gradients through the "constant error carousel."
+
+</details>
+
+---
+
+### GRU Formulas
+
+<details>
+<summary><b>GRU Equations</b> — Try to recall first</summary>
+
+| Gate | Equation |
+|------|----------|
+| **Update Gate** | `z_t = σ(W_z·[h_{t-1}, x_t])` |
+| **Reset Gate** | `r_t = σ(W_r·[h_{t-1}, x_t])` |
+| **Candidate Hidden** | `h̃_t = tanh(W·[r_t⊙h_{t-1}, x_t])` |
+| **Hidden Update** | `h_t = (1-z_t)⊙h_{t-1} + z_t⊙h̃_t` |
+
+**Parameter count:** ~25% fewer than LSTM.
+
+</details>
+
+---
+
+### Attention Formulas
+
+<details>
+<summary><b>Attention Equations</b> — Try to recall first</summary>
+
+| Type | Formula |
+|------|---------|
+| **Bahdanau (Additive)** | `e_{t,i} = v^T·tanh(W_1·h_i + W_2·s_{t-1})` |
+| **Softmax** | `α_{t,i} = exp(e_{t,i}) / Σ_j exp(e_{t,j})` |
+| **Context Vector** | `c_t = Σ_i α_{t,i}·h_i` |
+| **Scaled Dot-Product** | `Attention(Q,K,V) = softmax(QK^T/√d_k)·V` |
+
+</details>
+
+---
+
+### Multi-Head Attention
+
+<details>
+<summary><b>Multi-Head Attention</b> — Try to recall first</summary>
+
+| Step | Operation |
+|------|-----------|
+| 1 | Project Q, K, V with `h` learned projection matrices |
+| 2 | Run attention in each subspace independently |
+| 3 | Concatenate head outputs |
+| 4 | Project through `W_o` |
+
+**Typical `h`:** 8-16 heads.
+
+</details>
+
+---
+
+### Transformer Block
+
+<details>
+<summary><b>Transformer Block</b> — Try to recall first</summary>
+
+```
+Input x
+    ↓
+x = LayerNorm(x + MultiHeadSelfAttention(x))   ← Residual + LayerNorm
+    ↓
+x = LayerNorm(x + FFN(x))                       ← Residual + LayerNorm
+    ↓
+Output
+```
+
+**FFN:** `W_2·σ(W_1·x + b_1) + b_2` (two linear layers with nonlinearity).
+
+</details>
+
+---
+
+### Positional Encoding
+
+<details>
+<summary><b>Sinusoidal Positional Encoding</b> — Try to recall first</summary>
+
+| Dimension | Formula |
+|-----------|---------|
+| Even (`2i`) | `PE(pos,2i) = sin(pos/10000^(2i/d))` |
+| Odd (`2i+1`) | `PE(pos,2i+1) = cos(pos/10000^(2i/d))` |
+
+**Properties:** Unique per position, no learned parameters, relative offsets are linearly representable.
+
+</details>
+
+---
+
+### Complexity Comparison
+
+<details>
+<summary><b>Self-Attention vs Recurrence</b> — Try to recall first</summary>
+
+| Metric | Self-Attention | Recurrence (RNN) |
+|--------|---------------|------------------|
+| Time complexity per layer | `O(n²·d)` | `O(n·d²)` |
+| Sequential operations | `O(1)` | `O(n)` |
+| Max path length | `O(1)` | `O(n)` |
+
+**Trade-off:** Self-attention is parallel and has short paths, but quadratic in sequence length.
+
+</details>
+
+---
+
+### Key Defaults
+
+<details>
+<summary><b>Key Defaults</b> — Try to recall first</summary>
+
+| Concept | Default |
+|---------|---------|
+| LSTM forget gate bias | **1.0** (positive, remember by default) |
+| Gradient clipping threshold | 1.0-5.0 |
+| Beam search width `k` | 3-5 |
+| Transformer heads `h` | 8-16 |
+| Transformer layers `N` | 6-12 |
+| Embedding dimension `d` | 256-1024 |
+
+</details>
+
+---
+
+## 6. CONNECTIONS MAP — WEEK 5 DL
+
+### 🌳 TEXT-BASED CONCEPT MAP
+
+```
+╔══════════════════════════════════════════════════════════════════════════╗
+║                                                                          ║
+║                    WEEK 5 DL: SEQUENCE MODELS                          ║
+║                                                                          ║
+║                    ┌─────────────────────────────────────┐              ║
+║                    │   WHY SEQUENCE MODELS?              │              ║
+║                    │   Memory + Parameter Sharing        │              ║
+║                    └──────────────┬──────────────────────┘              ║
+║                                   │                                      ║
+║                                   ▼                                      ║
+║                    ┌─────────────────────────────────────┐              ║
+║                    │   VANILLA RNN                       │              ║
+║                    │   h_t = tanh(W_hh·h_{t-1}+W_xh·x_t)│              ║
+║                    └──────────────┬──────────────────────┘              ║
+║                                   │                                      ║
+║    ┌──────────────────────────────┼──────────────────────────────┐      ║
+║    │                              │                              │      ║
+║    ▼                              ▼                              ▼      ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │  UNROLLING   │          │   BPTT       │          │ VANISHING/   │  ║
+║ │  Through Time│          │   (Training) │          │ EXPLODING    │  ║
+║ └──────────────┘          └──────────────┘          └──────────────┘  ║
+║        │                         │                         │          ║
+║        └─────────────────────────┼─────────────────────────┘          ║
+║                                  │                                     ║
+║                                  ▼                                     ║
+║                    ┌─────────────────────────────────────┐             ║
+║                    │   GATED ARCHITECTURES               │             ║
+║                    │   LSTM · GRU · BiLSTM              │             ║
+║                    └──────────────┬──────────────────────┘             ║
+║                                   │                                     ║
+║    ┌──────────────────────────────┼──────────────────────────────┐     ║
+║    │                              │                              │     ║
+║    ▼                              ▼                              ▼     ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │   LSTM       │          │   GRU        │          │   BiLSTM     │  ║
+║ │   3 Gates    │          │   2 Gates    │          │   Forward+   │  ║
+║ │   Cell State │          │   Hidden only│          │   Backward   │  ║
+║ └──────────────┘          └──────────────┘          └──────────────┘  ║
+║        │                         │                         │          ║
+║        └─────────────────────────┼─────────────────────────┘          ║
+║                                  │                                     ║
+║                                  ▼                                     ║
+║                    ┌─────────────────────────────────────┐             ║
+║                    │   SEQ2SEQ + ATTENTION               │             ║
+║                    └──────────────┬──────────────────────┘             ║
+║                                   │                                     ║
+║    ┌──────────────────────────────┼──────────────────────────────┐     ║
+║    │                              │                              │     ║
+║    ▼                              ▼                              ▼     ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │ ENCODER-     │          │ BEAM SEARCH  │          │  ATTENTION   │  ║
+║ │ DECODER      │          │ k-best paths │          │  Bahdanau    │  ║
+║ │ Context Vec  │          │ Length Norm  │          │  Dot-Product │  ║
+║ └──────────────┘          └──────────────┘          └──────────────┘  ║
+║        │                                                  │          ║
+║        └──────────────────────────┬───────────────────────┘          ║
+║                                   │                                     ║
+║                                   ▼                                     ║
+║                    ┌─────────────────────────────────────┐             ║
+║                    │   TRANSFORMER                       │             ║
+║                    │   Self-Attention · No Recurrence   │             ║
+║                    │   Positional Encoding              │             ║
+║                    └──────────────┬──────────────────────┘             ║
+║                                   │                                     ║
+║    ┌──────────────────────────────┼──────────────────────────────┐     ║
+║    │                              │                              │     ║
+║    ▼                              ▼                              ▼     ║
+║ ┌──────────────┐          ┌──────────────┐          ┌──────────────┐  ║
+║ │  MULTI-HEAD  │          │  POSITION-   │          │  RESIDUAL +  │  ║
+║ │  ATTENTION   │          │  AL ENCODING │          │  LAYER NORM  │  ║
+║ │  Self/Cross  │          │  Sinusoidal  │          │              │  ║
+║ └──────────────┘          └──────────────┘          └──────────────┘  ║
+║                                                                         ║
+║                    ┌─────────────────────────────────────┐             ║
+║                    │   ENCODER/DECODER STACKS            │             ║
+║                    │   Encoder-only (BERT) · Decoder-   │             ║
+║                    │   only (GPT) · Full (Translation)  │             ║
+║                    └─────────────────────────────────────┘             ║
+║                                                                         ║
+╚══════════════════════════════════════════════════════════════════════════╝
+```
+
+---
+
+### 🔗 KEY CONNECTION EXPLANATIONS
+
+<details>
+<summary><b>Connection 1: How do vanishing gradients connect vanilla RNNs to LSTMs?</b></summary>
+
+```
+VANILLA RNN
+    │
+    ├── Hidden state update: h_t = tanh(W·h_{t-1} + U·x_t)
+    ├── Gradient product: Π W·diag(tanh'(·))
+    ├── If singular values < 1 → VANISHING GRADIENTS
+    └── If singular values > 1 → EXPLODING GRADIENTS
+
+    ↓ PROBLEM: Long-range dependencies are lost
+
+LSTM
+    │
+    ├── Cell state update: c_t = f_t⊙c_{t-1} + i_t⊙c̃_t
+    ├── ADDITIVE update (not multiplicative)
+    ├── When f_t ≈ 1, gradients flow directly
+    └── "Constant Error Carousel" preserves long-range signals
+
+    ↓ SOLUTION: Gradients survive across hundreds of steps
+```
+
+**Key insight:** The additive cell state update is the single most important design choice in the LSTM — it replaces destructive multiplication with controllable addition.
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 2: How does attention fix the Seq2Seq bottleneck?</b></summary>
+
+```
+PLAIN ENCODER-DECODER (No Attention)
+    │
+    ├── Encoder produces one context vector (final hidden state)
+    ├── Decoder uses SAME vector for every output step
+    ├── Early tokens get diluted/overwritten
+    └── Performance degrades on long sequences
+
+    ↓ PROBLEM: Fixed-size bottleneck
+
+WITH ATTENTION
+    │
+    ├── Encoder keeps ALL hidden states (h₁, h₂, ..., hₙ)
+    ├── Each decoder step computes fresh attention weights
+    ├── Weights: α_{t,i} = softmax(score(s_{t-1}, h_i))
+    ├── Context vector: c_t = Σ_i α_{t,i}·h_i
+    └── Decoder looks up relevant parts on demand
+
+    ↓ SOLUTION: Dynamic, per-step summary of the input
+```
+
+**Key insight:** Attention replaces "what did I decide was important earlier?" with "what is important right now?"
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 3: How did the Transformer remove recurrence?</b></summary>
+
+```
+RNN/LSTM/GRU
+    │
+    ├── Sequential processing: step t depends on t-1
+    ├── Training: cannot parallelize across time
+    ├── Gradient path: O(n) between distant positions
+    └── Vanishing gradients: mitigated by gating, not eliminated
+
+    ↓ REMOVE RECURRENCE
+
+TRANSFORMER
+    │
+    ├── Self-attention: every position attends to every other
+    ├── Training: O(1) sequential steps → PARALLEL
+    ├── Gradient path: O(1) between any two positions
+    └── But: O(n²·d) computation (quadratic in sequence length)
+
+    ↓ KEY INSIGHT: Parallelism + short paths → scalability
+```
+
+**Key insight:** The Transformer isn't "better" in an abstract sense — it has a computational profile that matches what modern hardware and large datasets reward.
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 4: How do the attention variants relate?</b></summary>
+
+```
+BAHDANAU (Additive) ATTENTION
+    │
+    ├── Score: e_{t,i} = v^T·tanh(W₁·h_i + W₂·s_{t-1})
+    ├── Learned scoring network
+    ├── Expensive to compute pairwise
+    └── Used in early Seq2Seq with attention
+
+    ↓ SIMPLIFY + OPTIMIZE
+
+SCALED DOT-PRODUCT ATTENTION
+    │
+    ├── Score: Q·K^T / √d_k
+    ├── Fixed similarity (dot product)
+    ├── Single matrix multiplication → PARALLEL
+    └── Query-Key-Value formalism
+
+    ↓ ENSEMBLE
+
+MULTI-HEAD ATTENTION
+    │
+    ├── h independent projections + attention
+    ├── Each head specializes in different relationships
+    ├── Concatenate + project through W_o
+    └── Used in Transformer
+
+    ↓ APPLY TO SAME SEQUENCE
+
+SELF-ATTENTION
+    │
+    ├── Q, K, V all from the same sequence
+    ├── Every position attends to every other
+    └── Foundation of the Transformer
+```
+
+**Key insight:** Each step is a simplification or generalization of the previous one, driven by computational efficiency and representational power.
+
+</details>
+
+---
+
+<details>
+<summary><b>Connection 5: The evolution from RNN to Transformer</b></summary>
+
+```
+Vanilla RNN (1980s)
+    │
+    ├── Hidden state: h_t = tanh(W·h_{t-1} + U·x_t)
+    ├── Problem: Vanishing/exploding gradients
+    └── Limitation: Can't learn long-range dependencies
+
+    ↓ FIX: Gating
+
+LSTM (1997) / GRU (2014)
+    │
+    ├── Additive updates + gates
+    ├── Problem: Still sequential (can't parallelize)
+    └── Limitation: Training is O(n) steps per epoch
+
+    ↓ FIX: Attention
+
+Seq2Seq + Attention (2015)
+    │
+    ├── Decoder can see all encoder states
+    ├── Problem: Still uses RNNs underneath
+    └── Limitation: Recurrence is the bottleneck, not attention
+
+    ↓ REMOVE RECURRENCE
+
+Transformer (2017)
+    │
+    ├── Self-attention + feedforward only
+    ├── O(1) sequential steps → PARALLEL
+    └── Trade-off: O(n²·d) computation vs O(n·d²) for RNNs
+```
+
+**Key insight:** Each architecture addresses a specific limitation of its predecessor — the story of sequence modeling is one of iterative improvement.
+
+</details>
+
+---
+
+### 📊 CONNECTION MATRIX
+
+| Concept A | Connects To | Why |
+|-----------|-------------|-----|
+| **Vanilla RNN** | BPTT | Training via unrolling |
+| **Vanishing Gradients** | LSTM/GRU | Gating fixes vanishing gradients |
+| **LSTM Cell State** | Constant Error Carousel | Additive updates preserve gradients |
+| **GRU** | LSTM | Simplified gating, fewer parameters |
+| **BiLSTM** | Full Context | Forward + backward = richer representations |
+| **Encoder-Decoder** | Context Vector | Final hidden state carries input summary |
+| **Context Vector** | Attention | Attention replaces fixed vector with dynamic summary |
+| **Bahdanau Attention** | Dot-Product Attention | Learned scoring → fixed efficient scoring |
+| **Dot-Product Attention** | Multi-Head Attention | Single head → multiple specialized heads |
+| **Cross-Attention** | Self-Attention | Q from one sequence, K/V from another |
+| **Self-Attention** | Transformer | Foundation of the architecture |
+| **Positional Encoding** | Transformer | Injects order into permutation-invariant attention |
+| **Residual Connections** | Transformer | Enables deep stacks |
+| **LayerNorm** | Transformer | Stabilizes training |
+
+---
+
+## 7. COMMON MISCONCEPTIONS — WEEK 5 DL
+
+**How to use:** Read each misconception first. Try to identify what's wrong. Then click to reveal the reality.
+
+---
+
+### Misconception 1: "RNNs don't work at all because of vanishing gradients."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| RNNs are useless due to vanishing gradients. | Vanishing gradients affect **long-range** dependencies. Vanilla RNNs work fine for **short** sequences (e.g., character-level modeling over short windows, simple time series). LSTM/GRU fix long-range dependencies. |
+
+**Key insight:** Vanilla RNNs are useful pedagogically and for short sequences. Gated architectures extend their range.
+
+</details>
+
+---
+
+### Misconception 2: "LSTM and GRU completely eliminate vanishing gradients."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| LSTM/GRU solve the vanishing gradient problem entirely. | They **mitigate** but don't **eliminate** it. The additive cell update preserves gradients when the forget gate is near 1, but if the forget gate closes (near 0), gradients can still vanish. They make vanishing gradients much less severe, not impossible. |
+
+**Key insight:** Gating provides **controlled** forgetting instead of uncontrolled overwriting.
+
+</details>
+
+---
+
+### Misconception 3: "GRU is always worse than LSTM because it has fewer gates."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| LSTM is better than GRU because it has more gates. | LSTM and GRU perform **comparably** on many tasks. GRU has ~25% fewer parameters, trains faster, and needs less data. The "best" choice is task-dependent — neither dominates universally. |
+
+**Key insight:** More parameters ≠ better. GRU's efficiency can be a real advantage on smaller datasets.
+
+</details>
+
+---
+
+### Misconception 4: "BiLSTMs are always better than unidirectional LSTMs."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Bidirectional is always better. | BiLSTMs **cannot be used for online/streaming tasks** (where you don't know the future). They require the full sequence upfront. For offline tasks (e.g., named entity recognition, classification), they are often better. |
+
+**Key insight:** Bidirectional context helps, but it's a trade-off with applicability.
+
+</details>
+
+---
+
+### Misconception 5: "Beam search with a larger beam width always improves quality."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Larger beam width = better translations. | Quality does not always improve monotonically with beam width. Very large beams can hurt quality, especially without length normalization, by favoring shorter outputs. Typical `k` values are 3-5. |
+
+**Key insight:** Beam search is a controlled compromise — bigger isn't always better.
+
+</details>
+
+---
+
+### Misconception 6: "Attention weights show what the model is 'thinking'."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Attention weights explain model decisions. | They are **suggestive**, not proof. A high attention weight doesn't mean a position **caused** the output. Attention patterns often align with intuition, but they don't provide a complete explanation of model behavior. |
+
+**Key insight:** Attention weights are a useful diagnostic, not a causal explanation.
+
+</details>
+
+---
+
+### Misconception 7: "Scaled dot-product attention is the same as Bahdanau attention."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Bahdanau and dot-product attention are interchangeable. | They use different scoring mechanisms: |
+| | • **Bahdanau**: learned feedforward network (`v^T·tanh(W₁h_i + W₂s_{t-1})`) |
+| | • **Dot-product**: fixed similarity (`Q·K^T/√d_k`) |
+| | Dot-product is a single matrix multiplication, far more parallelizable. |
+
+**Key insight:** The move from Bahdanau to dot-product trades flexibility for efficiency.
+
+</details>
+
+---
+
+### Misconception 8: "The Transformer has no notion of order."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Transformers can't handle sequences because they ignore order. | Self-attention itself is permutation-invariant, but Transformers **inject order** via positional encoding (sinusoidal or learned). Without it, "the dog bit the man" and "the man bit the dog" would be indistinguishable. |
+
+**Key insight:** Positional encoding explicitly adds back the order that recurrence used to provide implicitly.
+
+</details>
+
+---
+
+### Misconception 9: "Transformers are always faster than RNNs."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Transformers are faster than RNNs. | Transformers have **O(n²·d)** computation vs RNNs' **O(n·d²)**. For **long sequences** (n large), Transformers can be **slower and more memory-intensive** because the attention matrix grows with n². For short sequences, they are faster due to parallelism. |
+
+**Key insight:** The Transformer trades off computation for parallelism — the balance depends on sequence length.
+
+</details>
+
+---
+
+### Misconception 10: "The Transformer's feedforward network mixes information across positions."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| The FFN in a Transformer connects different positions. | The FFN is **position-wise**: it applies the same transformation **independently** to each position. **Only self-attention mixes information across positions** — the FFN processes each position on its own. |
+
+**Key insight:** The Transformer alternates "mixing" (attention) and "processing" (FFN) steps.
+
+</details>
+
+---
+
+### Misconception 11: "The Transformer decoder's masked attention is just for efficiency."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Masked attention is an optimization to save computation. | Masking is **required for correctness**. Without masking, the decoder would "cheat" by seeing future tokens during training, and the model would not learn to generate left-to-right. It makes training consistent with inference. |
+
+**Key insight:** Masking enforces causal generation — the decoder can't see what it hasn't predicted yet.
+
+</details>
+
+---
+
+### Misconception 12: "Sinusoidal and learned positional embeddings are the same."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Both positional encoding methods work the same way. | They have different properties: |
+| | • **Sinusoidal**: fixed, no parameters, defined for any length, relative offsets linearly representable |
+| | • **Learned**: trainable, adapts to task, fixed to max training length, cannot extrapolate beyond it |
+| | Both are used; the choice is task-dependent. |
+
+**Key insight:** Fixed and learned solutions often perform comparably — a recurring pattern in deep learning.
+
+</details>
+
+---
+
+### Misconception 13: "The Transformer is just an attention layer."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| Transformers = attention. | Transformers are a **full architecture**: |
+| | • Multi-head self-attention (mixes positions) |
+| | • Position-wise FFN (processes each position) |
+| | • Residual connections + LayerNorm (stability) |
+| | • Positional encoding (order) |
+| | • Encoder/decoder stacks |
+| | All components work together. |
+
+**Key insight:** Attention is the key innovation, but the Transformer is more than just attention.
+
+</details>
+
+---
+
+### Misconception 14: "You can use a Transformer encoder for text generation."
+
+<details>
+<summary><b>Click for Reality Check</b></summary>
+
+| Misconception | Reality |
+|---------------|---------|
+| The encoder is used for generation. | The **encoder** is for **understanding** (BERT-like models). The **decoder** is for **generation** (GPT-like models). The full encoder-decoder (original Transformer) is for translation where there's an input and an output. |
+
+**Key insight:** Different tasks use different halves of the Transformer template.
+
+</details>
+
+---
+
+## 📊 QUICK REFERENCE: MISCONCEPTIONS vs REALITY
+
+| Misconception | Reality |
+|---------------|---------|
+| RNNs are useless | Work for short sequences; gating extends range |
+| LSTM eliminates vanishing gradients | Mitigates, doesn't eliminate |
+| GRU is worse than LSTM | Comparable; GRU has fewer parameters |
+| BiLSTM is always better | Can't be used for streaming tasks |
+| Larger beam width = better quality | Quality can degrade; k=3-5 typical |
+| Attention weights explain decisions | Suggestive, not causal |
+| Bahdanau = Dot-product | Different scoring mechanisms |
+| Transformer has no order | Positional encoding adds order |
+| Transformer is always faster | O(n²) memory for long sequences |
+| FFN mixes across positions | FFN is position-wise (per position only) |
+| Masked attention is for efficiency | Required for correctness (no cheating) |
+| Sinusoidal = Learned embeddings | Different properties; both used |
+| Transformer = attention | Full architecture with multiple components |
+| Encoder is for generation | Encoder=understanding; Decoder=generation |
+
+---
+
+# 📚 WEEK 5 DL — COMPLETE STUDY GUIDE
+## All Exercises with Answers in Spoiler Format
+
+---
+
+# SECTION 1: VANILLA RNN
+
+---
+
+## Exercise RNN-1: Hidden State & Unrolling
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. Write the recurrence relation for a vanilla RNN hidden state. | |
+| 2. Why is the RNN's hidden state called a "memory"? | |
+| 3. What does "parameter sharing" mean in an RNN? | |
+| 4. What is "unrolling" an RNN through time? | |
+| 5. What does unrolling reveal about the RNN's structure? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Hidden state recurrence | `h_t = tanh(W_hh·h_{t-1} + W_xh·x_t + b_h)` — the hidden state is computed from the current input and the previous hidden state. |
+| 2. Why "memory" | The hidden state compresses the entire history of the sequence into a fixed-size vector that is carried forward and used to predict the next element. |
+| 3. Parameter sharing | The same weight matrices `W_hh`, `W_xh`, `W_hy` are reused at every time step, allowing a single RNN to process sequences of arbitrary length with a fixed number of parameters. |
+| 4. Unrolling | Drawing the RNN as a chain of copies, one per time step, each feeding its hidden state to the next — turns a recurrent network into a very deep feedforward network. |
+| 5. What unrolling reveals | An RNN is equivalent to a very deep, weight-tied feedforward network with depth equal to sequence length. This also exposes depth-related pathologies (vanishing/exploding gradients). |
+
+</details>
+
+---
+
+## Exercise RNN-2: Backpropagation Through Time (BPTT)
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is BPTT and how does it work? | |
+| 2. Write the gradient of the loss at time T with respect to an early hidden state `h_t`. | |
+| 3. Why does the gradient product cause vanishing gradients? | |
+| 4. Why does the same product cause exploding gradients? | |
+| 5. What is the key difference between vanilla RNN and LSTM in terms of gradient flow? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. BPTT | Backpropagation applied to the unrolled computation graph of an RNN. Gradients with respect to shared weights are **summed** across all time steps. |
+| 2. Gradient product | `∂h_T/∂h_t = Π_{k=t+1}^T W_hh·diag(tanh'(·))` — the product of Jacobians across every intermediate step. |
+| 3. Vanishing gradients | If the singular values of `W_hh` are less than 1, and `tanh'(·) < 1`, repeated multiplication makes the product shrink exponentially with `T-t`, so gradients from distant steps become negligible. |
+| 4. Exploding gradients | If the largest singular value of `W_hh` exceeds 1, the same product grows exponentially, causing numerical instability and NaN values. |
+| 5. Key difference | Vanilla RNN: purely multiplicative gradient flow. LSTM: **additive** cell state update (`c_t = f_t⊙c_{t-1} + i_t⊙c̃_t`) allows gradients to flow directly when `f_t ≈ 1`. |
+
+</details>
+
+---
+
+## Exercise RNN-3: Vanishing vs Exploding Gradients
+
+| Aspect | Vanishing Gradients | Exploding Gradients |
+|--------|---------------------|---------------------|
+| Cause | | |
+| Effect on gradients | | |
+| Effect on training | | |
+| Fix | | |
+| Signature | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Aspect | Vanishing Gradients | Exploding Gradients |
+|--------|---------------------|---------------------|
+| Cause | Singular values of `W_hh` < 1 | Singular values of `W_hh` > 1 |
+| Effect on gradients | Exponentially small | Exponentially large |
+| Effect on training | Early layers don't learn; long-range dependencies lost | Numerical instability; NaN loss |
+| Fix | LSTM/GRU gating, residual connections | Gradient clipping |
+| Signature | Loss plateaus; poor performance on long sequences | Sudden spikes in loss; NaN values |
+
+</details>
+
+---
+
+## Exercise RNN-4: Gradient Clipping
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is gradient clipping? | |
+| 2. Write the norm clipping formula. | |
+| 3. Why does norm clipping preserve direction? | |
+| 4. What are the practical considerations for setting the clipping threshold? | |
+| 5. Does gradient clipping fix vanishing gradients? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Gradient clipping | Rescales the gradient vector when its norm exceeds a threshold to prevent catastrophic updates from exploding gradients. |
+| 2. Norm clipping formula | `g ← g·min(1, θ_max/||g||)` — preserves direction while capping magnitude. |
+| 3. Preserves direction | The formula multiplies the entire vector by a scalar, so the direction (unit vector) remains unchanged; only the length is capped. |
+| 4. Practical considerations | Threshold is a hyperparameter: too small → slow convergence; too large → fails to prevent instability. Typical: 1.0-5.0. |
+| 5. Does it fix vanishing gradients? | **No.** It only addresses exploding gradients. Vanishing gradients require architectural fixes like LSTM/GRU gating. |
+
+</details>
+
+---
+
+# SECTION 2: LSTM & GRU
+
+---
+
+## Exercise LSTM-1: LSTM Architecture & Gates
+
+| Gate | Purpose | Formula | What It Controls |
+|------|---------|---------|------------------|
+| Forget Gate | | | |
+| Input Gate | | | |
+| Output Gate | | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Gate | Purpose | Formula | What It Controls |
+|------|---------|---------|------------------|
+| **Forget Gate** | What to discard from old cell state | `f_t = σ(W_f·[h_{t-1}, x_t] + b_f)` | Fraction of old cell state to keep (1=keep all, 0=forget all) |
+| **Input Gate** | What new info to add | `i_t = σ(W_i·[h_{t-1}, x_t] + b_i)` | What new information to write in |
+| **Output Gate** | What to expose as hidden state | `o_t = σ(W_o·[h_{t-1}, x_t] + b_o)` | What part of cell state to reveal |
+
+</details>
+
+---
+
+## Exercise LSTM-2: Cell State & Constant Error Carousel
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What are the two parallel states in an LSTM? | |
+| 2. Write the cell state update formula. | |
+| 3. Why is the cell state called a "Constant Error Carousel"? | |
+| 4. How does the additive cell state update fix vanishing gradients? | |
+| 5. What practical initialization tip improves LSTM training? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Two parallel states | **Cell state `c_t`** — long-term memory (conveyor belt). **Hidden state `h_t`** — filtered view of cell state, used for output and passed to next step. |
+| 2. Cell state update | `c_t = f_t⊙c_{t-1} + i_t⊙c̃_t` — additive combination of forgetting old info and adding new info. |
+| 3. Constant Error Carousel | When `f_t ≈ 1`, the gradient flows through the `c_t = c_{t-1}` path with minimal attenuation, preserving signals across many steps. |
+| 4. Additive update fixes vanishing gradients | The update is **additive** (`c_t = c_{t-1} + something`), not purely multiplicative. Gradients don't get multiplied by `W_hh` at every step, so they don't vanish exponentially. |
+| 5. Practical tip | Initialize the **forget gate bias to a positive value (e.g., 1.0)** so gates start biased toward **remembering**, which improves early gradient flow. |
+
+</details>
+
+---
+
+## Exercise LSTM-3: LSTM vs GRU Comparison
+
+| Aspect | LSTM | GRU |
+|--------|------|-----|
+| Number of gates | | |
+| Number of states | | |
+| Parameter count | | |
+| Training speed | | |
+| Best for | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Aspect | LSTM | GRU |
+|--------|------|-----|
+| Number of gates | **3** (forget, input, output) | **2** (update, reset) |
+| Number of states | **2** (cell, hidden) | **1** (hidden only) |
+| Parameter count | More (~25% more) | **Fewer** (~25% less) |
+| Training speed | Slower | **Faster** |
+| Best for | Tasks requiring very long-range memory; more control | Efficiency; smaller datasets; comparable performance |
+
+</details>
+
+---
+
+## Exercise LSTM-4: BiLSTM Architecture
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What limitation of unidirectional RNNs does BiLSTM address? | |
+| 2. How does a BiLSTM work? | |
+| 3. How are the forward and backward states combined? | |
+| 4. What is the key limitation of BiLSTM? | |
+| 5. What tasks are BiLSTMs good for? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Unidirectional limitation | A unidirectional RNN at time `t` only has access to past context (steps 1...t). It cannot see future context. |
+| 2. How BiLSTM works | Runs two independent LSTMs — one **forward** (1→T), one **backward** (T→1) — over the same sequence. |
+| 3. Combining states | Concatenate the forward and backward hidden states at each time step: `h_t = [→h_t; ←h_t]`. |
+| 4. Key limitation | Requires the **full sequence upfront** — cannot be used for strictly online/streaming, left-to-right generation tasks. |
+| 5. Good for | Named entity recognition, part-of-speech tagging, classification where full context is available — offline tasks. |
+
+</details>
+
+---
+
+# SECTION 3: SEQ2SEQ, BEAM SEARCH & ATTENTION
+
+---
+
+## Exercise SEQ-1: Encoder-Decoder Architecture
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is the encoder-decoder architecture? | |
+| 2. What is the context vector? | |
+| 3. What is teacher forcing? | |
+| 4. What is the bottleneck problem? | |
+| 5. Why does the bottleneck hurt long sequences? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Encoder-decoder | Split sequence tasks into two RNNs: an **encoder** reads the input and compresses it into a summary (context vector), and a **decoder** generates output one token at a time from that summary. |
+| 2. Context vector | The final hidden state of the encoder (`h_n`), treated as a fixed-size summary of the entire input sequence. |
+| 3. Teacher forcing | During training, feeding the **true previous token** into the decoder instead of its own prediction, speeding convergence and stabilizing training. |
+| 4. Bottleneck problem | A single fixed-size context vector must carry all information about the input, regardless of length — information is diluted or lost. |
+| 5. Why it hurts long sequences | Early tokens are repeatedly overwritten as the encoder processes later tokens, so they are the most likely to be lost by the time the encoder finishes. |
+
+</details>
+
+---
+
+## Exercise SEQ-2: Greedy Decoding vs Beam Search
+
+| Aspect | Greedy Decoding | Beam Search |
+|--------|-----------------|-------------|
+| Number of hypotheses tracked | | |
+| Decision process | | |
+| Quality guarantee | | |
+| Computational cost | | |
+| Special case | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Aspect | Greedy Decoding | Beam Search |
+|--------|-----------------|-------------|
+| Number of hypotheses tracked | 1 | `k` (beam width) |
+| Decision process | Pick single highest-probability token at each step | Keep top `k` partial sequences; expand all; keep top `k` |
+| Quality guarantee | Local optimum only | Approximates global search; no guarantee |
+| Computational cost | Cheap | O(k·V) per step (V = vocabulary size) |
+| Special case | — | `k=1` recovers greedy decoding |
+
+</details>
+
+---
+
+## Exercise SEQ-3: Beam Search — Practical Considerations
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What problem does length normalization solve? | |
+| 2. How does length normalization work? | |
+| 3. What is the typical beam width `k`? | |
+| 4. Does larger beam width always improve quality? | |
+| 5. Why might very large beam width hurt quality? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Problem | Summing log-probabilities means longer sequences accumulate more negative terms and are penalized relative to shorter ones, even when the shorter sequence is worse. |
+| 2. Length normalization | Divide the cumulative score by the sequence length (or `len^α`) before comparing candidates, so sequences of different lengths are compared fairly. |
+| 3. Typical beam width | `k = 3-5` |
+| 4. Does larger beam always improve quality? | **Not always.** Quality does not always improve monotonically with beam width. Very large beams can hurt quality without length normalization. |
+| 5. Why very large beam hurts | Without length normalization, very large beams can favor shorter outputs; even with normalization, very large beams may explore unlikely paths that don't lead to good translations. |
+
+</details>
+
+---
+
+## Exercise SEQ-4: Attention — Motivation & Bahdanau
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What problem does attention solve in Seq2Seq? | |
+| 2. How does attention work conceptually? | |
+| 3. Write the Bahdanau (additive) attention score formula. | |
+| 4. How are attention weights computed? | |
+| 5. How is the context vector computed? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Problem solved | The fixed context vector bottleneck — each decoding step uses the same compressed summary, losing early tokens. Attention uses a **dynamic, per-step** summary. |
+| 2. Conceptual | Keep **all** encoder hidden states `h_1, ..., h_n`. At each decoder step, compute which encoder states are most relevant now, and take a weighted sum. |
+| 3. Bahdanau score | `e_{t,i} = v^T·tanh(W_1·h_i + W_2·s_{t-1})` — a small feedforward network scores each query-key pair. |
+| 4. Attention weights | `α_{t,i} = exp(e_{t,i}) / Σ_j exp(e_{t,j})` — softmax over scores across input positions. |
+| 5. Context vector | `c_t = Σ_i α_{t,i}·h_i` — weighted sum of encoder states, with weights from the softmax. |
+
+</details>
+
+---
+
+## Exercise SEQ-5: Scaled Dot-Product Attention
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is the Query-Key-Value formalism? | |
+| 2. Write the scaled dot-product attention formula. | |
+| 3. Why scale by `√d_k`? | |
+| 4. Why is dot-product attention more efficient than Bahdanau? | |
+| 5. What is the practical advantage of dot-product attention? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Q-K-V formalism | **Query** (Q): what am I looking for? **Key** (K): what do I advertise? **Value** (V): what do I contribute? This separation enables flexible reuse. |
+| 2. Scaled dot-product attention | `Attention(Q,K,V) = softmax(QK^T/√d_k)·V` — single matrix multiplication. |
+| 3. Why scale by `√d_k` | Dot products grow in magnitude with dimension `d_k`; without scaling, the softmax inputs can become large, pushing the softmax into a saturated region where gradients are tiny. |
+| 4. Why more efficient | Bahdanau: pairwise scoring network (expensive). Dot-product: **single matrix multiplication** (parallelizable, hardware-optimized). |
+| 5. Practical advantage | Maps directly to highly optimized matrix operations on GPU/TPU, making it far faster and more scalable than additive attention. |
+
+</details>
+
+---
+
+## Exercise SEQ-6: Multi-Head Attention
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is the limitation of single-head attention? | |
+| 2. How does multi-head attention work? | |
+| 3. Why do different heads help? | |
+| 4. What is the computational cost of multi-head attention? | |
+| 5. What is the typical number of heads `h`? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Single-head limitation | One attention computation produces one weighted average — it can only capture one notion of "relevance" at a time. |
+| 2. Multi-head attention | Project `Q, K, V` into `h` separate, lower-dimensional subspaces; run attention in each independently; concatenate outputs; project back through `W_o`. |
+| 3. Why different heads help | Each head can specialize in different relationships (e.g., one tracks nearby words, another tracks long-range dependencies, another tracks syntactic structure). |
+| 4. Computational cost | Similar to one large head, because the heads are in lower-dimensional subspaces — the total FLOPs are roughly the same. |
+| 5. Typical `h` | 8-16 heads. |
+
+</details>
+
+---
+
+## Exercise SEQ-7: Self-Attention vs Cross-Attention
+
+| Question | Self-Attention | Cross-Attention |
+|----------|----------------|-----------------|
+| 1. Where do queries come from? | | |
+| 2. Where do keys and values come from? | | |
+| 3. What does it connect? | | |
+| 4. Where is it used in Transformer? | | |
+| 5. What does it allow? | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Self-Attention | Cross-Attention |
+|----------|----------------|-----------------|
+| 1. Where do queries come from? | Same sequence | Different sequence (decoder) |
+| 2. Where do keys and values come from? | Same sequence | Different sequence (encoder) |
+| 3. What does it connect? | Positions within the same sequence | Two different sequences |
+| 4. Where is it used in Transformer? | Encoder self-attention, decoder masked self-attention | Encoder-decoder attention (decoder cross-attention) |
+| 5. What does it allow? | Context-aware representations of own tokens | Decoder to "look into" the encoder's output |
+
+</details>
+
+---
+
+# SECTION 4: TRANSFORMER
+
+---
+
+## Exercise TF-1: Removing Recurrence
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What does the Transformer remove? | |
+| 2. Why is removing recurrence beneficial? | |
+| 3. What problem does removing recurrence create? | |
+| 4. What replaces recurrence in the Transformer? | |
+| 5. What is the key trade-off of the Transformer? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. What does it remove? | Recurrence entirely — no RNNs, no hidden state carried step by step. |
+| 2. Why beneficial? | Every position can be computed in parallel (`O(1)` sequential operations), enabling training on massive datasets with hardware acceleration. |
+| 3. What problem does it create? | Self-attention is permutation-invariant — it has no inherent notion of order. Position must be added explicitly via positional encoding. |
+| 4. What replaces recurrence? | **Self-attention** + **position-wise feedforward networks**, stacked in blocks. |
+| 5. Key trade-off | `O(n²·d)` computation per layer (quadratic in sequence length) in exchange for `O(1)` sequential steps and `O(1)` path length between positions. |
+
+</details>
+
+---
+
+## Exercise TF-2: Positional Encoding
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. Why does the Transformer need positional encoding? | |
+| 2. What are the two types of positional encoding? | |
+| 3. Write the sinusoidal positional encoding formula. | |
+| 4. What are the properties of sinusoidal positional encoding? | |
+| 5. What are the trade-offs between sinusoidal and learned encodings? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Why needed | Self-attention is permutation-invariant — shuffling input positions produces the same outputs. Without positional encoding, order is lost. |
+| 2. Two types | **Sinusoidal** (fixed, no learned parameters) and **Learned** (trainable embeddings per position). |
+| 3. Sinusoidal formula | `PE(pos,2i) = sin(pos/10000^(2i/d))`, `PE(pos,2i+1) = cos(pos/10000^(2i/d))` — different frequencies for each dimension. |
+| 4. Properties | Unique per position; no learned parameters; relative offsets are linearly representable (sinusoids are shift-invariant in frequency space). |
+| 5. Trade-offs | **Sinusoidal**: defined for any length, no parameters; **Learned**: adapts to task, fixed to max training length. Both perform comparably. |
+
+</details>
+
+---
+
+## Exercise TF-3: The Transformer Block
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What are the two sublayers in a Transformer block? | |
+| 2. What does each sublayer do? | |
+| 3. What wraps each sublayer? | |
+| 4. Why use residual connections? | |
+| 5. Why use Layer Normalization? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Two sublayers | **Multi-head self-attention** and **position-wise feedforward network**. |
+| 2. What each does | **Self-attention**: mixes information across positions. **FFN**: processes each position independently (non-linear transformation). |
+| 3. Wrapping | Each sublayer is wrapped as `LayerNorm(x + Sublayer(x))` — residual connection + layer normalization. |
+| 4. Residual connections | Provide a direct gradient path around sublayers, enabling training of very deep stacks (dozens of blocks). |
+| 5. Layer Normalization | Normalizes activations across the feature dimension for each position independently, stabilizing training regardless of batch composition. |
+
+</details>
+
+---
+
+## Exercise TF-4: Position-Wise Feedforward Network
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What is the structure of the FFN? | |
+| 2. Write the FFN formula. | |
+| 3. What does "position-wise" mean? | |
+| 4. What is the division of labor between attention and FFN? | |
+| 5. What is the FFN's role in the Transformer? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. FFN structure | Two linear layers with a nonlinearity (ReLU or GELU) in between. |
+| 2. FFN formula | `FFN(x) = W_2·σ(W_1·x + b_1) + b_2` — expansion then contraction (often 4× the embedding dimension). |
+| 3. "Position-wise" | The same two weight matrices are applied **independently** to each position — there is no mixing across positions inside the FFN. |
+| 4. Division of labor | **Attention** decides what information to pull from other positions. **FFN** transforms each position's combined representation nonlinearly. |
+| 5. Role | Adds per-position non-linear capacity — after attention mixes information, FFN processes the result. |
+
+</details>
+
+---
+
+## Exercise TF-5: Masked Self-Attention
+
+| Question | Your Answer |
+|----------|-------------|
+| 1. What problem does masked self-attention solve? | |
+| 2. How does masking work? | |
+| 3. Why is masking necessary? | |
+| 4. What does masking make consistent? | |
+| 5. What value is used for masked positions? | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Answer |
+|----------|--------|
+| 1. Problem solved | Without masking, the decoder would "cheat" by attending to future tokens during training (tokens it should be predicting). |
+| 2. How masking works | Before the softmax, set attention scores from position `t` to positions after `t` to `-∞`. After softmax, these positions receive weight 0. |
+| 3. Why necessary | To match left-to-right generation at inference time — the model must predict each token using only previously generated tokens. |
+| 4. What it makes consistent | Training and inference. The model is trained exactly as it will be used — one step at a time, with only past context. |
+| 5. Masked value | `-∞` (so `exp(-∞) = 0` after softmax). |
+
+</details>
+
+---
+
+## Exercise TF-6: Encoder vs Decoder Stacks
+
+| Question | Encoder | Decoder |
+|----------|---------|---------|
+| 1. What type of attention is used? | | |
+| 2. Does it use masking? | | |
+| 3. What is the input? | | |
+| 4. What is the output? | | |
+| 5. Which models use only this? | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Question | Encoder | Decoder |
+|----------|---------|---------|
+| 1. Type of attention | Full self-attention (unmasked) | Masked self-attention + cross-attention |
+| 2. Uses masking? | No (sees all positions) | Yes (causal masking in self-attention) |
+| 3. Input | Source sequence | Target sequence (generated) |
+| 4. Output | Contextual representations | Token probabilities (next token) |
+| 5. Models using only this | Encoder-only: BERT, RoBERTa | Decoder-only: GPT, Llama |
+
+</details>
+
+---
+
+## Exercise TF-7: Transformer Complexity
+
+| Metric | Self-Attention | Recurrence (RNN) |
+|--------|---------------|------------------|
+| Time complexity per layer | | |
+| Sequential operations | | |
+| Maximum path length | | |
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+| Metric | Self-Attention | Recurrence (RNN) |
+|--------|---------------|------------------|
+| Time complexity per layer | `O(n²·d)` | `O(n·d²)` |
+| Sequential operations | `O(1)` | `O(n)` |
+| Maximum path length | `O(1)` | `O(n)` |
+
+**Trade-off:** Self-attention is parallel (`O(1)` sequential steps) and has short paths (`O(1)`), but costs quadratic in sequence length for computation and memory.
+
+</details>
+
+---
+
+## Exercise TF-8: Complete Cheat Sheet
+
+### Fill in all blanks:
+
+**Vanilla RNN Core Equation:**
+`h_t = tanh(___________ · h_{t-1} + ___________ · x_t + b_h)`
+
+**LSTM Cell Update:**
+`c_t = ___ ⊙ c_{t-1} + ___ ⊙ c̃_t`
+
+**LSTM Gates:**
+
+| Gate | Purpose | Activation |
+|------|---------|------------|
+| Forget Gate | | |
+| Input Gate | | |
+| Output Gate | | |
+
+**GRU Gates:**
+
+| Gate | Purpose | Activation |
+|------|---------|------------|
+| Update Gate | | |
+| Reset Gate | | |
+
+**Attention Formula:**
+`Attention(Q,K,V) = softmax(_________)·V`
+
+**Transformer Block:**
+`x = LayerNorm(x + _____________)` then `x = LayerNorm(x + _____________)`
+
+**Positional Encoding:**
+`PE(pos,2i) = __________`, `PE(pos,2i+1) = __________`
+
+<details>
+<summary>📖 Click for Answers</summary>
+
+**Vanilla RNN Core Equation:**
+`h_t = tanh( **W_hh** · h_{t-1} + **W_xh** · x_t + b_h)`
+
+**LSTM Cell Update:**
+`c_t = **f_t** ⊙ c_{t-1} + **i_t** ⊙ c̃_t`
+
+**LSTM Gates:**
+
+| Gate | Purpose | Activation |
+|------|---------|------------|
+| Forget Gate | What to discard from old cell state | Sigmoid |
+| Input Gate | What new info to add | Sigmoid |
+| Output Gate | What to expose as hidden state | Sigmoid |
+
+**GRU Gates:**
+
+| Gate | Purpose | Activation |
+|------|---------|------------|
+| Update Gate | How much to keep vs overwrite (merges forget+input) | Sigmoid |
+| Reset Gate | How much previous state contributes to candidate | Sigmoid |
+
+**Attention Formula:**
+`Attention(Q,K,V) = softmax( **QK^T/√d_k** )·V`
+
+**Transformer Block:**
+`x = LayerNorm(x + **MultiHeadSelfAttention(x)** )` then `x = LayerNorm(x + **FFN(x)** )`
+
+**Positional Encoding:**
+`PE(pos,2i) = **sin(pos/10000^(2i/d))**`, `PE(pos,2i+1) = **cos(pos/10000^(2i/d))**`
+
+</details>
+
+---
+
+# 📊 COMPLETE COVERAGE SUMMARY
+
+| Category | Concepts | Status |
+|----------|----------|--------|
+| Vanilla RNN | Hidden state, unrolling, BPTT, parameter sharing | ✅ 100% |
+| Gradient Problems | Vanishing, exploding, gradient clipping | ✅ 100% |
+| LSTM | 3 gates, cell state, Constant Error Carousel | ✅ 100% |
+| GRU | 2 gates, simplified gating | ✅ 100% |
+| BiLSTM | Forward + backward, full context | ✅ 100% |
+| Seq2Seq | Encoder-decoder, context vector, bottleneck | ✅ 100% |
+| Beam Search | Greedy vs beam, length normalization | ✅ 100% |
+| Attention | Bahdanau, dot-product, Q-K-V formalism | ✅ 100% |
+| Multi-Head Attention | Multiple heads, specialization | ✅ 100% |
+| Transformer | Self-attention, positional encoding, blocks | ✅ 100% |
+| Complexity | O(n²·d) vs O(n·d²), trade-offs | ✅ 100% |
+| **TOTAL** | **All Week 5 DL concepts** | ✅ **100%** |
+
+---
+
+## 📝 How to Use This Document
+
+1. **Read the question**, write your answer in the blank/box
+2. **Click the dropdown** to reveal the model answer
+3. **Compare** your answer to the model
+4. **Re-study** any sections where you got something wrong
+5. **Mark** your confidence level for each topic
+
+---
+
+**Good luck with your studies! 🎯**
